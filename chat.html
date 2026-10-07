@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat — AI CLUB</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <script>try { var t = localStorage.getItem('aiclub-theme'); if (t) document.documentElement.dataset.theme = t } catch (e) { }</script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <style>
+        /* ========================= CSS VARIABLES ========================= */
+        :root {
+            --sans: 'Space Grotesk', sans-serif;
+            --mono: 'JetBrains Mono', monospace;
+            --bg: #0b0d09;
+            --bg2: #0e110b;
+            --surface: #12160f;
+            --surface2: #171c13;
+            --line: #242b1e;
+            --line2: #333c2a;
+            --text: #edf1e4;
+            --muted: #9aa28c;
+            --faint: #68705c;
+            --accent: #c9f24e;
+            --accent-t: #c9f24e;
+            --accent-dim: rgba(201, 242, 78, .12);
+            --ink: #0c0e09;
+            --accent2: #ff4a4a;
+            --accent2-dim: rgba(255, 74, 74, .14);
+            --glass: rgba(11, 13, 9, .8);
+            --r: 14px;
+            --r-sm: 10px;
+            --ease: cubic-bezier(.16, 1, .3, 1);
+        }
+
+        [data-theme="light"] {
+            --bg: #f3f1f7;
+            --bg2: #eae7f1;
+            --surface: #fbfafd;
+            --surface2: #f1eef6;
+            --line: #ded8e8;
+            --line2: #c8bfd6;
+            --text: #1b1424;
+            --muted: #615670;
+            --faint: #91879f;
+            --accent: #b98ee8;
+            --accent-t: #6d3fb5;
+            --accent-dim: rgba(140, 100, 210, .13);
+            --ink: #1d1128;
+            --accent2: #b98ee8;
+            --glass: rgba(243, 241, 247, .85);
+        }
+
+        /* ========================= GLOBAL ========================= */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            font-family: var(--sans);
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+            transition: background .35s, color .35s;
+            height: 100vh;
+            display: flex;
+            flex-direction: column
+        }
+
+        ::selection {
+            background: var(--accent);
+            color: var(--ink)
+        }
+
+        img {
+            display: block
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none
+        }
+
+        button {
+            font-family: inherit;
+            color: inherit;
+            background: none;
+            border: none;
+            cursor: pointer
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+            border-radius: 4px
+        }
+
+        ::-webkit-scrollbar {
+            width: 9px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--line2);
+            border-radius: 6px
+        }
+
+        /* ========================= CURSOR (dot only) ========================= */
+        html.cur-on,
+        html.cur-on * {
+            cursor: none !important
+        }
+
+        .cur-dot {
+            position: fixed;
+            left: -5px;
+            top: -5px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent);
+            z-index: 1200;
+            pointer-events: none
+        }
+
+        @media(pointer:coarse) {
+            .cur-dot {
+                display: none
+            }
+        }
+
+        /* ========================= NAVBAR ========================= */
+        .nav {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            padding: 0 clamp(18px, 4vw, 48px);
+            z-index: 100;
+            border-bottom: 1px solid var(--line);
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            flex: none
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
+
+        .brand .mark {
+            width: 34px;
+            height: 34px
+        }
+
+        .brand-t {
+            line-height: 1.05;
+            font-weight: 700;
+            font-size: 17px
+        }
+
+        .brand-t b {
+            color: var(--accent-t)
+        }
+
+        .brand-t small {
+            display: block;
+            font-family: var(--mono);
+            font-weight: 500;
+            font-size: 8.5px;
+            letter-spacing: .28em;
+            color: var(--faint)
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: auto
+        }
+
+        .nav-links a {
+            font-size: 14.5px;
+            font-weight: 500;
+            color: var(--muted);
+            padding: 8px 14px;
+            border-radius: 999px;
+            transition: .25s
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+            background: var(--accent-dim)
+        }
+
+        .nav-links a.on {
+            color: var(--ink);
+            background: var(--accent);
+            font-weight: 600
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid var(--line);
+            display: grid;
+            place-items: center;
+            transition: .25s
+        }
+
+        .icon-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent-t)
+        }
+
+        .icon-btn svg {
+            width: 17px;
+            height: 17px
+        }
+
+        #themeBtn .i-sun {
+            display: none
+        }
+
+        [data-theme="light"] #themeBtn .i-sun {
+            display: block
+        }
+
+        [data-theme="light"] #themeBtn .i-moon {
+            display: none
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            font-weight: 600;
+            font-size: 14.5px;
+            padding: 13px 24px;
+            border-radius: 999px;
+            transition: .3s var(--ease);
+            border: 1px solid transparent
+        }
+
+        .btn svg {
+            width: 16px;
+            height: 16px
+        }
+
+        .btn-pri {
+            background: var(--accent);
+            color: var(--ink)
+        }
+
+        .btn-gho {
+            border-color: var(--line2)
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 13px
+        }
+
+        .nav-burger {
+            display: none
+        }
+
+        .m-only {
+            display: none
+        }
+
+        /* ========================= CHAT LAYOUT ========================= */
+        .chat-shell {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 22px clamp(16px, 4vw, 32px) 18px;
+            min-height: 0
+        }
+
+        .chat-head {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--line)
+        }
+
+        .avatar {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            background: var(--accent);
+            display: grid;
+            place-items: center;
+            flex: none
+        }
+
+        .avatar svg {
+            width: 30px;
+            height: 30px
+        }
+
+        .chat-head h1 {
+            font-size: 18px;
+            font-weight: 600
+        }
+
+        .chat-head .st {
+            font-family: var(--mono);
+            font-size: 10.5px;
+            letter-spacing: .14em;
+            color: var(--faint);
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-top: 3px
+        }
+
+        .st i {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: inline-block;
+            animation: pulse 1.8s infinite
+        }
+
+        @keyframes pulse {
+            50% {
+                opacity: .4
+            }
+        }
+
+        .chat-head .tools {
+            margin-left: auto;
+            display: flex;
+            gap: 8px
+        }
+
+        /* messages */
+        .msgs {
+            flex: 1;
+            overflow-y: auto;
+            padding: 22px 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-height: 0
+        }
+
+        .row {
+            display: flex;
+            gap: 12px;
+            max-width: 88%;
+            animation: rise .4s var(--ease)
+        }
+
+        @keyframes rise {
+            from {
+                opacity: 0;
+                transform: translateY(12px)
+            }
+        }
+
+        .row.user {
+            align-self: flex-end;
+            flex-direction: row-reverse
+        }
+
+        .m-av {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            flex: none;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--line2);
+            background: var(--surface)
+        }
+
+        .m-av svg {
+            width: 16px;
+            height: 16px
+        }
+
+        .row.user .m-av {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--ink)
+        }
+
+        .bubble {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 4px 16px 16px 16px;
+            padding: 12px 16px;
+            font-size: 14.5px
+        }
+
+        .row.user .bubble {
+            background: var(--accent);
+            color: var(--ink);
+            border-color: var(--accent);
+            border-radius: 16px 4px 16px 16px;
+            font-weight: 500
+        }
+
+        .b-time {
+            display: block;
+            font-family: var(--mono);
+            font-size: 9.5px;
+            color: var(--faint);
+            margin-top: 8px;
+            letter-spacing: .1em
+        }
+
+        .row.user .b-time {
+            color: rgba(0, 0, 0, .5)
+        }
+
+        /* typing */
+        .typing {
+            display: inline-flex;
+            gap: 5px;
+            padding: 6px 2px
+        }
+
+        .typing i {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--accent-t);
+            animation: tp 1.2s infinite
+        }
+
+        .typing i:nth-child(2) {
+            animation-delay: .15s
+        }
+
+        .typing i:nth-child(3) {
+            animation-delay: .3s
+        }
+
+        @keyframes tp {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+                opacity: .4
+            }
+
+            30% {
+                transform: translateY(-5px);
+                opacity: 1
+            }
+        }
+
+        /* empty state */
+        .empty-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            color: var(--faint);
+            text-align: center
+        }
+
+        .empty-chat svg {
+            width: 42px;
+            height: 42px
+        }
+
+        .empty-chat b {
+            color: var(--text);
+            font-size: 17px
+        }
+
+        .empty-chat p {
+            font-size: 13px;
+            max-width: 34ch
+        }
+
+        /* suggestions + input */
+        .sugs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 14px 0 10px
+        }
+
+        .sug {
+            font-family: var(--mono);
+            font-size: 11px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--line2);
+            color: var(--muted);
+            transition: .25s
+        }
+
+        .sug:hover {
+            border-color: var(--accent);
+            color: var(--accent-t);
+            background: var(--accent-dim)
+        }
+
+        .inp-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            border: 1px solid var(--line2);
+            border-radius: 999px;
+            background: var(--surface);
+            padding: 8px 8px 8px 22px;
+            transition: .25s
+        }
+
+        .inp-row:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-dim)
+        }
+
+        .inp-row input {
+            flex: 1;
+            background: none;
+            border: none;
+            outline: none;
+            color: var(--text);
+            font-family: var(--sans);
+            font-size: 15px;
+            min-width: 0
+        }
+
+        .send {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: var(--ink);
+            display: grid;
+            place-items: center;
+            flex: none;
+            transition: .25s
+        }
+
+        .send:hover {
+            transform: scale(1.08)
+        }
+
+        .send:disabled {
+            opacity: .45;
+            transform: none
+        }
+
+        .send svg {
+            width: 18px;
+            height: 18px
+        }
+
+        .disclaimer {
+            text-align: center;
+            font-family: var(--mono);
+            font-size: 9.5px;
+            letter-spacing: .14em;
+            color: var(--faint);
+            padding-top: 12px
+        }
+
+        .b-action {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .b-action .btn {
+            background: var(--surface2);
+            border: 1px solid var(--line2);
+            color: var(--text);
+            padding: 7px 14px;
+            font-size: 12.5px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            transition: .25s var(--ease);
+            text-decoration: none;
+        }
+
+        .b-action .btn:hover {
+            border-color: var(--accent);
+            color: var(--accent-t);
+            background: var(--accent-dim);
+            transform: translateY(-1px);
+        }
+
+        .b-action .btn svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        @media(max-width:960px) and (min-width:761px) {
+            .nav-links a {
+                padding: 6px 10px;
+                font-size: 13.5px;
+            }
+            .nav {
+                gap: 14px;
+            }
+        }
+
+        /* responsive */
+        @media(max-width:760px) {
+            .nav-links {
+                position: fixed;
+                top: 70px;
+                left: 0;
+                right: 0;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0;
+                background: var(--glass);
+                backdrop-filter: blur(18px);
+                border-bottom: 1px solid var(--line);
+                padding: 10px 20px 20px;
+                transform: translateY(-8px);
+                opacity: 0;
+                visibility: hidden;
+                transition: .3s;
+                z-index: 99
+            }
+
+            .nav.open .nav-links {
+                transform: none;
+                opacity: 1;
+                visibility: visible
+            }
+
+            .nav-links a {
+                padding: 14px 12px;
+                border-radius: var(--r-sm);
+                font-size: 16px
+            }
+
+            .nav-burger {
+                display: grid
+            }
+
+            .m-only {
+                display: block
+            }
+
+            .nav-cta-desktop {
+                display: none
+            }
+
+            .row {
+                max-width: 96%
+            }
+
+            .chat-head .tools .btn-label {
+                display: none
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ========================= NAVBAR ========================= -->
+    <nav class="nav" id="nav" aria-label="Main navigation">
+        <a class="brand" href="index.html" aria-label="AI Club home">
+            <svg class="mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                <path d="M16 6 L27 25 L5 25 Z" stroke="var(--line2)" stroke-width="1.5" />
+                <circle cx="16" cy="6" r="3.2" fill="var(--accent)" />
+                <circle cx="27" cy="25" r="2.6" stroke="currentColor" stroke-width="1.5" />
+                <circle cx="5" cy="25" r="2.6" stroke="currentColor" stroke-width="1.5" />
+            </svg>
+            <span class="brand-t">AI<b>CLUB</b><small>SRI SHAKTHI</small></span>
+        </a>
+        <div class="nav-links" id="navLinks">
+            <a href="index.html">Home</a>
+            <a href="index.html#about">About</a>
+            <a href="index.html#projects">Projects</a>
+            <a href="index.html#events">Events</a>
+            <a href="gallery.html">Gallery</a>
+            <a href="chat.html" class="on">AI Chat</a>
+            <a href="login.html" class="m-only">Login</a>
+        </div>
+        <div class="nav-right">
+            <button class="icon-btn" id="themeBtn" aria-label="Toggle theme"><i data-lucide="moon" class="i-moon"></i><i
+                    data-lucide="sun" class="i-sun"></i></button>
+            <a class="btn btn-gho btn-sm nav-cta-desktop" href="login.html"><i data-lucide="lock"></i> Login</a>
+            <button class="icon-btn nav-burger" id="burger" aria-label="Open menu" aria-expanded="false"><i
+                    data-lucide="menu"></i></button>
+        </div>
+    </nav>
+
+    <!-- ========================= CHAT ========================= -->
+    <main class="chat-shell">
+        <div class="chat-head">
+            <div class="avatar" aria-hidden="true">
+                <svg viewBox="0 0 32 32" fill="none">
+                    <path d="M16 6 L27 25 L5 25 Z" stroke="var(--ink)" stroke-width="1.8" />
+                    <circle cx="16" cy="6" r="3.2" fill="var(--ink)" />
+                    <circle cx="27" cy="25" r="2.4" stroke="var(--ink)" stroke-width="1.8" />
+                    <circle cx="5" cy="25" r="2.4" stroke="var(--ink)" stroke-width="1.8" />
+                </svg>
+            </div>
+            <div>
+                <h1>AI Club Assistant</h1>
+                <span class="st mono"><i></i>DEMO MODE · OFFLINE KNOWLEDGE BASE</span>
+            </div>
+            <div class="tools">
+                <a class="icon-btn" href="index.html" aria-label="Back to home" title="Back to home"><i data-lucide="home"></i></a>
+                <a class="icon-btn" href="gallery.html" aria-label="View gallery" title="View gallery"><i data-lucide="image"></i></a>
+                <button class="icon-btn" id="clearBtn" aria-label="Clear chat" title="Clear chat"><i data-lucide="trash-2"></i></button>
+            </div>
+        </div>
+
+        <div class="msgs" id="msgs" aria-live="polite"></div>
+
+        <div class="sugs" id="sugs" aria-label="Suggested questions"></div>
+
+        <form class="inp-row" id="chatForm">
+            <input type="text" id="chatInput" placeholder="Ask something about the AI Club…"
+                aria-label="Type your message" autocomplete="off" maxlength="300">
+            <button class="send" type="submit" id="sendBtn" aria-label="Send message"><i
+                    data-lucide="arrow-up"></i></button>
+        </form>
+        <p class="disclaimer">FRONTEND DEMO — RESPONSES ARE PREDEFINED · A LIVE AI BACKEND WILL BE CONNECTED LATER</p>
+    </main>
+
+    <script>
+        /* ========================= UTILITIES ========================= */
+        const $ = s => document.querySelector(s), $$ = s => document.querySelectorAll(s);
+        const icons = () => window.lucide && lucide.createIcons();
+        const wait = ms => new Promise(r => setTimeout(r, ms));
+        const now = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        /* ========================= THEME ========================= */
+        $('#themeBtn').addEventListener('click', () => {
+            const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+            document.documentElement.dataset.theme = t; localStorage.setItem('aiclub-theme', t);
+        });
+
+        /* ========================= NAVIGATION ========================= */
+        const burger = $('#burger');
+        burger.addEventListener('click', () => {
+            const o = $('#nav').classList.toggle('open'); burger.setAttribute('aria-expanded', o);
+            burger.innerHTML = `<i data-lucide="${o ? 'x' : 'menu'}"></i>`; icons();
+        });
+        $$('#navLinks a').forEach(a => a.addEventListener('click', () => $('#nav').classList.remove('open')));
+
+        /* ========================= CURSOR EFFECT (dot only) ========================= */
+        (function () {
+            if (!matchMedia('(pointer:fine)').matches || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            document.documentElement.classList.add('cur-on');
+            const d = document.createElement('div'); d.className = 'cur-dot';
+            document.body.append(d);
+            let mx = -100, my = -100, s = 1, ts = 1;
+            addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+            addEventListener('mouseover', e => { if (e.target.closest('a,button,input')) ts = 1.9 });
+            addEventListener('mouseout', e => { if (e.target.closest('a,button,input')) ts = 1 });
+            (function loop() {
+                s += (ts - s) * .2;
+                d.style.transform = `translate(${mx}px,${my}px) scale(${s})`; requestAnimationFrame(loop)
+            })();
+        })();
+
+        /* ========================= DATA: KNOWLEDGE BASE (DEMO) ========================= */
+        const KB = [
+            {
+                k: ['project', 'translator', 'bot', 'disease', 'attendance', 'forecast'],
+                r: "Here are some projects currently built in the AI Club showcase: a Sign Language Translator (Computer Vision), Campus Query Bot (NLP), Crop Disease Detector (Machine Learning), and Face-Embed Attendance system.",
+                link: { href: 'index.html#projects', label: 'Explore Projects Showcase', icon: 'arrow-up-right' }
+            },
+            {
+                k: ['hackathon'],
+                r: "The AI Club runs internal hackathon sprints and has an upcoming inter-college hackathon planned this season. Check our schedules and details in the events section.",
+                link: { href: 'index.html#events', label: 'View Hackathons & Events', icon: 'calendar' }
+            },
+            {
+                k: ['workshop', 'transformer'],
+                r: "Workshops cover deep learning, transformers, prompt engineering, and practical machine learning. You can see past and upcoming sessions on the events section.",
+                link: { href: 'index.html#events', label: 'Check Workshop Schedules', icon: 'calendar' }
+            },
+            {
+                k: ['achiev', 'win', 'award'],
+                r: "Club members participate in hackathons, research publications, and regional challenges with verified highlights displayed on our home page.",
+                link: { href: 'index.html#achievements', label: 'View Club Achievements', icon: 'award' }
+            },
+            {
+                k: ['gallery', 'photo', 'picture', 'image'],
+                r: "Browse our high-resolution visual archive featuring photos from workshops, hackathons, team sessions, and campus demo days.",
+                link: { href: 'gallery.html', label: 'Open Visual Gallery Archive', icon: 'image' }
+            },
+            {
+                k: ['member', 'team', 'who are', 'coordinator', 'lead'],
+                r: "The AI Club is a student-run collective at Sri Shakthi Institute of Engineering and Technology, organized across Vision, NLP, ML, and Outreach branches.",
+                link: { href: 'index.html#about', label: 'Learn More About The Club', icon: 'users' }
+            },
+            {
+                k: ['login', 'admin', 'portal', 'signin'],
+                r: "Students and club coordinators can access the AI Club Portal for project submissions, internal records, and coordinator privileges.",
+                link: { href: 'login.html', label: 'Open Portal Login', icon: 'lock' }
+            },
+            {
+                k: ['contact', 'email', 'reach'],
+                r: "You can reach out to the AI Club via Sri Shakthi Institute of Engineering and Technology or follow our social channels in the website footer.",
+                link: { href: 'index.html#contact', label: 'View Contact & Social Links', icon: 'mail' }
+            },
+            {
+                k: ['event', 'activity'],
+                r: "We regularly host technical workshops, sprint hackathons, algorithmic contests, and AI reading circles throughout the academic year.",
+                link: { href: 'index.html#events', label: 'Browse All Events on Home', icon: 'calendar' }
+            },
+            {
+                k: ['join', 'how can i', 'register'],
+                r: "Joining opens at the start of each semester for Sri Shakthi students. You can also participate in any open workshop or hackathon to get involved.",
+                link: { href: 'index.html#about', label: 'Check About Section', icon: 'sparkles' }
+            },
+            {
+                k: ['hello', 'hi', 'hey', 'vanakkam'],
+                r: "Hello! I'm the AI Club Assistant. Ask me about our projects, hackathons, workshops, achievements, visual gallery, or portal login!"
+            },
+            {
+                k: ['thank'],
+                r: "You're very welcome! If you need more information about the AI Club or want to explore pages, just let me know."
+            }
+        ];
+        const FALLBACK = "I'm a frontend demo assistant with a predefined knowledge base. Try one of the suggested questions below, or ask about our projects, events, workshops, achievements, visual gallery, and portal access.";
+        const SUGGESTIONS = [
+            "What projects does the AI Club have?",
+            "What hackathons have been conducted?",
+            "What workshops are available?",
+            "Show me the visual gallery archive",
+            "How can I access the member portal?",
+            "How can I contact the AI Club?"
+        ];
+
+        /* ========================= BOT (TEMPORARY FRONTEND DEMO) ========================= */
+        async function getBotReply(message) {
+            await wait(450 + Math.random() * 450);
+            const q = message.toLowerCase();
+            const hit = KB.find(e => e.k.some(k => q.includes(k)));
+            return hit ? { text: hit.r, link: hit.link } : { text: FALLBACK, link: null };
+        }
+
+        /* ========================= CHAT UI ========================= */
+        const msgs = $('#msgs'), input = $('#chatInput'), sendBtn = $('#sendBtn');
+        let busy = false;
+
+        function emptyState() {
+            msgs.innerHTML = `<div class="empty-chat"><i data-lucide="message-circle"></i>
+    <b>Start the conversation</b><p>Ask about projects, events, hackathons, workshops — or how to join the club.</p></div>`;
+            icons();
+        }
+        function scrollDown() { msgs.scrollTop = msgs.scrollHeight; }
+        function addMsg(who, text) {
+            const empty = msgs.querySelector('.empty-chat'); if (empty) empty.remove();
+            const row = document.createElement('div'); row.className = 'row ' + who;
+            row.innerHTML = `
+    <span class="m-av" aria-hidden="true"><i data-lucide="${who === 'user' ? 'user' : 'bot'}"></i></span>
+    <div class="bubble">${text}<span class="b-time">${who === 'user' ? 'YOU' : 'AI CLUB ASSISTANT'} · ${now()}</span></div>`;
+            msgs.append(row); icons(); scrollDown();
+        }
+        function showTyping() {
+            const row = document.createElement('div'); row.className = 'row bot'; row.id = 'typingRow';
+            row.innerHTML = `<span class="m-av"><i data-lucide="bot"></i></span>
+    <div class="bubble"><span class="typing"><i></i><i></i><i></i></span></div>`;
+            msgs.append(row); icons(); scrollDown();
+        }
+        function streamText(text, link) {
+            const row = document.createElement('div'); row.className = 'row bot';
+            row.innerHTML = `<span class="m-av"><i data-lucide="bot"></i></span><div class="bubble"></div>`;
+            msgs.append(row);
+            const b = row.querySelector('.bubble');
+            
+            function finish() {
+                if (link) {
+                    const act = document.createElement('div');
+                    act.className = 'b-action';
+                    act.innerHTML = `<a class="btn" href="${link.href}"><i data-lucide="${link.icon || 'arrow-up-right'}"></i> ${link.label}</a>`;
+                    b.appendChild(act);
+                }
+                b.insertAdjacentHTML('beforeend', `<span class="b-time">AI CLUB ASSISTANT · ${now()}</span>`);
+                icons();
+                scrollDown();
+            }
+
+            if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                b.textContent = text;
+                finish();
+            } else {
+                let i = 0;
+                const t = setInterval(() => {
+                    b.textContent = text.slice(0, i += 2);
+                    scrollDown();
+                    if (i >= text.length) {
+                        clearInterval(t);
+                        finish();
+                    }
+                }, 14);
+            }
+        }
+
+        /* MAIN SEND PIPELINE */
+        async function sendMessage(message) {
+            if (busy || !message.trim()) return;
+            busy = true; sendBtn.disabled = true;
+            addMsg('user', message.trim());
+            input.value = '';
+            showTyping();
+            const reply = await getBotReply(message);
+            $('#typingRow')?.remove();
+            streamText(reply.text, reply.link);
+            busy = false; sendBtn.disabled = false; input.focus();
+        }
+
+        /* suggestions */
+        $('#sugs').innerHTML = SUGGESTIONS.map(s => `<button class="sug" type="button">${s}</button>`).join('');
+        $$('.sug').forEach(b => b.addEventListener('click', () => sendMessage(b.textContent)));
+
+        /* form: enter-to-send + button */
+        $('#chatForm').addEventListener('submit', e => { e.preventDefault(); sendMessage(input.value); });
+
+        /* clear chat */
+        $('#clearBtn').addEventListener('click', () => {
+            msgs.innerHTML = ''; emptyState();
+            const d = document.createElement('div'); d.className = 'row bot';
+            d.innerHTML = `<span class="m-av"><i data-lucide="bot"></i></span><div class="bubble">Chat cleared. Ask me anything about the AI Club.<span class="b-time">AI CLUB ASSISTANT · ${now()}</span></div>`;
+            msgs.append(d); icons();
+        });
+
+        /* ========================= INIT ========================= */
+        emptyState();
+        const urlParams = new URLSearchParams(window.location.search);
+        const qParam = urlParams.get('q');
+        if (qParam) {
+            sendMessage(qParam);
+        } else {
+            streamText("Hi! I'm the AI Club Assistant. I can tell you about our projects, hackathons, workshops, achievements, visual gallery, or how to get involved. What would you like to know?");
+        }
+        icons();
+    </script>
+</body>
+
+</html>

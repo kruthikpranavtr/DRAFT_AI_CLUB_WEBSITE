@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery — AI CLUB</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <script>try { var t = localStorage.getItem('aiclub-theme'); if (t) document.documentElement.dataset.theme = t } catch (e) { }</script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <style>
+        /* ========================= CSS VARIABLES ========================= */
+        :root {
+            --sans: 'Space Grotesk', sans-serif;
+            --mono: 'JetBrains Mono', monospace;
+            --bg: #0b0d09;
+            --bg2: #0e110b;
+            --surface: #12160f;
+            --surface2: #171c13;
+            --line: #242b1e;
+            --line2: #333c2a;
+            --text: #edf1e4;
+            --muted: #9aa28c;
+            --faint: #68705c;
+            --accent: #c9f24e;
+            --accent-t: #c9f24e;
+            --accent-dim: rgba(201, 242, 78, .12);
+            --ink: #0c0e09;
+            --accent2: #ff4a4a;
+            --accent2-dim: rgba(255, 74, 74, .14);
+            --glass: rgba(11, 13, 9, .8);
+            --shadow: 0 24px 70px rgba(0, 0, 0, .5);
+            --r: 14px;
+            --r-sm: 10px;
+            --ease: cubic-bezier(.16, 1, .3, 1);
+        }
+
+        [data-theme="light"] {
+            --bg: #f3f1f7;
+            --bg2: #eae7f1;
+            --surface: #fbfafd;
+            --surface2: #f1eef6;
+            --line: #ded8e8;
+            --line2: #c8bfd6;
+            --text: #1b1424;
+            --muted: #615670;
+            --faint: #91879f;
+            --accent: #b98ee8;
+            --accent-t: #6d3fb5;
+            --accent-dim: rgba(140, 100, 210, .13);
+            --ink: #1d1128;
+            --accent2: #b98ee8;
+            --glass: rgba(243, 241, 247, .85);
+            --shadow: 0 24px 60px rgba(60, 40, 100, .12);
+        }
+
+        /* ========================= GLOBAL ========================= */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        html {
+            scroll-behavior: smooth
+        }
+
+        body {
+            font-family: var(--sans);
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+            transition: background .35s, color .35s
+        }
+
+        ::selection {
+            background: var(--accent);
+            color: var(--ink)
+        }
+
+        img {
+            display: block;
+            max-width: 100%
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none
+        }
+
+        button {
+            font-family: inherit;
+            color: inherit;
+            background: none;
+            border: none;
+            cursor: pointer
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 3px;
+            border-radius: 4px
+        }
+
+        .mono {
+            font-family: var(--mono)
+        }
+
+        .wrap {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 clamp(20px, 5vw, 64px)
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg)
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--line2);
+            border-radius: 6px
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent)
+        }
+
+        /* ========================= CURSOR (dot only) ========================= */
+        html.cur-on,
+        html.cur-on * {
+            cursor: none !important
+        }
+
+        .cur-dot {
+            position: fixed;
+            left: -5px;
+            top: -5px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent);
+            z-index: 1200;
+            pointer-events: none
+        }
+
+        @media(pointer:coarse) {
+            .cur-dot {
+                display: none
+            }
+        }
+
+        /* ========================= NAVBAR ========================= */
+        .nav {
+            position: fixed;
+            inset: 0 0 auto;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            padding: 0 clamp(18px, 4vw, 48px);
+            z-index: 100;
+            border-bottom: 1px solid var(--line);
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            transition: background .3s
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
+
+        .brand .mark {
+            width: 34px;
+            height: 34px;
+            flex: none
+        }
+
+        .brand-t {
+            line-height: 1.05;
+            font-weight: 700;
+            font-size: 17px
+        }
+
+        .brand-t b {
+            color: var(--accent-t)
+        }
+
+        .brand-t small {
+            display: block;
+            font-family: var(--mono);
+            font-weight: 500;
+            font-size: 8.5px;
+            letter-spacing: .28em;
+            color: var(--faint)
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: auto
+        }
+
+        .nav-links a {
+            font-size: 14.5px;
+            font-weight: 500;
+            color: var(--muted);
+            padding: 8px 14px;
+            border-radius: 999px;
+            transition: .25s
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+            background: var(--accent-dim)
+        }
+
+        .nav-links a.on {
+            color: var(--ink);
+            background: var(--accent);
+            font-weight: 600
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid var(--line);
+            display: grid;
+            place-items: center;
+            transition: .25s
+        }
+
+        .icon-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent-t);
+            transform: rotate(15deg)
+        }
+
+        .icon-btn svg {
+            width: 17px;
+            height: 17px
+        }
+
+        #themeBtn .i-sun {
+            display: none
+        }
+
+        [data-theme="light"] #themeBtn .i-sun {
+            display: block
+        }
+
+        [data-theme="light"] #themeBtn .i-moon {
+            display: none
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            font-weight: 600;
+            font-size: 14.5px;
+            padding: 13px 24px;
+            border-radius: 999px;
+            transition: .3s var(--ease);
+            border: 1px solid transparent
+        }
+
+        .btn svg {
+            width: 16px;
+            height: 16px
+        }
+
+        .btn-pri {
+            background: var(--accent);
+            color: var(--ink)
+        }
+
+        .btn-pri:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px var(--accent-dim)
+        }
+
+        .btn-gho {
+            border-color: var(--line2)
+        }
+
+        .btn-gho:hover {
+            border-color: var(--accent);
+            color: var(--accent-t)
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 13px
+        }
+
+        .nav-burger {
+            display: none
+        }
+
+        .m-only {
+            display: none
+        }
+
+        /* ========================= PAGE HEAD ========================= */
+        .page {
+            padding: 130px 0 40px
+        }
+
+        .kicker {
+            font-family: var(--mono);
+            font-size: 12px;
+            letter-spacing: .24em;
+            color: var(--accent-t);
+            margin-bottom: 16px
+        }
+
+        h1 {
+            font-size: clamp(46px, 8vw, 96px);
+            line-height: .95;
+            letter-spacing: -.03em;
+            font-weight: 700
+        }
+
+        h1 .ol {
+            color: transparent;
+            -webkit-text-stroke: 1.5px var(--text)
+        }
+
+        /* ========================= TOOLBAR ========================= */
+        .toolbar {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin: 40px 0 14px;
+            position: sticky;
+            top: 70px;
+            z-index: 40;
+            background: var(--glass);
+            backdrop-filter: blur(14px);
+            padding: 14px;
+            border: 1px solid var(--line);
+            border-radius: var(--r)
+        }
+
+        .search {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid var(--line2);
+            border-radius: 999px;
+            padding: 10px 18px;
+            min-width: 240px;
+            flex: 1;
+            max-width: 360px;
+            transition: .25s;
+            background: var(--surface)
+        }
+
+        .search:focus-within {
+            border-color: var(--accent)
+        }
+
+        .search svg {
+            width: 16px;
+            height: 16px;
+            color: var(--faint);
+            flex: none
+        }
+
+        .search input {
+            background: none;
+            border: none;
+            outline: none;
+            color: var(--text);
+            font-family: var(--mono);
+            font-size: 13px;
+            width: 100%
+        }
+
+        .search input::placeholder {
+            color: var(--faint)
+        }
+
+        .count {
+            margin-left: auto;
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: .16em;
+            color: var(--faint)
+        }
+
+        .count b {
+            color: var(--accent-t)
+        }
+
+        .filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 34px
+        }
+
+        .fbtn {
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: .16em;
+            padding: 9px 18px;
+            border-radius: 999px;
+            border: 1px solid var(--line2);
+            color: var(--muted);
+            transition: .25s
+        }
+
+        .fbtn:hover {
+            border-color: var(--accent);
+            color: var(--accent-t)
+        }
+
+        .fbtn.on {
+            background: var(--accent);
+            color: var(--ink);
+            border-color: var(--accent);
+            font-weight: 600
+        }
+
+        /* ========================= GRID ========================= */
+        .ggrid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            padding-bottom: 90px
+        }
+
+        .gitem {
+            position: relative;
+            border-radius: var(--r);
+            overflow: hidden;
+            border: 1px solid var(--line);
+            background: var(--surface);
+            text-align: left;
+            padding: 0;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity .5s var(--ease), transform .5s var(--ease)
+        }
+
+        .gitem.in {
+            opacity: 1;
+            transform: none
+        }
+
+        .gitem .ph {
+            aspect-ratio: 4/3;
+            overflow: hidden;
+            background: var(--bg2)
+        }
+
+        .gitem img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform .7s var(--ease)
+        }
+
+        .gitem:hover img {
+            transform: scale(1.07)
+        }
+
+        .gitem .cap {
+            position: absolute;
+            inset: auto 0 0;
+            padding: 30px 16px 14px;
+            background: color-mix(in srgb, var(--bg) 80%, transparent);
+            backdrop-filter: blur(6px);
+            transform: translateY(8px);
+            opacity: 0;
+            transition: .35s var(--ease)
+        }
+
+        .gitem:hover .cap,
+        .gitem:focus-visible .cap {
+            transform: none;
+            opacity: 1
+        }
+
+        .gitem .cap b {
+            display: block;
+            font-size: 15px
+        }
+
+        .gitem .cap span {
+            font-family: var(--mono);
+            font-size: 10px;
+            letter-spacing: .18em;
+            color: var(--accent-t)
+        }
+
+        .zoom-hint {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--glass);
+            border: 1px solid var(--line);
+            display: grid;
+            place-items: center;
+            opacity: 0;
+            transition: .3s
+        }
+
+        .gitem:hover .zoom-hint {
+            opacity: 1
+        }
+
+        .zoom-hint svg {
+            width: 15px;
+            height: 15px
+        }
+
+        /* empty state */
+        .empty {
+            grid-column: 1/-1;
+            text-align: center;
+            padding: 90px 20px;
+            border: 1px dashed var(--line2);
+            border-radius: var(--r);
+            color: var(--faint)
+        }
+
+        .empty svg {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 16px;
+            color: var(--faint)
+        }
+
+        .empty b {
+            display: block;
+            color: var(--text);
+            font-size: 18px;
+            margin-bottom: 6px
+        }
+
+        .empty p {
+            font-size: 13.5px
+        }
+
+        /* ========================= LIGHTBOX ========================= */
+        .lb {
+            position: fixed;
+            inset: 0;
+            z-index: 300;
+            display: grid;
+            place-items: center;
+            padding: clamp(14px, 4vw, 48px);
+            visibility: hidden;
+            opacity: 0;
+            transition: .3s
+        }
+
+        .lb.open {
+            visibility: visible;
+            opacity: 1
+        }
+
+        .lb-back {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, .72);
+            backdrop-filter: blur(8px)
+        }
+
+        .lb-card {
+            position: relative;
+            background: var(--surface);
+            border: 1px solid var(--line2);
+            border-radius: var(--r);
+            max-width: 860px;
+            width: 100%;
+            max-height: 88vh;
+            overflow: auto;
+            transform: scale(.96) translateY(16px);
+            transition: .35s var(--ease)
+        }
+
+        .lb.open .lb-card {
+            transform: none
+        }
+
+        .lb-card img {
+            width: 100%;
+            max-height: 52vh;
+            object-fit: cover
+        }
+
+        .lb-body {
+            padding: 24px 28px 30px
+        }
+
+        .lb-body .cat {
+            font-family: var(--mono);
+            font-size: 10px;
+            letter-spacing: .2em;
+            color: var(--accent-t)
+        }
+
+        .lb-body h3 {
+            font-size: 22px;
+            margin: 8px 0 4px
+        }
+
+        .lb-body .meta {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--faint);
+            letter-spacing: .1em;
+            margin-bottom: 12px
+        }
+
+        .lb-body p {
+            color: var(--muted);
+            font-size: 14px
+        }
+
+        .lb-x {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--glass);
+            border: 1px solid var(--line);
+            display: grid;
+            place-items: center;
+            z-index: 2;
+            transition: .25s
+        }
+
+        .lb-x:hover {
+            border-color: var(--accent);
+            color: var(--accent-t);
+            transform: rotate(90deg)
+        }
+
+        .lb-x svg {
+            width: 17px;
+            height: 17px
+        }
+
+        .lb-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: var(--glass);
+            border: 1px solid var(--line);
+            display: grid;
+            place-items: center;
+            z-index: 2;
+            transition: .25s
+        }
+
+        .lb-nav:hover {
+            border-color: var(--accent);
+            color: var(--accent-t)
+        }
+
+        .lb-nav svg {
+            width: 18px;
+            height: 18px
+        }
+
+        .lb-prev {
+            left: 14px
+        }
+
+        .lb-next {
+            right: 14px
+        }
+
+        /* ========================= FOOTER ========================= */
+        .foot-main {
+            border-top: 1px solid var(--line);
+            background: var(--bg);
+            margin-top: 80px;
+        }
+
+        .foot-top {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr 1fr;
+            gap: 40px;
+            padding: 60px 0 44px;
+        }
+
+        .f-brand p {
+            color: var(--muted);
+            font-size: 14px;
+            margin: 16px 0;
+            max-width: 36ch;
+        }
+
+        .f-tag {
+            font-family: var(--mono);
+            font-size: 10px;
+            letter-spacing: .26em;
+            color: var(--faint);
+        }
+
+        .f-col h4 {
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: .26em;
+            color: var(--faint);
+            margin-bottom: 18px;
+        }
+
+        .f-col a,
+        .f-col span {
+            display: block;
+            font-size: 14px;
+            color: var(--muted);
+            padding: 5px 0;
+            transition: .2s;
+        }
+
+        .f-col a:hover {
+            color: var(--accent-t);
+            padding-left: 6px;
+        }
+
+        .foot-bot {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+            padding: 22px 0;
+            border-top: 1px solid var(--line);
+            font-size: 12.5px;
+            color: var(--faint);
+        }
+
+        .foot-bot .mono {
+            font-size: 10px;
+            letter-spacing: .2em;
+        }
+
+        @media(max-width:1020px) {
+            .foot-top {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media(max-width:960px) and (min-width:761px) {
+            .nav-links a {
+                padding: 6px 10px;
+                font-size: 13.5px;
+            }
+            .nav {
+                gap: 14px;
+            }
+        }
+
+        @media(max-width:960px) {
+            .ggrid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media(max-width:760px) {
+            .foot-top {
+                grid-template-columns: 1fr;
+            }
+            .nav-links {
+                position: fixed;
+                top: 70px;
+                left: 0;
+                right: 0;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0;
+                background: var(--glass);
+                backdrop-filter: blur(18px);
+                border-bottom: 1px solid var(--line);
+                padding: 10px 20px 20px;
+                transform: translateY(-8px);
+                opacity: 0;
+                visibility: hidden;
+                transition: .3s
+            }
+
+            .nav.open .nav-links {
+                transform: none;
+                opacity: 1;
+                visibility: visible
+            }
+
+            .nav-links a {
+                padding: 14px 12px;
+                border-radius: var(--r-sm);
+                font-size: 16px
+            }
+
+            .nav-burger {
+                display: grid
+            }
+
+            .m-only {
+                display: block
+            }
+
+            .nav-cta-desktop {
+                display: none
+            }
+
+            .count {
+                width: 100%;
+                margin: 0
+            }
+
+            .lb-nav {
+                width: 38px;
+                height: 38px
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ========================= NAVBAR ========================= -->
+    <nav class="nav" id="nav" aria-label="Main navigation">
+        <a class="brand" href="index.html" aria-label="AI Club home">
+            <svg class="mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                <path d="M16 6 L27 25 L5 25 Z" stroke="var(--line2)" stroke-width="1.5" />
+                <circle cx="16" cy="6" r="3.2" fill="var(--accent)" />
+                <circle cx="27" cy="25" r="2.6" stroke="currentColor" stroke-width="1.5" />
+                <circle cx="5" cy="25" r="2.6" stroke="currentColor" stroke-width="1.5" />
+            </svg>
+            <span class="brand-t">AI<b>CLUB</b><small>SRI SHAKTHI</small></span>
+        </a>
+        <div class="nav-links" id="navLinks">
+            <a href="index.html">Home</a>
+            <a href="index.html#about">About</a>
+            <a href="index.html#projects">Projects</a>
+            <a href="index.html#events">Events</a>
+            <a href="gallery.html" class="on">Gallery</a>
+            <a href="chat.html">AI Chat</a>
+            <a href="login.html" class="m-only">Login</a>
+        </div>
+        <div class="nav-right">
+            <button class="icon-btn" id="themeBtn" aria-label="Toggle theme"><i data-lucide="moon" class="i-moon"></i><i
+                    data-lucide="sun" class="i-sun"></i></button>
+            <a class="btn btn-gho btn-sm nav-cta-desktop" href="login.html"><i data-lucide="lock"></i> Login</a>
+            <button class="icon-btn nav-burger" id="burger" aria-label="Open menu" aria-expanded="false"><i
+                    data-lucide="menu"></i></button>
+        </div>
+    </nav>
+
+    <main class="wrap">
+        <!-- ========================= PAGE HEAD ========================= -->
+        <header class="page">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+                <a class="mono" href="index.html" style="font-size:12px;color:var(--accent-t);display:inline-flex;align-items:center;gap:6px"><i data-lucide="arrow-left" style="width:14px;height:14px"></i> HOME</a>
+                <span class="mono" style="font-size:12px;color:var(--faint)">/</span>
+                <span class="mono" style="font-size:12px;color:var(--faint)">SECTIONS:</span>
+                <a class="mono" href="index.html#projects" style="font-size:12px;color:var(--muted)">PROJECTS</a>
+                <span class="mono" style="font-size:12px;color:var(--faint)">·</span>
+                <a class="mono" href="index.html#events" style="font-size:12px;color:var(--muted)">EVENTS</a>
+                <span class="mono" style="font-size:12px;color:var(--faint)">·</span>
+                <a class="mono" href="chat.html" style="font-size:12px;color:var(--accent-t);display:inline-flex;align-items:center;gap:4px"><i data-lucide="message-square" style="width:12px;height:12px"></i> ASK AI</a>
+            </div>
+            <p class="kicker">// VISUAL ARCHIVE</p>
+            <h1>GALL<span class="ol">ERY</span></h1>
+        </header>
+
+        <!-- ========================= TOOLBAR ========================= -->
+        <div class="toolbar">
+            <label class="search"><i data-lucide="search"></i>
+                <input type="search" id="gSearch" placeholder="Search gallery… e.g. hackathon"
+                    aria-label="Search gallery items">
+            </label>
+            <span class="count mono">SHOWING <b id="gCount">0</b> / <span id="gTotal">0</span> · DEMO DATA</span>
+        </div>
+        <div class="filters" id="gFilters" role="tablist" aria-label="Gallery categories"></div>
+
+        <!-- ========================= GRID ========================= -->
+        <div class="ggrid" id="gGrid"></div>
+    </main>
+
+    <!-- ========================= FOOTER ========================= -->
+    <footer class="foot-main" id="contact">
+        <div class="wrap">
+            <div class="foot-top">
+                <div class="f-brand">
+                    <a class="brand" href="index.html">
+                        <svg class="mark" viewBox="0 0 32 32" fill="none" aria-hidden="true" style="width:34px;height:34px"><path d="M16 6 L27 25 L5 25 Z" stroke="var(--line2)" stroke-width="1.5"/><circle cx="16" cy="6" r="3.2" fill="var(--accent)"/><circle cx="27" cy="25" r="2.6" stroke="currentColor" stroke-width="1.5"/><circle cx="5" cy="25" r="2.6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span class="brand-t">AI<b>CLUB</b><small>SRI SHAKTHI</small></span>
+                    </a>
+                    <p>The official AI student community of Sri Shakthi Institute of Engineering and Technology.</p>
+                    <span class="f-tag">STUDENT AI COLLECTIVE — VISUAL ARCHIVE</span>
+                </div>
+                <div class="f-col">
+                    <h4>EXPLORE</h4>
+                    <a href="index.html">Home</a><a href="index.html#about">About</a><a href="index.html#projects">Projects</a><a href="index.html#events">Events</a><a href="gallery.html">Gallery</a><a href="chat.html">AI Chat</a><a href="login.html">Admin Login</a>
+                </div>
+                <div class="f-col">
+                    <h4>CONTACT</h4>
+                    <span>Sri Shakthi Institute of Engineering and Technology</span>
+                    <span class="mono" style="font-size:12px;color:var(--faint)">email — placeholder pending</span>
+                    <h4 style="margin-top:22px">COMMUNITY & ASSISTANT</h4>
+                    <div style="display:flex;gap:10px;margin-top:8px">
+                        <a class="btn btn-gho btn-sm" href="chat.html"><i data-lucide="message-square"></i> Open AI Assistant</a>
+                    </div>
+                </div>
+            </div>
+            <div class="foot-bot">
+                <span>© <span class="yr"></span> AI CLUB — Sri Shakthi Institute of Engineering and Technology</span>
+                <span class="mono">FRONTEND BUILD · BACKEND PENDING</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ========================= LIGHTBOX ========================= -->
+    <div class="lb" id="lb" aria-hidden="true">
+        <div class="lb-back" data-lb-close></div>
+        <div class="lb-card" role="dialog" aria-modal="true" aria-labelledby="lbTitle">
+            <button class="lb-x" data-lb-close aria-label="Close preview"><i data-lucide="x"></i></button>
+            <button class="lb-nav lb-prev" id="lbPrev" aria-label="Previous image"><i
+                    data-lucide="chevron-left"></i></button>
+            <button class="lb-nav lb-next" id="lbNext" aria-label="Next image"><i
+                    data-lucide="chevron-right"></i></button>
+            <img id="lbImg" alt="">
+            <div class="lb-body">
+                <span class="cat" id="lbCat"></span>
+                <h3 id="lbTitle"></h3>
+                <div class="meta mono" id="lbDate"></div>
+                <p id="lbDesc"></p>
+                <div class="lb-actions" style="margin-top:18px;display:flex;gap:12px;flex-wrap:wrap">
+                    <a class="btn btn-gho btn-sm" id="lbChatBtn" href="chat.html"><i data-lucide="message-square"></i> Ask Assistant About This</a>
+                    <a class="btn btn-gho btn-sm" href="index.html#events"><i data-lucide="calendar"></i> View Events on Home</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ========================= UTILITIES ========================= */
+        const $ = s => document.querySelector(s), $$ = s => document.querySelectorAll(s);
+        const icons = () => window.lucide && lucide.createIcons();
+
+        /* ========================= DATA (DEMO) ========================= */
+        /* FUTURE API: loadGallery() will fetch('/api/gallery') instead of using this array */
+        const GALLERY = [
+            { seed: 'gal01', t: 'Orientation Session (Demo)', c: 'Events', date: '2025-08-04', desc: 'Sample photo entry — the new-member orientation briefing.' },
+            { seed: 'gal02', t: 'Hackathon Sprint (Demo)', c: 'Hackathons', date: '2025-07-19', desc: 'Teams working through the night. Placeholder image and caption.' },
+            { seed: 'gal03', t: 'ML Workshop (Demo)', c: 'Workshops', date: '2025-07-12', desc: 'A hands-on model-training session. Sample entry.' },
+            { seed: 'gal04', t: 'Project Demo Day (Demo)', c: 'Projects', date: '2025-06-28', desc: 'Members presenting their builds. Placeholder entry.' },
+            { seed: 'gal05', t: 'Contest Winners (Demo)', c: 'Achievements', date: '2025-06-15', desc: 'Placeholder for a competition result photo.' },
+            { seed: 'gal06', t: 'Industry Visitors (Demo)', c: 'Visitors', date: '2025-05-30', desc: 'Guest interaction session. Sample entry.' },
+            { seed: 'gal07', t: 'Core Team (Demo)', c: 'Team', date: '2025-05-20', desc: 'Placeholder team photo — names pending official data.' },
+            { seed: 'gal08', t: 'Coding Contest (Demo)', c: 'Competitions', date: '2025-05-10', desc: 'Internal competitive programming round. Sample entry.' },
+            { seed: 'gal09', t: 'Paper Reading Circle (Demo)', c: 'Events', date: '2025-04-26', desc: 'Weekly discussion of a classic AI paper. Sample entry.' },
+            { seed: 'gal10', t: 'Robotics Workshop (Demo)', c: 'Workshops', date: '2025-04-12', desc: 'Intro to AI in robotics. Placeholder entry.' },
+            { seed: 'gal11', t: 'Hackathon Finale (Demo)', c: 'Hackathons', date: '2025-03-29', desc: 'Final pitches and judging. Sample entry.' },
+            { seed: 'gal12', t: 'Collaboration Meet (Demo)', c: 'Visitors', date: '2025-03-15', desc: 'Meeting a partner organisation. Placeholder entry.' }
+        ];
+        const CATS = ['All', 'Events', 'Hackathons', 'Workshops', 'Projects', 'Achievements', 'Visitors', 'Team', 'Competitions'];
+
+        /* ========================= STATE ========================= */
+        let filter = 'All', query = '', lbIndex = -1, visible = [];
+
+        /* ========================= THEME ========================= */
+        const themeBtn = $('#themeBtn');
+        themeBtn.addEventListener('click', () => {
+            const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+            document.documentElement.dataset.theme = t; localStorage.setItem('aiclub-theme', t);
+        });
+
+        /* ========================= NAVIGATION ========================= */
+        const nav = $('#nav'), burger = $('#burger');
+        burger.addEventListener('click', () => {
+            const o = nav.classList.toggle('open'); burger.setAttribute('aria-expanded', o);
+            burger.innerHTML = `<i data-lucide="${o ? 'x' : 'menu'}"></i>`; icons();
+        });
+        $$('#navLinks a').forEach(a => a.addEventListener('click', () => nav.classList.remove('open')));
+
+        /* ========================= CURSOR EFFECT (dot only) ========================= */
+        (function () {
+            if (!matchMedia('(pointer:fine)').matches || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            document.documentElement.classList.add('cur-on');
+            const d = document.createElement('div'); d.className = 'cur-dot';
+            document.body.append(d);
+            let mx = -100, my = -100, s = 1, ts = 1;
+            addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+            addEventListener('mouseover', e => { if (e.target.closest('a,button,input,.gitem')) ts = 1.9 });
+            addEventListener('mouseout', e => { if (e.target.closest('a,button,input,.gitem')) ts = 1 });
+            (function loop() {
+                s += (ts - s) * .2;
+                d.style.transform = `translate(${mx}px,${my}px) scale(${s})`; requestAnimationFrame(loop)
+            })();
+        })();
+
+        /* ========================= GALLERY: FILTERS ========================= */
+        $('#gFilters').innerHTML = CATS.map(c => `<button class="fbtn ${c === 'All' ? 'on' : ''}" role="tab" aria-selected="${c === 'All'}" data-cat="${c}">${c.toUpperCase()}</button>`).join('');
+        $$('.fbtn').forEach(b => b.addEventListener('click', () => {
+            filter = b.dataset.cat;
+            $$('.fbtn').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-selected', x === b); });
+            renderGallery();
+        }));
+        $('#gSearch').addEventListener('input', e => { query = e.target.value.trim().toLowerCase(); renderGallery(); });
+
+        /* ========================= GALLERY: RENDER ========================= */
+        function loadGallery() { renderGallery(); }
+        function renderGallery() {
+            const items = GALLERY.filter(g =>
+                (filter === 'All' || g.c === filter) &&
+                (!query || (g.t + ' ' + g.c + ' ' + g.desc).toLowerCase().includes(query)));
+            visible = items;
+            $('#gCount').textContent = items.length; $('#gTotal').textContent = GALLERY.length;
+            const grid = $('#gGrid');
+            if (!items.length) {
+                grid.innerHTML = `<div class="empty"><i data-lucide="image-off"></i><b>No matching gallery items found.</b><p>Try a different search term or category filter.</p></div>`;
+                icons(); return;
+            }
+            grid.innerHTML = items.map((g, i) => `
+    <button class="gitem" data-idx="${i}" aria-label="Open preview: ${g.t}">
+      <div class="ph"><img src="https://picsum.photos/seed/${g.seed}/800/600.jpg" alt="${g.t}" loading="lazy"></div>
+      <span class="zoom-hint"><i data-lucide="maximize-2"></i></span>
+      <div class="cap"><span>${g.c.toUpperCase()} · DEMO</span><b>${g.t}</b></div>
+    </button>`).join('');
+            $$('.gitem').forEach(el => {
+                requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('in')));
+                el.addEventListener('click', () => openLightbox(+el.dataset.idx));
+            });
+            icons();
+        }
+
+        /* ========================= LIGHTBOX ========================= */
+        const lb = $('#lb');
+        function openLightbox(i) { lbIndex = i; fillLightbox(); lb.classList.add('open'); lb.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden'; $('.lb-x').focus(); }
+        function closeLightbox() { lb.classList.remove('open'); lb.setAttribute('aria-hidden', 'true'); document.body.style.overflow = ''; }
+        function fillLightbox() {
+            const g = visible[lbIndex]; if (!g) return;
+            $('#lbImg').src = `https://picsum.photos/seed/${g.seed}/1200/800.jpg`; $('#lbImg').alt = g.t;
+            $('#lbCat').textContent = g.c.toUpperCase() + ' · DEMO ENTRY';
+            $('#lbTitle').textContent = g.t; $('#lbDate').textContent = g.date; $('#lbDesc').textContent = g.desc;
+            const chatBtn = $('#lbChatBtn');
+            if (chatBtn) chatBtn.href = 'chat.html?q=' + encodeURIComponent('Tell me about the ' + g.t + ' event in AI Club');
+            icons();
+        }
+        function step(dir) { lbIndex = (lbIndex + dir + visible.length) % visible.length; fillLightbox(); }
+        $('#lbPrev').addEventListener('click', () => step(-1));
+        $('#lbNext').addEventListener('click', () => step(1));
+        $$('[data-lb-close]').forEach(el => el.addEventListener('click', closeLightbox));
+        addEventListener('keydown', e => {
+            if (!lb.classList.contains('open')) return;
+            if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'ArrowLeft') step(-1);
+            if (e.key === 'ArrowRight') step(1);
+        });
+
+        /* ========================= INIT ========================= */
+        $$('.yr').forEach(el => el.textContent = new Date().getFullYear());
+        /* Check URL parameter e.g. gallery.html?cat=Hackathons */
+        const paramCat = new URLSearchParams(window.location.search).get('cat');
+        if (paramCat) {
+            const found = CATS.find(c => c.toLowerCase() === paramCat.toLowerCase());
+            if (found) {
+                filter = found;
+                $$('.fbtn').forEach(x => {
+                    const match = x.dataset.cat.toLowerCase() === found.toLowerCase();
+                    x.classList.toggle('on', match);
+                    x.setAttribute('aria-selected', match);
+                });
+            }
+        }
+        loadGallery(); icons();
+    </script>
+</body>
+
+</html>
