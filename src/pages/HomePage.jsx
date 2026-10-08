@@ -2,6 +2,16 @@ import { useEffect, useRef, useState } from 'react';
 import { ArrowDown, ArrowRight, MessageSquare, Send, X, Sparkles } from 'lucide-react';
 import { KB, FALLBACK, SUGGESTIONS } from '../data/chatData';
 
+const heroTransitionFrames = [
+  '/scroll-frames/frame_001.webp',
+  '/scroll-frames/frame_002.png',
+  '/scroll-frames/frame_003.png',
+  '/scroll-frames/frame_004.png',
+  '/scroll-frames/frame_006.png',
+  '/scroll-frames/frame_009.png',
+  '/scroll-frames/frame_011.png',
+];
+
 const panels = [
   {
     id: 'home',
@@ -19,7 +29,7 @@ const panels = [
     eyebrow: 'DISCOVER',
     title: <>Curiosity becomes<br/><em>capability.</em></>,
     body: 'Workshops, paper discussions and hands-on sessions help members move from curiosity to practical understanding.',
-    image: '/scroll-frames/frame_061.webp',
+    image: '/scroll-frames/frame_011.png',
     align: 'left',
     tone: 'cyan',
   },
@@ -83,23 +93,22 @@ function ChatPanel({ open, onClose }) {
   );
 }
 
-function HomePanel({ panel, children }) {
+function HomePanel({ panel, children, sectionRef, sharedVisual = false }) {
   return (
     <section
-      className={`home-panel home-panel--${panel.align} home-panel--${panel.tone}`}
+      className={`home-panel home-panel--${panel.align} home-panel--${panel.tone}${sharedVisual ? ' home-panel--shared' : ''}`}
       id={panel.id}
+      ref={sectionRef}
     >
-      <div className="home-panel-media" aria-hidden="true">
-        <img
-          src={panel.image}
-          alt=""
-          loading="eager"
-          decoding="async"
-          fetchPriority={panel.index === '01' ? 'high' : 'auto'}
-        />
-      </div>
-      <div className="home-panel-vignette" aria-hidden="true" />
-      <div className="home-panel-noise" aria-hidden="true" />
+      {!sharedVisual && (
+        <>
+          <div className="home-panel-media" aria-hidden="true">
+            <img src={panel.image} alt="" loading="eager" decoding="async" />
+          </div>
+          <div className="home-panel-vignette" aria-hidden="true" />
+          <div className="home-panel-noise" aria-hidden="true" />
+        </>
+      )}
 
       <div className="home-panel-inner">
         <div className="home-panel-copy">
@@ -117,6 +126,134 @@ function HomePanel({ panel, children }) {
   );
 }
 
+function HeroDiscoverPair({ onChat }) {
+  const heroRef = useRef(null);
+  const discoverRef = useRef(null);
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const hero = heroRef.current;
+    const discover = discoverRef.current;
+    const canvas = canvasRef.current;
+    if (!hero || !discover || !canvas) return undefined;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return undefined;
+    const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const decoded = [];
+    const images = heroTransitionFrames.map((src, frame) => {
+      const img = new Image();
+      img.decoding = 'async';
+      img.fetchPriority = frame === 0 ? 'high' : 'auto';
+      img.src = src;
+      return img;
+    });
+    let raf = 0;
+    let disposed = false;
+    let displayedFrame = -1;
+
+    const drawCover = (frame) => {
+      const img = images[frame];
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const width = Math.max(1, Math.round(canvas.clientWidth * dpr));
+      const height = Math.max(1, Math.round(canvas.clientHeight * dpr));
+      const resized = canvas.width !== width || canvas.height !== height;
+      if (displayedFrame === frame && !resized) return;
+      if (resized) {
+        canvas.width = width;
+        canvas.height = height;
+      }
+
+      const scale = Math.max(width / img.naturalWidth, height / img.naturalHeight);
+      const sw = width / scale;
+      const sh = height / scale;
+      const sx = (img.naturalWidth - sw) / 2;
+      const sy = (img.naturalHeight - sh) / 2;
+      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, width, height);
+      displayedFrame = frame;
+      // Expose the frame actually painted, also useful when inspecting slow loads.
+      canvas.dataset.frame = heroTransitionFrames[frame];
+    };
+
+    const render = () => {
+      raf = 0;
+      if (disposed) return;
+      const heroTop = hero.getBoundingClientRect().top;
+      const discoverTop = discover.getBoundingClientRect().top;
+      // Only the real distance from Hero's top to Discover's top drives frames.
+      // Discover's height and the background track never add animation travel.
+      const travel = Math.max(1, discoverTop - heroTop);
+      const progress = Math.max(0, Math.min(1, -heroTop / travel));
+      const frameProgress = motionPreference.matches ? 0 : progress;
+      const frame = Math.round(frameProgress * (images.length - 1));
+      // Retain the last valid image until the requested frame is decoded.
+      const readyFrame = decoded[frame] ? frame : displayedFrame;
+      if (readyFrame >= 0) drawCover(readyFrame);
+    };
+
+    const schedule = () => {
+      if (!disposed && !raf) raf = requestAnimationFrame(render);
+    };
+
+    images.forEach(async (img, frame) => {
+      try {
+        await img.decode();
+        if (disposed) return;
+        decoded[frame] = true;
+        schedule();
+      } catch {
+        // The static Hero fallback / last painted frame stays visible on failure.
+      }
+    });
+
+    const observer = new ResizeObserver(schedule);
+    observer.observe(hero);
+    observer.observe(discover);
+    observer.observe(canvas);
+    schedule();
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule, { passive: true });
+    motionPreference.addEventListener('change', schedule);
+
+    return () => {
+      disposed = true;
+      if (raf) cancelAnimationFrame(raf);
+      window.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+      motionPreference.removeEventListener('change', schedule);
+      observer.disconnect();
+    };
+  }, []);
+
+  return (
+    <div className="hero-discover-pair">
+      <div className="hero-discover-pair__background" aria-hidden="true">
+        <div className="hero-discover-pair__visual">
+          <canvas ref={canvasRef} className="hero-discover-pair__canvas" />
+          <div className="home-panel-vignette" />
+          <div className="home-panel-noise" />
+        </div>
+      </div>
+
+      <HomePanel panel={panels[0]} sectionRef={heroRef} sharedVisual>
+        <div className="home-panel-actions">
+          <a className="cin-btn primary" href="#discover">Explore the Club <ArrowRight size={17}/></a>
+          <button className="cin-btn ghost" onClick={onChat}>AI Chat <MessageSquare size={17}/></button>
+        </div>
+        <div className="home-scroll-cue"><ArrowDown size={15}/><span>SCROLL TO EXPLORE</span></div>
+      </HomePanel>
+
+      <HomePanel panel={panels[1]} sectionRef={discoverRef} sharedVisual>
+        <div className="home-feature-grid">
+          <article><span>01</span><strong>Learn</strong><p>Workshops, paper clubs and practical AI sessions.</p></article>
+          <article><span>02</span><strong>Experiment</strong><p>Try ideas quickly and understand how modern AI behaves.</p></article>
+          <article><span>03</span><strong>Discuss</strong><p>Share findings, challenge assumptions and learn with peers.</p></article>
+        </div>
+      </HomePanel>
+    </div>
+  );
+}
+
 export default function HomePage() {
   const [chatOpen, setChatOpen] = useState(false);
   const flowRef = useRef(null);
@@ -125,17 +262,8 @@ export default function HomePage() {
     const root = flowRef.current;
     if (!root) return undefined;
 
-    const sections = [...root.querySelectorAll('.home-panel')];
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const sections = [...root.querySelectorAll('.home-panel:not(.home-panel--shared)')];
     let raf = 0;
-
-    const preloaders = panels.map(({ image }) => {
-      const img = new Image();
-      img.src = image;
-      img.decoding = 'async';
-      img.decode?.().catch(() => {});
-      return img;
-    });
 
     const update = () => {
       raf = 0;
@@ -143,10 +271,6 @@ export default function HomePage() {
 
       sections.forEach((section) => {
         const rect = section.getBoundingClientRect();
-        const centerOffset = (rect.top + rect.height / 2 - vh / 2) / vh;
-        const clamped = Math.max(-1, Math.min(1, centerOffset));
-        section.style.setProperty('--panel-shift', reduced ? '0px' : `${clamped * -18}px`);
-
         const visible = rect.bottom > vh * 0.14 && rect.top < vh * 0.86;
         section.classList.toggle('is-visible', visible);
       });
@@ -164,27 +288,12 @@ export default function HomePage() {
       if (raf) cancelAnimationFrame(raf);
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
-      preloaders.forEach((img) => { img.src = ''; });
     };
   }, []);
 
   return (
     <main className="cin-page normal-home" ref={flowRef}>
-      <HomePanel panel={panels[0]}>
-        <div className="home-panel-actions">
-          <a className="cin-btn primary" href="#discover">Explore the Club <ArrowRight size={17}/></a>
-          <button className="cin-btn ghost" onClick={() => setChatOpen(true)}>AI Chat <MessageSquare size={17}/></button>
-        </div>
-        <div className="home-scroll-cue"><ArrowDown size={15}/><span>SCROLL TO EXPLORE</span></div>
-      </HomePanel>
-
-      <HomePanel panel={panels[1]}>
-        <div className="home-feature-grid">
-          <article><span>01</span><strong>Learn</strong><p>Workshops, paper clubs and practical AI sessions.</p></article>
-          <article><span>02</span><strong>Experiment</strong><p>Try ideas quickly and understand how modern AI behaves.</p></article>
-          <article><span>03</span><strong>Discuss</strong><p>Share findings, challenge assumptions and learn with peers.</p></article>
-        </div>
-      </HomePanel>
+      <HeroDiscoverPair onChat={() => setChatOpen(true)} />
 
       <HomePanel panel={panels[2]}>
         <div className="home-panel-actions">

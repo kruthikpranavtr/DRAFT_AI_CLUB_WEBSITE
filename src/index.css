@@ -2573,141 +2573,24 @@ body{background:var(--cin-bg);color:var(--cin-text)}
 }
 
 
-/* ========================= PREMIUM SCROLL STORY ========================= */
-.cin-home-story{background:#03070b}
-.scroll-story{position:relative;height:430vh;background:#03070b}
-.scroll-story-sticky{
-  position:sticky;top:0;height:100svh;overflow:hidden;isolation:isolate;
-  background:#03070b;
-}
-.scroll-story-canvas{
-  position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;
-  transform:translateZ(0);
-}
-.scroll-story-shade{
-  position:absolute;inset:0;z-index:1;pointer-events:none;
-  background:
-    linear-gradient(90deg,rgba(2,5,8,.92) 0%,rgba(2,5,8,.79) 26%,rgba(2,5,8,.38) 48%,rgba(2,5,8,.08) 72%,rgba(2,5,8,.16) 100%),
-    linear-gradient(180deg,rgba(2,5,8,.18) 0%,transparent 34%,rgba(2,5,8,.2) 76%,rgba(2,5,8,.78) 100%);
-}
-.scroll-story-grain{
-  position:absolute;inset:-40%;z-index:2;pointer-events:none;opacity:.12;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
-  animation:storyGrain .45s steps(2) infinite;
-}
-.scroll-story-ui{
-  position:relative;z-index:4;width:min(1380px,100%);height:100%;margin:0 auto;
-  padding:0 clamp(24px,6vw,88px);
-}
-.story-copy{
-  position:absolute;left:clamp(24px,6vw,88px);top:50%;width:min(680px,62vw);
-  transform:translateY(calc(-50% + 32px));opacity:0;pointer-events:none;
-  transition:opacity .55s ease,transform .75s cubic-bezier(.16,1,.3,1);
-}
-.story-copy.is-active{opacity:1;transform:translateY(-50%);pointer-events:auto}
-.story-eyebrow{
-  display:flex;align-items:center;gap:14px;margin-bottom:26px;
-  font-family:var(--mono);font-size:10px;letter-spacing:.24em;color:#d6dce5;
-}
-.story-eyebrow i{display:block;width:54px;height:1px;background:linear-gradient(90deg,var(--cin-gold),transparent)}
-.story-copy h1{
-  margin:0;color:#fff;font-size:clamp(58px,7.2vw,112px);font-weight:620;
-  letter-spacing:-.06em;line-height:.9;text-wrap:balance;
-  text-shadow:0 6px 35px rgba(0,0,0,.35);
-}
-.story-copy h1 em{
-  font-style:normal;color:transparent;
-  background:linear-gradient(90deg,#fff0b0 0%,var(--cin-gold) 42%,var(--cin-gold2) 100%);
-  -webkit-background-clip:text;background-clip:text;
-}
-.story-copy>p{
-  max-width:580px;margin:27px 0 0;color:#c0c8d3;font-size:clamp(15px,1.25vw,18px);
-  line-height:1.72;text-shadow:0 2px 18px rgba(0,0,0,.55);
-}
-.story-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
-.story-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:28px}
-.story-tags span{
-  padding:8px 12px;border:1px solid rgba(255,255,255,.14);border-radius:999px;
-  background:rgba(3,7,11,.46);backdrop-filter:blur(10px);
-  font-family:var(--mono);font-size:9px;letter-spacing:.17em;color:#c4ccd7;
-}
-.story-stage-index{
-  position:absolute;right:clamp(22px,4vw,62px);top:50%;z-index:5;
-  display:flex;align-items:center;gap:10px;transform:rotate(90deg) translateY(-50%);
-  transform-origin:right top;font-family:var(--mono);font-size:9px;letter-spacing:.2em;color:#aab3bf;
-}
-.story-stage-index span:first-child{color:var(--cin-gold)}
-.story-stage-index i{width:54px;height:1px;background:rgba(255,255,255,.3)}
-.story-scroll-hint{
-  position:absolute;z-index:5;left:clamp(24px,6vw,88px);bottom:34px;
-  display:flex;align-items:center;gap:10px;font-family:var(--mono);
-  font-size:9px;letter-spacing:.22em;color:#aab2bc;
-}
-.story-scroll-hint svg{animation:storyNudge 1.8s ease-in-out infinite}
-.story-progress{
-  position:absolute;left:0;right:0;bottom:0;height:3px;z-index:7;
-  background:rgba(255,255,255,.08);
-}
-.story-progress>div{
-  width:100%;height:100%;transform:scaleX(0);transform-origin:left center;will-change:transform;
-  background:linear-gradient(90deg,var(--cin-gold2),var(--cin-gold),#fff0af);
-  box-shadow:0 0 18px rgba(255,190,70,.45);
-}
-.story-loader{
-  position:absolute;inset:0;z-index:10;display:grid;place-items:center;
-  background:#03070b;transition:opacity .6s ease,visibility .6s ease;
-}
-.story-loader span{
-  font-family:var(--mono);font-size:10px;letter-spacing:.28em;color:#8f99a6;
-  animation:storyPulse 1.15s ease-in-out infinite;
-}
-.story-loader.is-ready{opacity:0;visibility:hidden;pointer-events:none}
-.story-end-marker{position:absolute;bottom:0;height:1px;width:1px}
-
-@keyframes storyPulse{50%{opacity:.4}}
-@keyframes storyNudge{50%{transform:translateY(5px)}}
-@keyframes storyGrain{0%{transform:translate(0,0)}25%{transform:translate(2%,-1%)}50%{transform:translate(-1%,2%)}75%{transform:translate(1%,1%)}100%{transform:translate(-2%,-1%)}}
-
-@media(max-width:980px){
-  .scroll-story{height:400vh}
-  .scroll-story-shade{
-    background:
-      linear-gradient(90deg,rgba(2,5,8,.9) 0%,rgba(2,5,8,.7) 48%,rgba(2,5,8,.18) 100%),
-      linear-gradient(180deg,rgba(2,5,8,.12),transparent 45%,rgba(2,5,8,.74) 100%);
-  }
-  .story-copy{width:min(660px,78vw)}
-  .story-copy h1{font-size:clamp(52px,9vw,88px)}
-}
-@media(max-width:640px){
-  .scroll-story{height:380vh}
-  .scroll-story-shade{
-    background:
-      linear-gradient(180deg,rgba(2,5,8,.24) 0%,rgba(2,5,8,.18) 32%,rgba(2,5,8,.78) 64%,rgba(2,5,8,.94) 100%),
-      linear-gradient(90deg,rgba(2,5,8,.42),rgba(2,5,8,.06));
-  }
-  .scroll-story-ui{padding:0 20px}
-  .story-copy{
-    left:20px;right:20px;top:auto;bottom:88px;width:auto;
-    transform:translateY(24px);
-  }
-  .story-copy.is-active{transform:none}
-  .story-copy h1{font-size:clamp(42px,13vw,62px);line-height:.94}
-  .story-copy>p{font-size:14px;line-height:1.6;margin-top:18px}
-  .story-eyebrow{margin-bottom:16px}
-  .story-actions{margin-top:20px;display:grid;grid-template-columns:1fr}
-  .story-tags{margin-top:18px}
-  .story-stage-index{right:18px;top:104px}
-  .story-scroll-hint{left:20px;bottom:30px}
-  .story-copy:not(:first-child) .story-scroll-hint{display:none}
-}
-@media(prefers-reduced-motion:reduce){
-  .scroll-story-grain,.story-scroll-hint svg{animation:none}
-  .story-copy{transition:opacity .2s ease}
-}
-
-
 /* ========================= NORMAL FOUR-SECTION HOME ========================= */
-.normal-home{background:#03070b;overflow:hidden}
+/* clip prevents horizontal spill without creating a nested scroll container. */
+.normal-home{background:#03070b;overflow:clip}
+
+/* The two sections alone size this pair. The backdrop adds no document height. */
+.hero-discover-pair{position:relative;isolation:isolate}
+.hero-discover-pair__background{
+  position:absolute;inset:0;z-index:0;pointer-events:none;
+}
+.hero-discover-pair__visual{
+  position:sticky;top:0;height:100svh;height:100dvh;overflow:hidden;
+  background:#03070b url('/scroll-frames/frame_001.webp') center/cover no-repeat;
+}
+.hero-discover-pair__canvas{
+  position:absolute;inset:0;display:block;width:100%;height:100%;
+}
+
+@keyframes homeScrollNudge{50%{transform:translateY(5px)}}
 .home-panel{
   --panel-shift:0px;
   position:relative;min-height:100svh;display:flex;align-items:center;overflow:hidden;
@@ -2746,6 +2629,9 @@ body{background:var(--cin-bg);color:var(--cin-text)}
   transition:opacity .7s ease,transform .85s cubic-bezier(.16,1,.3,1);
 }
 .home-panel.is-visible .home-panel-copy{opacity:1;transform:none}
+/* Shared-background content always moves with its section, without reveal effects. */
+.hero-discover-pair .home-panel{min-height:100svh;border:0}
+.home-panel--shared .home-panel-copy{opacity:1;transform:none;transition:none}
 .home-panel--right .home-panel-copy{margin-left:auto;text-align:left}
 .home-panel-meta{
   display:flex;align-items:center;gap:13px;margin-bottom:25px;
@@ -2780,7 +2666,7 @@ body{background:var(--cin-bg);color:var(--cin-text)}
   display:flex;align-items:center;gap:10px;margin-top:48px;
   font-family:var(--mono);font-size:9px;letter-spacing:.22em;color:#aeb6c1;
 }
-.home-scroll-cue svg{animation:storyNudge 1.8s ease-in-out infinite}
+.home-scroll-cue svg{animation:homeScrollNudge 1.8s ease-in-out infinite}
 .home-feature-grid{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:34px;
   max-width:720px;
@@ -2841,6 +2727,7 @@ body{background:var(--cin-bg);color:var(--cin-text)}
   .home-panel--gold .home-panel-copy{padding:22px;border-radius:18px}
 }
 @media(prefers-reduced-motion:reduce){
+  html:has(.normal-home){scroll-behavior:auto}
   .home-panel-media img{object-position:center center}
   .home-panel-copy{transition:none;opacity:1;transform:none}
   .home-scroll-cue svg{animation:none}
