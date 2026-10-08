@@ -1,17 +1,16 @@
-# AI Club Website — Sri Shakthi Institute of Engineering and Technology
+# React + Vite
 
-Official web application for the AI Club at Sri Shakthi Institute of Engineering and Technology.
+This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
-## 🌟 Pages & Architecture
+Currently, two official plugins are available:
 
-- **`index.html`**: Main landing page featuring the club overview, neural canvas animation, projects showcase, workshops & hackathons schedule, achievements, team overview, and AI assistant CTA.
-- **`gallery.html`**: Filterable visual archive of club activities, hackathons, workshops, and competitions with category tabs, search, and full-screen lightbox.
-- **`chat.html`**: Interactive AI Club Assistant chatbot with suggested questions, live typing, query parameter support (`?q=...`), and direct action links.
-- **`login.html`**: Member and coordinator authentication portal with role switcher, quick-demo autofill chips, and password toggle.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-## 🎨 Features
+## React Compiler
 
-- **Dark & Light Mode**: Seamless theme switching with persistent state saved in `localStorage`.
-- **Interconnected Navigation**: Unified navbar, breadcrumbs, modals, and contextual action links connecting all pages and sections.
-- **Responsive Layout**: Designed for mobile, tablet, and desktop viewports.
-- **Lucide Icons & Modern Typography**: Powered by Space Grotesk and JetBrains Mono.
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+
+## Expanding the Oxlint configuration
+
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
