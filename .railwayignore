@@ -1,0 +1,7 @@
+.git
+node_modules
+dist
+server/data
+server/uploads
+public/*.mp4
+*.log
