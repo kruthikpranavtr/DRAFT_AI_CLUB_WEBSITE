@@ -7,6 +7,7 @@ import GalleryPage from './pages/GalleryPage';
 import AboutPage from './pages/AboutPage';
 import NewsPage from './pages/NewsPage';
 import AssessmentPage from './pages/AssessmentPage';
+import AdminLoginPage from './pages/AdminLoginPage';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -16,20 +17,32 @@ function ScrollToTop() {
   return null;
 }
 
+function AppRoutes() {
+  const { pathname } = useLocation();
+  const isAdminRoute = pathname.startsWith('/admin');
+
+  return (
+    <>
+      {!isAdminRoute && <Navbar />}
+      <ScrollToTop />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/gallery" element={<GalleryPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/news" element={<NewsPage />} />
+        <Route path="/assessment" element={<AssessmentPage />} />
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+        <Route path="*" element={<HomePage />} />
+      </Routes>
+    </>
+  );
+}
+
 export default function App() {
   return (
     <ThemeProvider>
       <BrowserRouter>
-        <Navbar />
-        <ScrollToTop />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/gallery" element={<GalleryPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/news" element={<NewsPage />} />
-          <Route path="/assessment" element={<AssessmentPage />} />
-          <Route path="*" element={<HomePage />} />
-        </Routes>
+        <AppRoutes />
       </BrowserRouter>
     </ThemeProvider>
   );
