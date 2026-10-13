@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-route
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import SiteAnnouncement from './components/SiteAnnouncement';
 import ProtectedRoute from './components/ProtectedRoute';
 import HomePage from './pages/HomePage';
 import GalleryPage from './pages/GalleryPage';
@@ -21,7 +22,8 @@ function ScrollToTop() {
 }
 
 function DashboardRedirect() {
-  const { session } = useAuth();
+  const { session, loading } = useAuth();
+  if (loading) return null;
   if (!session) return <Navigate to="/login" replace />;
   return <Navigate to={session.role === 'admin' ? '/admin/dashboard' : '/student/dashboard'} replace />;
 }
@@ -31,7 +33,7 @@ function AppRoutes() {
   const standalone = pathname === '/login' || pathname === '/forgot-password' || pathname.startsWith('/admin') || pathname.startsWith('/student');
 
   return <>
-    {!standalone && <Navbar />}
+    {!standalone && <><Navbar/><SiteAnnouncement/></>}
     <ScrollToTop />
     <Routes>
       <Route path="/" element={<HomePage />} />

@@ -1,4 +1,4 @@
-import { BarChart3, BookOpenCheck, ChevronRight, ClipboardCheck, FileText, Home, LayoutDashboard, LogOut, Menu, ShieldCheck, UserRoundCheck, Users, X } from 'lucide-react';
+import { BarChart3, BookOpenCheck, ChevronRight, FileImage, FileText, FolderOpen, Home, LayoutDashboard, LogOut, Menu, PanelsTopLeft, Settings, ShieldCheck, Users, X } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -12,9 +12,12 @@ const studentItems = [
 
 const adminItems = [
   ['overview','Overview',LayoutDashboard],
-  ['applicants','Applicants',Users],
-  ['assessments','Assessments',ClipboardCheck],
   ['content','Content',FileText],
+  ['pages','Pages & sections',PanelsTopLeft],
+  ['gallery','Gallery',FileImage],
+  ['files','Files',FolderOpen],
+  ['users','Users & access',Users],
+  ['settings','Website settings',Settings],
 ];
 
 export default function DashboardShell({ role, view, onViewChange, children }) {

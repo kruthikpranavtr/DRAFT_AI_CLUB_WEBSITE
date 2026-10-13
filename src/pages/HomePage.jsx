@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { Send, X, Sparkles } from 'lucide-react';
 import { KB, FALLBACK, SUGGESTIONS } from '../data/chatData';
 import ScrollVideoStory from '../components/ScrollVideoStory';
+import { usePublishedContent } from '../lib/useCms';
 
-const panels = [
+const fallbackPanels = [
   {
     id: 'home',
     index: '01',
@@ -82,6 +83,16 @@ function ChatPanel({ open, onClose }) {
 
 export default function HomePage() {
   const [chatOpen, setChatOpen] = useState(false);
+  const { items } = usePublishedContent({ page:'home',type:'page-section' });
+  const panels = items.length ? items.map(item => ({
+    id:item.section_key,
+    index:item.payload.index || String(item.sort_order + 1).padStart(2,'0'),
+    eyebrow:item.excerpt,
+    title:item.title,
+    body:item.body,
+    align:item.payload.align || 'left',
+    tone:item.payload.tone || 'cyan',
+  })) : fallbackPanels;
   return (
     <main className="cin-page video-home">
       <ScrollVideoStory panels={panels} onChat={() => setChatOpen(true)} />

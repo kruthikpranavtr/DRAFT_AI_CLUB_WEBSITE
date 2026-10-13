@@ -1,51 +1,50 @@
-import { createContext, useContext, useMemo, useState } from 'react';
-
-const SESSION_KEY = 'ai-club-mock-session';
-
-export const MOCK_ACCOUNTS = {
-  student: {
-    email: 'student@srishakthi.ac.in',
-    password: 'Student@123',
-    name: 'AI Club Student',
-    id: 'SSAC-2026-014',
-  },
-  admin: {
-    email: 'admin@srishakthi.ac.in',
-    password: 'Admin@123',
-    name: 'Club Administrator',
-    id: 'ADMIN-01',
-  },
-};
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
 const AuthContext = createContext(null);
 
-export function AuthProvider({ children }) {
-  const [session, setSession] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY) || 'null'); }
-    catch { return null; }
+async function request(path, options = {}) {
+  const response = await fetch(path, {
+    credentials:'include',
+    headers:options.body instanceof FormData ? options.headers : { 'Content-Type':'application/json', ...options.headers },
+    ...options,
   });
+  const body = response.status === 204 ? null : await response.json().catch(() => null);
+  if (!response.ok) throw new Error(body?.error || 'The request could not be completed.');
+  return body;
+}
 
-  function signIn(role, email, password, remember = true) {
-    const account = MOCK_ACCOUNTS[role];
-    if (!account || email !== account.email || password !== account.password) {
-      return { ok:false, message:'These details do not match the selected mock account.' };
+export function AuthProvider({ children }) {
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    request('/api/auth/me')
+      .then(data => { if (active) setSession(data.user); })
+      .catch(() => { if (active) setSession(null); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, []);
+
+  async function signIn(identifier, password, remember = true) {
+    try {
+      const data = await request('/api/auth/login', {
+        method:'POST',
+        body:JSON.stringify({ identifier,password,remember }),
+      });
+      setSession(data.user);
+      return { ok:true,user:data.user };
+    } catch (error) {
+      return { ok:false,message:error.message };
     }
-    const nextSession = { role, name:account.name, email:account.email, id:account.id };
-    setSession(nextSession);
-    localStorage.removeItem(SESSION_KEY);
-    sessionStorage.removeItem(SESSION_KEY);
-    if (remember) localStorage.setItem(SESSION_KEY, JSON.stringify(nextSession));
-    else sessionStorage.setItem(SESSION_KEY, JSON.stringify(nextSession));
-    return { ok:true, user:nextSession };
   }
 
-  function signOut() {
-    setSession(null);
-    localStorage.removeItem(SESSION_KEY);
-    sessionStorage.removeItem(SESSION_KEY);
+  async function signOut() {
+    try { await request('/api/auth/logout', { method:'POST' }); }
+    finally { setSession(null); }
   }
 
-  const value = useMemo(() => ({ session, signIn, signOut }), [session]);
+  const value = useMemo(() => ({ session,loading,signIn,signOut }), [session,loading]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

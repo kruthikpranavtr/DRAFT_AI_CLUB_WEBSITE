@@ -1,35 +1,30 @@
 import { useState } from 'react';
-import { ArrowLeft, ArrowRight, Eye, EyeOff, GraduationCap, KeyRound, LockKeyhole, Mail, ShieldCheck, Sparkles, UserCog } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Eye, EyeOff, GraduationCap, KeyRound, LockKeyhole, Mail, ShieldCheck, Sparkles } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MOCK_ACCOUNTS, useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import './AdminLoginPage.css';
 
 export default function AdminLoginPage() {
   const { signIn } = useAuth();
   const navigate = useNavigate();
-  const [role, setRole] = useState('student');
-  const [email, setEmail] = useState(MOCK_ACCOUNTS.student.email);
-  const [password, setPassword] = useState(MOCK_ACCOUNTS.student.password);
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [status, setStatus] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  function selectRole(nextRole) {
-    const account = MOCK_ACCOUNTS[nextRole];
-    setRole(nextRole);
-    setEmail(account.email);
-    setPassword(account.password);
-    setStatus(null);
-  }
-
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    const result = signIn(role, email, password, remember);
+    setSubmitting(true);
+    setStatus(null);
+    const result = await signIn(identifier, password, remember);
+    setSubmitting(false);
     if (!result.ok) {
       setStatus({ type:'error', text:result.message });
       return;
     }
-    navigate(role === 'admin' ? '/admin/dashboard' : '/student/dashboard', { replace:true });
+    navigate(result.user.role === 'admin' ? '/admin/dashboard' : '/student/dashboard', { replace:true });
   }
 
   return (
@@ -50,26 +45,21 @@ export default function AdminLoginPage() {
         <Link to="/" className="admin-login__back"><ArrowLeft size={16}/> Back to website</Link>
         <div className="admin-login__card">
           <div className="admin-login__card-icon"><KeyRound size={24}/></div>
-          <div className="admin-login__label-row"><span className="admin-login__label">SECURE PORTAL</span><span className="admin-demo-badge">DEMO ACCOUNT</span></div>
+          <div className="admin-login__label-row"><span className="admin-login__label">SECURE PORTAL</span><span className="admin-demo-badge">PROTECTED ACCESS</span></div>
           <h2>Welcome back.</h2>
-          <p className="admin-login__intro">Choose a role. Its mock credentials are filled automatically.</p>
-
-          <div className="admin-role-switch" role="group" aria-label="Choose account type">
-            <button type="button" className={role === 'student' ? 'active' : ''} onClick={() => selectRole('student')} aria-pressed={role === 'student'}><GraduationCap size={17}/><span>Student</span></button>
-            <button type="button" className={role === 'admin' ? 'active' : ''} onClick={() => selectRole('admin')} aria-pressed={role === 'admin'}><UserCog size={17}/><span>Admin</span></button>
-          </div>
+          <p className="admin-login__intro">Enter your member ID and password. We will securely route you to the correct dashboard.</p>
 
           <form onSubmit={handleSubmit}>
-            <label htmlFor="member-email">{role === 'student' ? 'Student email address' : 'Administrator email address'}</label>
-            <div className="admin-field"><Mail size={18}/><input id="member-email" name="email" type="email" autoComplete="username" value={email} onChange={event => { setEmail(event.target.value); setStatus(null); }} required/></div>
+            <label htmlFor="member-identifier">Student ID or Admin ID</label>
+            <div className="admin-field"><Mail size={18}/><input id="member-identifier" name="identifier" type="text" autoComplete="username" value={identifier} onChange={event => { setIdentifier(event.target.value); setStatus(null); }} required/></div>
             <div className="admin-password-row"><label htmlFor="member-password">Password</label><Link to="/forgot-password">Forgot password?</Link></div>
             <div className="admin-field"><LockKeyhole size={18}/><input id="member-password" name="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" value={password} onChange={event => { setPassword(event.target.value); setStatus(null); }} required minLength={8}/><button type="button" className="admin-password-toggle" onClick={() => setShowPassword(value => !value)} aria-label={showPassword ? 'Hide password' : 'Show password'}>{showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}</button></div>
             <label className="admin-remember"><input type="checkbox" name="remember" checked={remember} onChange={event => setRemember(event.target.checked)}/><span><i><CheckMark/></i></span>Keep me signed in on this device</label>
-            <button type="submit" className="admin-login__submit">Sign in as {role} <ArrowRight size={17}/></button>
+            <button type="submit" className="admin-login__submit" disabled={submitting}>{submitting ? 'Verifying…' : 'Sign in to dashboard'} <ArrowRight size={17}/></button>
             <p className={'admin-login__message' + (status ? ' is-' + status.type : '')} role="status">{status?.text}</p>
           </form>
 
-          <div className="admin-login__security"><ShieldCheck size={15}/><span>Development-only credentials. Replace this mock session with secure server authentication before launch.</span></div>
+          <div className="admin-login__security"><ShieldCheck size={15}/><span>Your session is protected by an HTTP-only cookie and server-enforced access controls.</span></div>
         </div>
         <p className="admin-login__help">Need access? Contact the AI Club faculty coordinator.</p>
       </section>

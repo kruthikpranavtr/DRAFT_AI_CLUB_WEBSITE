@@ -1,9 +1,22 @@
 import { ArrowUpRight, Bell } from 'lucide-react';
 import { EVENTS } from '../data/eventsData';
+import { usePublishedContent } from '../lib/useCms';
 
 export default function NewsPage() {
-  const upcoming = EVENTS.filter(e => e.s === 'up');
-  const completed = EVENTS.filter(e => e.s === 'done');
+  const { items } = usePublishedContent({ page:'news' });
+  const cmsNews = items.filter(item => ['news','announcement','event'].includes(item.type));
+  const entries = cmsNews.length ? cmsNews.map(item => ({
+    id:item.id,
+    t:item.title,
+    desc:item.body,
+    d:item.payload.date || '',
+    mo:item.payload.month || '',
+    c:item.payload.category || item.type,
+    featured:item.payload.featured || item.sort_order === 0,
+  })) : EVENTS.map((item,index) => ({ ...item,featured:index === 0 }));
+
+  const featured = entries.find(item => item.featured) || entries[0];
+  const latest = entries.filter(item => item.id !== featured?.id);
 
   return (
     <main className="cin-page sub-page">
@@ -17,16 +30,16 @@ export default function NewsPage() {
 
       <section className="news-body">
         <div className="cin-shell">
-          {upcoming[0] && <article className="featured-news">
-            <div><span className="news-chip"><Bell size={13}/> FEATURED UPDATE</span><h2>{upcoming[0].t}</h2><p>{upcoming[0].desc}</p><small>{upcoming[0].d} {upcoming[0].mo} · {upcoming[0].c}</small></div>
+          {featured && <article className="featured-news">
+            <div><span className="news-chip"><Bell size={13}/> FEATURED UPDATE</span><h2>{featured.t}</h2><p>{featured.desc}</p><small>{featured.d} {featured.mo} · {featured.c}</small></div>
             <div className="feature-visual"><span>AI</span></div>
           </article>}
 
-          <div className="news-heading"><h2>Latest</h2><span>Repository-backed demo content</span></div>
+          <div className="news-heading"><h2>Latest</h2><span>Published by the AI Club team</span></div>
           <div className="news-list">
-            {[...upcoming.slice(1), ...completed].map((e,i)=><article key={e.id}>
-              <span className="news-index">{String(i+1).padStart(2,'0')}</span>
-              <div><small>{e.mo} {e.d} · {e.c}</small><h3>{e.t}</h3><p>{e.desc}</p></div>
+            {latest.map((item,index) => <article key={item.id}>
+              <span className="news-index">{String(index+1).padStart(2,'0')}</span>
+              <div><small>{item.mo} {item.d} · {item.c}</small><h3>{item.t}</h3><p>{item.desc}</p></div>
               <ArrowUpRight size={18}/>
             </article>)}
           </div>

@@ -1,0 +1,44 @@
+import { Router } from 'express';
+import { db, json } from '../db.js';
+
+const router = Router();
+
+router.get('/content', (req, res) => {
+  const { page, type } = req.query;
+  const filters = [`status='published'`];
+  const values = [];
+  if (page) { filters.push('page_key=?'); values.push(String(page)); }
+  if (type) { filters.push('type=?'); values.push(String(type)); }
+  const rows = db.prepare(`SELECT id,type,page_key,section_key,title,excerpt,body,payload,sort_order,published_at,updated_at
+    FROM content_entries WHERE ${filters.join(' AND ')}
+    ORDER BY page_key,sort_order,created_at`).all(...values);
+  res.json({ items:rows.map(row => ({ ...row, payload:json(row.payload, {}) })) });
+});
+
+router.get('/gallery', (req, res) => {
+  const items = db.prepare(`SELECT g.*,c.name category_name,c.slug category_slug,
+      f.public_url,f.mime_type,f.original_name
+    FROM gallery_items g
+    LEFT JOIN gallery_categories c ON c.id=g.category_id
+    JOIN files f ON f.id=g.file_id
+    WHERE g.status='published'
+    ORDER BY g.sort_order,g.created_at DESC`).all();
+  const categories = db.prepare('SELECT * FROM gallery_categories ORDER BY name').all();
+  res.json({ items, categories });
+});
+
+router.get('/settings', (req, res) => {
+  const rows = db.prepare('SELECT key,value FROM settings WHERE is_public=1').all();
+  res.json({ settings:Object.fromEntries(rows.map(row => [row.key,json(row.value,row.value)])) });
+});
+
+router.get('/files/:id', async (req, res, next) => {
+  try {
+    const record = db.prepare('SELECT * FROM files WHERE id=? AND is_public=1').get(req.params.id);
+    if (!record) return res.status(404).json({ error:'File not found.' });
+    const { sendStoredFile } = await import('../storage.js');
+    await sendStoredFile(record,res,'inline');
+  } catch (error) { next(error); }
+});
+
+export default router;
