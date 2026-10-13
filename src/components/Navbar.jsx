@@ -25,7 +25,7 @@ export default function Navbar() {
     <nav id="site-primary-nav" className={open ? 'site-nav-links open' : 'site-nav-links'} aria-label="Primary navigation">
       {links.map(([to, label], index) => <Link key={to} to={to} className={(pathname === to ? 'active' : '') + (home ? ' hero-appear ' + (index % 2 ? 'hero-appear--soft' : 'hero-appear--scale') : '')} style={home ? { '--d': (.16 + index * .12).toFixed(2) + 's' } : undefined} onClick={() => setOpen(false)}>{label}</Link>)}
     </nav>
-    <Link to="/about" onClick={() => setOpen(false)} className={'hero-intro__button hero-intro__button--primary site-nav__reference-cta' + (home ? ' hero-appear hero-appear--scale' : '')} style={home ? { "--d": ".34s" } : undefined}>Meet the Club</Link>
+    <Link to="/login" onClick={() => setOpen(false)} className={'hero-intro__button hero-intro__button--primary site-nav__reference-cta' + (home ? ' hero-appear hero-appear--scale' : '')} style={home ? { "--d": ".34s" } : undefined}>Member Login</Link>
     <button className={"site-menu-btn" + (home ? " hero-appear hero-appear--scale" : "")} style={home ? { "--d": ".34s" } : undefined} onClick={() => setOpen(v => !v)} aria-controls="site-primary-nav" aria-expanded={open} aria-label={open ? 'Close menu' : 'Open menu'}>{open ? <X size={20}/> : <Menu size={20}/>}</button>
   </header>;
 }

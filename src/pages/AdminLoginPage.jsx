@@ -1,20 +1,26 @@
 import { useState } from 'react';
-import { ArrowLeft, ArrowRight, Eye, EyeOff, KeyRound, LockKeyhole, Mail, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Eye, EyeOff, GraduationCap, KeyRound, LockKeyhole, Mail, ShieldCheck, Sparkles, UserCog } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import './AdminLoginPage.css';
 
 export default function AdminLoginPage() {
+  const [role, setRole] = useState('student');
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState('');
 
+  function selectRole(nextRole) {
+    setRole(nextRole);
+    setMessage('');
+  }
+
   function handleSubmit(event) {
     event.preventDefault();
-    setMessage('Authentication service is ready to be connected to the admin backend.');
+    setMessage('Secure ' + role + ' authentication is ready to be connected to the backend.');
   }
 
   return (
     <main className="admin-login">
-      <section className="admin-login__visual" aria-label="AI Club administration">
+      <section className="admin-login__visual" aria-label="AI Club member access">
         <div className="admin-login__ambient" aria-hidden="true">
           <span className="admin-node admin-node--one"/>
           <span className="admin-node admin-node--two"/>
@@ -30,16 +36,16 @@ export default function AdminLoginPage() {
         </Link>
 
         <div className="admin-login__story">
-          <div className="admin-login__eyebrow"><Sparkles size={14}/> ADMINISTRATIVE NETWORK</div>
-          <h1>Lead the club.<br/><em>Shape what comes next.</em></h1>
-          <p>A secure workspace for managing assessments, student progress, club activity and the stories shared with the community.</p>
+          <div className="admin-login__eyebrow"><Sparkles size={14}/> AI CLUB MEMBER NETWORK</div>
+          <h1>One club.<br/><em>One place to begin.</em></h1>
+          <p>A shared secure workspace where students take assessments, track their progress and build—while administrators guide the community.</p>
           <div className="admin-login__trust">
-            <span><ShieldCheck size={17}/> Protected administrative access</span>
-            <span><LockKeyhole size={17}/> Authorized members only</span>
+            <span><GraduationCap size={17}/> Student assessment access</span>
+            <span><ShieldCheck size={17}/> Protected admin controls</span>
           </div>
         </div>
 
-        <footer>AI CLUB ADMIN SYSTEM <span/> SECURE ACCESS</footer>
+        <footer>AI CLUB MEMBER SYSTEM <span/> SECURE ACCESS</footer>
       </section>
 
       <section className="admin-login__form-side">
@@ -47,24 +53,29 @@ export default function AdminLoginPage() {
 
         <div className="admin-login__card">
           <div className="admin-login__card-icon"><KeyRound size={24}/></div>
-          <span className="admin-login__label">ADMIN PORTAL</span>
+          <span className="admin-login__label">SECURE PORTAL</span>
           <h2>Welcome back.</h2>
-          <p className="admin-login__intro">Sign in with your authorized administrator account.</p>
+          <p className="admin-login__intro">Choose your account type and enter your credentials.</p>
+
+          <div className="admin-role-switch" role="group" aria-label="Choose account type">
+            <button type="button" className={role === 'student' ? 'active' : ''} onClick={() => selectRole('student')} aria-pressed={role === 'student'}><GraduationCap size={17}/><span>Student</span></button>
+            <button type="button" className={role === 'admin' ? 'active' : ''} onClick={() => selectRole('admin')} aria-pressed={role === 'admin'}><UserCog size={17}/><span>Admin</span></button>
+          </div>
 
           <form onSubmit={handleSubmit}>
-            <label htmlFor="admin-email">Email address</label>
+            <label htmlFor="member-email">{role === 'student' ? 'Student email address' : 'Administrator email address'}</label>
             <div className="admin-field">
               <Mail size={18}/>
-              <input id="admin-email" name="email" type="email" autoComplete="username" placeholder="admin@aiclub.edu" required/>
+              <input id="member-email" name="email" type="email" autoComplete="username" placeholder={role === 'student' ? 'student@srishakthi.ac.in' : 'admin@srishakthi.ac.in'} required/>
             </div>
 
             <div className="admin-password-row">
-              <label htmlFor="admin-password">Password</label>
+              <label htmlFor="member-password">Password</label>
               <button type="button">Forgot password?</button>
             </div>
             <div className="admin-field">
               <LockKeyhole size={18}/>
-              <input id="admin-password" name="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" placeholder="Enter your password" required minLength={8}/>
+              <input id="member-password" name="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" placeholder="Enter your password" required minLength={8}/>
               <button type="button" className="admin-password-toggle" onClick={() => setShowPassword(value => !value)} aria-label={showPassword ? 'Hide password' : 'Show password'}>
                 {showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}
               </button>
@@ -76,11 +87,11 @@ export default function AdminLoginPage() {
               Keep me signed in on this device
             </label>
 
-            <button type="submit" className="admin-login__submit">Sign in to dashboard <ArrowRight size={17}/></button>
+            <button type="submit" className="admin-login__submit">Continue as {role} <ArrowRight size={17}/></button>
             <p className="admin-login__message" role="status">{message}</p>
           </form>
 
-          <div className="admin-login__security"><ShieldCheck size={15}/><span>Your credentials will be encrypted and verified securely once authentication is connected.</span></div>
+          <div className="admin-login__security"><ShieldCheck size={15}/><span>Your credentials will be encrypted and routed to the correct workspace once authentication is connected.</span></div>
         </div>
 
         <p className="admin-login__help">Need access? Contact the AI Club faculty coordinator.</p>
