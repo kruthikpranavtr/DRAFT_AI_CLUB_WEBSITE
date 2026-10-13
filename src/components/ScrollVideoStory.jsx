@@ -4,10 +4,10 @@ import './ScrollVideoStory.css';
 import HeroIntro from './HeroIntro';
 
 const backgroundVideos = [
-  { id: 'home', src: '/hero-particle-ribbon-web.mp4', poster: '/hero-particle-ribbon-poster.jpg' },
-  { id: 'discover', src: '/section-discover.mp4', poster: '/section-discover-poster.jpg' },
-  { id: 'create', src: '/section-create.mp4', poster: '/section-create-poster.jpg' },
-  { id: 'connect', src: '/section-connect.mp4', poster: '/section-connect-poster.jpg' },
+  { id: 'home', src: '/api/public/media/hero-particle-ribbon-web.mp4', poster: '/hero-particle-ribbon-poster.jpg' },
+  { id: 'discover', src: '/api/public/media/section-discover.mp4', poster: '/section-discover-poster.jpg' },
+  { id: 'create', src: '/api/public/media/section-create.mp4', poster: '/section-create-poster.jpg' },
+  { id: 'connect', src: '/api/public/media/section-connect.mp4', poster: '/section-connect-poster.jpg' },
 ];
 
 function SharedStoryBackground({ chapterRefs }) {

@@ -3,6 +3,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const uploadDir = process.env.UPLOAD_DIR || path.join(here, 'uploads');
@@ -72,6 +73,14 @@ export async function deleteStoredFile(record) {
   }
   const target = path.resolve(uploadDir, record.storage_key);
   if (target.startsWith(path.resolve(uploadDir)) && fs.existsSync(target)) fs.unlinkSync(target);
+}
+
+export async function getStoredObjectUrl(key, expiresIn = 3600) {
+  if (!s3) return '';
+  return getSignedUrl(s3, new GetObjectCommand({
+    Bucket:process.env.S3_BUCKET,
+    Key:key,
+  }), { expiresIn });
 }
 
 export const storageMode = s3 ? 'object-storage' : 'local-disk';

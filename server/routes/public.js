@@ -3,6 +3,13 @@ import { db, json } from '../db.js';
 
 const router = Router();
 
+const siteVideos = new Set([
+  'hero-particle-ribbon-web.mp4',
+  'section-discover.mp4',
+  'section-create.mp4',
+  'section-connect.mp4',
+]);
+
 router.get('/content', (req, res) => {
   const { page, type } = req.query;
   const filters = [`status='published'`];
@@ -30,6 +37,17 @@ router.get('/gallery', (req, res) => {
 router.get('/settings', (req, res) => {
   const rows = db.prepare('SELECT key,value FROM settings WHERE is_public=1').all();
   res.json({ settings:Object.fromEntries(rows.map(row => [row.key,json(row.value,row.value)])) });
+});
+
+router.get('/media/:name', async (req, res, next) => {
+  try {
+    const name = String(req.params.name || '');
+    if (!siteVideos.has(name)) return res.status(404).json({ error:'Media not found.' });
+    const { getStoredObjectUrl } = await import('../storage.js');
+    const url = await getStoredObjectUrl(`site-videos/${name}`, 3600);
+    if (!url) return res.status(404).json({ error:'Media storage is not configured.' });
+    return res.redirect(302, url);
+  } catch (error) { next(error); }
 });
 
 router.get('/files/:id', async (req, res, next) => {
