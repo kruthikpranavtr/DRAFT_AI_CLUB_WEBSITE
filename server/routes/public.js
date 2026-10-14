@@ -45,8 +45,10 @@ router.get('/media/:name', async (req, res, next) => {
     if (!siteVideos.has(name)) return res.status(404).json({ error:'Media not found.' });
     const { getStoredObjectUrl } = await import('../storage.js');
     const url = await getStoredObjectUrl(`site-videos/${name}`, 3600);
-    if (!url) return res.status(404).json({ error:'Media storage is not configured.' });
-    return res.redirect(302, url);
+    if (url) return res.redirect(302, url);
+    const fallbackBase = String(process.env.MEDIA_FALLBACK_BASE_URL || '').replace(/\/$/, '');
+    if (fallbackBase) return res.redirect(302, `${fallbackBase}/${name}`);
+    return res.redirect(302, `/${name}`);
   } catch (error) { next(error); }
 });
 
