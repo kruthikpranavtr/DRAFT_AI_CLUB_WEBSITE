@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" fill="none" role="img" aria-labelledby="t">
+  <title id="t">AI Club symbol</title>
+  <defs>
+    <linearGradient id="rim" x1="11" y1="8" x2="59" y2="65" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F6F7FB" stop-opacity=".90"/>
+      <stop offset=".35" stop-color="#B98EE8" stop-opacity=".86"/>
+      <stop offset=".72" stop-color="#6D3FB5"/>
+      <stop offset="1" stop-color="#D7D7DC" stop-opacity=".85"/>
+    </linearGradient>
+    <linearGradient id="letter" x1="22" y1="15" x2="53" y2="55" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset=".55" stop-color="#EAE7F1"/>
+      <stop offset="1" stop-color="#B98EE8"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="15" y1="8" x2="59" y2="62" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1C152B" stop-opacity=".97"/>
+      <stop offset="1" stop-color="#0B0A12" stop-opacity=".92"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="36" cy="36" r="32" fill="url(#panel)" stroke="url(#rim)" stroke-width="1.7"/>
+  <circle cx="36" cy="36" r="28.5" stroke="#B98EE8" stroke-opacity=".24" stroke-width="1"/>
+  <path d="M14.6 20.4A27 27 0 0 1 52.1 14.4" stroke="#F6F7FB" stroke-opacity=".38" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M55.5 56.9A27 27 0 0 1 21.5 58.7" stroke="#8C64D2" stroke-opacity=".55" stroke-width="1.6" stroke-linecap="round"/>
+
+  <path d="M16.5 49.2 29.3 22c.5-1 2-1 2.5 0L44.5 49.2" stroke="url(#letter)" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M23.8 39h13.5" stroke="#B98EE8" stroke-width="4.4" stroke-linecap="round"/>
+  <path d="M50.6 30.5v18.7" stroke="url(#letter)" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="50.6" cy="22.5" r="3.4" fill="#FFC857"/>
+  <circle cx="50.6" cy="22.5" r="1.25" fill="#FFFFFF"/>
+
+  <circle cx="36" cy="8.3" r="1.2" fill="#D7D7DC" opacity=".85"/>
+  <circle cx="64" cy="36" r="1.1" fill="#8C64D2" opacity=".9"/>
+  <circle cx="8" cy="36" r="1.1" fill="#8C64D2" opacity=".9"/>
+</svg>

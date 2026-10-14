@@ -20,7 +20,7 @@ export default function Navbar() {
   }, [open]);
   return <header ref={headerRef} className="site-nav site-nav--reference">
     <Link to="/" className={"site-brand" + (home ? " hero-appear hero-appear--scale" : "")} style={home ? { "--d": ".08s" } : undefined} onClick={() => setOpen(false)} aria-label="AI Club home">
-      <span className="site-brand-mark"><img src="/ai-club-emblem.png" alt="" aria-hidden="true"/></span><span><strong>AI CLUB</strong><small>SRI SHAKTHI</small></span>
+      <span className="site-brand-mark"><img src="/ai-club-mark.svg" alt="" aria-hidden="true"/></span><span><strong>AI CLUB</strong><small>SRI SHAKTHI</small></span>
     </Link>
     <nav id="site-primary-nav" className={open ? 'site-nav-links open' : 'site-nav-links'} aria-label="Primary navigation">
       {links.map(([to, label], index) => <Link key={to} to={to} className={(pathname === to ? 'active' : '') + (home ? ' hero-appear ' + (index % 2 ? 'hero-appear--soft' : 'hero-appear--scale') : '')} style={home ? { '--d': (.16 + index * .12).toFixed(2) + 's' } : undefined} onClick={() => setOpen(false)}>{label}</Link>)}
