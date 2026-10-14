@@ -1,3 +1,4 @@
+import { Readable } from 'node:stream';
 import { Router } from 'express';
 import { db, json } from '../db.js';
 
@@ -47,7 +48,21 @@ router.get('/media/:name', async (req, res, next) => {
     const url = await getStoredObjectUrl(`site-videos/${name}`, 3600);
     if (url) return res.redirect(302, url);
     const fallbackBase = String(process.env.MEDIA_FALLBACK_BASE_URL || '').replace(/\/$/, '');
-    if (fallbackBase) return res.redirect(302, `${fallbackBase}/${name}`);
+    if (fallbackBase) {
+      const upstream = await fetch(`${fallbackBase}/${name}`, {
+        headers:req.get('range') ? { Range:req.get('range') } : undefined,
+      });
+      if (!upstream.ok && upstream.status !== 206) {
+        return res.status(upstream.status).json({ error:'Fallback media could not be loaded.' });
+      }
+      for (const header of ['content-type','content-length','content-range','accept-ranges','cache-control','etag','last-modified']) {
+        const value = upstream.headers.get(header);
+        if (value) res.setHeader(header, value);
+      }
+      res.status(upstream.status);
+      if (!upstream.body) return res.end();
+      return Readable.fromWeb(upstream.body).pipe(res);
+    }
     return res.redirect(302, `/${name}`);
   } catch (error) { next(error); }
 });

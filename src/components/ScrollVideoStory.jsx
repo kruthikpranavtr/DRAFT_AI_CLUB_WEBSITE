@@ -71,7 +71,7 @@ function SharedStoryBackground({ chapterRefs }) {
       key={video.id}
       ref={element => { layerRefs.current[index] = element; }}
       style={{ opacity: index === 0 ? 1 : 0 }}>
-      <video src={video.src} poster={video.poster} muted loop playsInline preload={index === 0 ? 'auto' : 'metadata'} tabIndex="-1"/>
+      <video src={video.src} poster={video.poster} muted loop playsInline autoPlay preload={index === 0 ? 'auto' : 'metadata'} tabIndex="-1"/>
     </div>)}
   </div>;
 }
