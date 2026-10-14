@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import './AdminLoginPage.css';
 
 export default function AdminLoginPage() {
-  const { signIn } = useAuth();
+  const { signIn, signOut } = useAuth();
   const navigate = useNavigate();
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
@@ -24,7 +24,12 @@ export default function AdminLoginPage() {
       setStatus({ type:'error', text:result.message });
       return;
     }
-    navigate(result.user.role === 'admin' ? '/admin/dashboard' : '/student/dashboard', { replace:true });
+    if (result.user.role !== 'student') {
+      await signOut();
+      setStatus({ type:'error', text:'The admin dashboard is no longer available. Please use a student account.' });
+      return;
+    }
+    navigate('/student/dashboard', { replace:true });
   }
 
   return (
@@ -35,8 +40,8 @@ export default function AdminLoginPage() {
         <div className="admin-login__story">
           <div className="admin-login__eyebrow"><Sparkles size={14}/> AI CLUB MEMBER NETWORK</div>
           <h1>One club.<br/><em>One place to begin.</em></h1>
-          <p>A shared secure workspace where students take assessments, track their progress and build—while administrators guide the community.</p>
-          <div className="admin-login__trust"><span><GraduationCap size={17}/> Student assessment access</span><span><ShieldCheck size={17}/> Protected admin controls</span></div>
+          <p>A secure workspace where students take assessments, track their progress and build skills together.</p>
+          <div className="admin-login__trust"><span><GraduationCap size={17}/> Student assessment access</span><span><ShieldCheck size={17}/> Protected student progress</span></div>
         </div>
         <footer>AI CLUB MEMBER SYSTEM <span/> SECURE ACCESS</footer>
       </section>
@@ -47,15 +52,15 @@ export default function AdminLoginPage() {
           <div className="admin-login__card-icon"><KeyRound size={24}/></div>
           <div className="admin-login__label-row"><span className="admin-login__label">SECURE PORTAL</span><span className="admin-demo-badge">PROTECTED ACCESS</span></div>
           <h2>Welcome back.</h2>
-          <p className="admin-login__intro">Enter your member ID and password. We will securely route you to the correct dashboard.</p>
+          <p className="admin-login__intro">Enter your student ID or email and password to access your dashboard.</p>
 
           <form onSubmit={handleSubmit}>
-            <label htmlFor="member-identifier">Student ID or Admin ID</label>
+            <label htmlFor="member-identifier">Student ID or email</label>
             <div className="admin-field"><Mail size={18}/><input id="member-identifier" name="identifier" type="text" autoComplete="username" value={identifier} onChange={event => { setIdentifier(event.target.value); setStatus(null); }} required/></div>
             <div className="admin-password-row"><label htmlFor="member-password">Password</label><Link to="/forgot-password">Forgot password?</Link></div>
             <div className="admin-field"><LockKeyhole size={18}/><input id="member-password" name="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" value={password} onChange={event => { setPassword(event.target.value); setStatus(null); }} required minLength={8}/><button type="button" className="admin-password-toggle" onClick={() => setShowPassword(value => !value)} aria-label={showPassword ? 'Hide password' : 'Show password'}>{showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}</button></div>
             <label className="admin-remember"><input type="checkbox" name="remember" checked={remember} onChange={event => setRemember(event.target.checked)}/><span><i><CheckMark/></i></span>Keep me signed in on this device</label>
-            <button type="submit" className="admin-login__submit" disabled={submitting}>{submitting ? 'Verifying…' : 'Sign in to dashboard'} <ArrowRight size={17}/></button>
+            <button type="submit" className="admin-login__submit" disabled={submitting}>{submitting ? 'Verifying…' : 'Sign in to student dashboard'} <ArrowRight size={17}/></button>
             <p className={'admin-login__message' + (status ? ' is-' + status.type : '')} role="status">{status?.text}</p>
           </form>
 

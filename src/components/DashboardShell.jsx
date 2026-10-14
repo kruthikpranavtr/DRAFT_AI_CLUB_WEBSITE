@@ -1,4 +1,4 @@
-import { BarChart3, BookOpenCheck, ChevronRight, FileImage, FileText, FolderOpen, Home, LayoutDashboard, LogOut, Menu, PanelsTopLeft, Settings, ShieldCheck, Users, X } from 'lucide-react';
+import { BarChart3, BookOpenCheck, ChevronRight, Home, LayoutDashboard, LogOut, Menu, ShieldCheck, X } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -10,21 +10,10 @@ const studentItems = [
   ['membership','Membership',ShieldCheck],
 ];
 
-const adminItems = [
-  ['overview','Overview',LayoutDashboard],
-  ['content','Content',FileText],
-  ['pages','Pages & sections',PanelsTopLeft],
-  ['gallery','Gallery',FileImage],
-  ['files','Files',FolderOpen],
-  ['users','Users & access',Users],
-  ['settings','Website settings',Settings],
-];
-
-export default function DashboardShell({ role, view, onViewChange, children }) {
+export default function DashboardShell({ view, onViewChange, children }) {
   const { session, signOut } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
-  const items = role === 'admin' ? adminItems : studentItems;
 
   function choose(nextView) {
     onViewChange(nextView);
@@ -37,17 +26,17 @@ export default function DashboardShell({ role, view, onViewChange, children }) {
   }
 
   return (
-    <div className={'dash-app dash-app--' + role}>
+    <div className="dash-app dash-app--student">
       <aside className={'dash-sidebar' + (menuOpen ? ' is-open' : '')}>
         <div className="dash-brand">
           <img src="/ai-club-emblem.png" alt=""/>
-          <span><strong>AI CLUB</strong><small>{role === 'admin' ? 'ADMIN CONSOLE' : 'STUDENT PORTAL'}</small></span>
+          <span><strong>AI CLUB</strong><small>STUDENT PORTAL</small></span>
         </div>
         <button className="dash-sidebar__close" onClick={() => setMenuOpen(false)} aria-label="Close menu"><X size={19}/></button>
 
-        <nav aria-label={role + ' dashboard'}>
+        <nav aria-label="Student dashboard">
           <span className="dash-nav-label">WORKSPACE</span>
-          {items.map(([id,label,Icon]) => <button className={view === id ? 'active' : ''} onClick={() => choose(id)} key={id}><Icon size={18}/><span>{label}</span><ChevronRight size={14}/></button>)}
+          {studentItems.map(([id,label,Icon]) => <button className={view === id ? 'active' : ''} onClick={() => choose(id)} key={id}><Icon size={18}/><span>{label}</span><ChevronRight size={14}/></button>)}
         </nav>
 
         <div className="dash-sidebar__bottom">
@@ -59,11 +48,11 @@ export default function DashboardShell({ role, view, onViewChange, children }) {
       <div className="dash-main">
         <header className="dash-topbar">
           <button className="dash-menu" onClick={() => setMenuOpen(true)} aria-label="Open dashboard menu"><Menu size={20}/></button>
-          <div><span>{role === 'admin' ? 'ADMINISTRATION' : 'MEMBER WORKSPACE'}</span><strong>{view.charAt(0).toUpperCase() + view.slice(1)}</strong></div>
+          <div><span>MEMBER WORKSPACE</span><strong>{view.charAt(0).toUpperCase() + view.slice(1)}</strong></div>
           <div className="dash-user">
-            <span className="dash-role"><BarChart3 size={13}/>{role}</span>
+            <span className="dash-role"><BarChart3 size={13}/>student</span>
             <div><strong>{session?.name}</strong><small>{session?.id}</small></div>
-            <span className="dash-avatar">{role === 'admin' ? 'AD' : 'ST'}</span>
+            <span className="dash-avatar">ST</span>
           </div>
         </header>
         <main className="dash-content">{children}</main>

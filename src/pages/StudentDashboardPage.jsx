@@ -17,7 +17,7 @@ export default function StudentDashboardPage() {
   const eligible = completed.length === LEVEL_NAMES.length;
   const currentLevel = Math.min(completed.length + 1, LEVEL_NAMES.length);
 
-  return <DashboardShell role="student" view={view} onViewChange={setView}>
+  return <DashboardShell view={view} onViewChange={setView}>
     {view === 'overview' && <>
       <PageHead eyebrow="STUDENT WORKSPACE" title={'Welcome, ' + session.name + '.'} text="Track your assessment pathway, club-entry status and upcoming learning activity."/>
       <div className="dash-grid dash-grid--4">

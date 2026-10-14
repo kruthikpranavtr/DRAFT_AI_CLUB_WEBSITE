@@ -14,7 +14,7 @@ export default function ProtectedRoute({ role, children }) {
   }
 
   if (role && session.role !== role) {
-    const destination = session.role === 'admin' ? '/admin/dashboard' : '/student/dashboard';
+    const destination = session.role === 'student' ? '/student/dashboard' : '/';
     return <Navigate to={destination} replace />;
   }
 

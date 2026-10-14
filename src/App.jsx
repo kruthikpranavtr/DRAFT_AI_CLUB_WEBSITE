@@ -13,7 +13,6 @@ import AssessmentPage from './pages/AssessmentPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import StudentDashboardPage from './pages/StudentDashboardPage';
-import AdminDashboardPage from './pages/AdminDashboardPage';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -25,7 +24,7 @@ function DashboardRedirect() {
   const { session, loading } = useAuth();
   if (loading) return null;
   if (!session) return <Navigate to="/login" replace />;
-  return <Navigate to={session.role === 'admin' ? '/admin/dashboard' : '/student/dashboard'} replace />;
+  return <Navigate to={session.role === 'student' ? '/student/dashboard' : '/'} replace />;
 }
 
 function AppRoutes() {
@@ -46,7 +45,7 @@ function AppRoutes() {
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/dashboard" element={<DashboardRedirect />} />
       <Route path="/student/dashboard" element={<ProtectedRoute role="student"><StudentDashboardPage /></ProtectedRoute>} />
-      <Route path="/admin/dashboard" element={<ProtectedRoute role="admin"><AdminDashboardPage /></ProtectedRoute>} />
+      <Route path="/admin/dashboard" element={<Navigate to="/" replace />} />
       <Route path="*" element={<HomePage />} />
     </Routes>
   </>;
