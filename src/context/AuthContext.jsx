@@ -1,34 +1,37 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { api, clearClientCsrfToken } from '../lib/api';
 
 const AuthContext = createContext(null);
-
-async function request(path, options = {}) {
-  const response = await fetch(path, {
-    credentials:'include',
-    headers:options.body instanceof FormData ? options.headers : { 'Content-Type':'application/json', ...options.headers },
-    ...options,
-  });
-  const body = response.status === 204 ? null : await response.json().catch(() => null);
-  if (!response.ok) throw new Error(body?.error || 'The request could not be completed.');
-  return body;
-}
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const refreshSession = useCallback(async () => {
+    try {
+      const data = await api('/api/auth/me');
+      setSession(data.user);
+      return data.user;
+    } catch {
+      setSession(null);
+      return null;
+    }
+  }, []);
+
   useEffect(() => {
     let active = true;
-    request('/api/auth/me')
+    const expireSession = () => setSession(null);
+    window.addEventListener('aiclub:session-expired',expireSession);
+    api('/api/auth/me')
       .then(data => { if (active) setSession(data.user); })
       .catch(() => { if (active) setSession(null); })
       .finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
+    return () => { active = false; window.removeEventListener('aiclub:session-expired',expireSession); };
   }, []);
 
-  async function signIn(identifier, password, remember = true) {
+  const signIn = useCallback(async (identifier,password,remember = true) => {
     try {
-      const data = await request('/api/auth/login', {
+      const data = await api('/api/auth/login', {
         method:'POST',
         body:JSON.stringify({ identifier,password,remember }),
       });
@@ -37,14 +40,29 @@ export function AuthProvider({ children }) {
     } catch (error) {
       return { ok:false,message:error.message };
     }
-  }
+  }, []);
 
-  async function signOut() {
-    try { await request('/api/auth/logout', { method:'POST' }); }
-    finally { setSession(null); }
-  }
+  const signOut = useCallback(async () => {
+    try { await api('/api/auth/logout',{ method:'POST' }); }
+    finally { clearClientCsrfToken(); setSession(null); }
+  }, []);
 
-  const value = useMemo(() => ({ session,loading,signIn,signOut }), [session,loading]);
+  const changePassword = useCallback(async (currentPassword,newPassword) => {
+    try {
+      await api('/api/auth/change-password',{
+        method:'POST',body:JSON.stringify({ currentPassword,newPassword }),
+      });
+      const user = await refreshSession();
+      if (!user) return { ok:false,message:'Password updated. Sign in again to continue.' };
+      return { ok:true,user };
+    } catch (error) {
+      return { ok:false,message:error.message,issues:error.issues };
+    }
+  },[refreshSession]);
+
+  const value = useMemo(() => ({
+    session,loading,signIn,signOut,changePassword,refreshSession,
+  }), [session,loading,signIn,signOut,changePassword,refreshSession]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

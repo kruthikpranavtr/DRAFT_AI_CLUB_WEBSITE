@@ -1,18 +1,26 @@
 PRAGMA journal_mode = WAL;
 PRAGMA foreign_keys = ON;
 
+-- Reference snapshot only. Runtime schema changes are applied from server/migrations.
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
   member_id TEXT NOT NULL UNIQUE COLLATE NOCASE,
-  email TEXT NOT NULL UNIQUE COLLATE NOCASE,
+  email TEXT COLLATE NOCASE,
   name TEXT NOT NULL,
   password_hash TEXT NOT NULL,
   role TEXT NOT NULL CHECK (role IN ('admin','student')),
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','inactive','suspended')),
-  permissions TEXT NOT NULL DEFAULT '[]',
+  permissions TEXT NOT NULL DEFAULT '[]'
+    CHECK (json_valid(permissions) AND json_type(permissions) = 'array'),
+  must_change_password INTEGER NOT NULL DEFAULT 0
+    CHECK (must_change_password IN (0,1)),
+  password_changed_at TEXT,
   created_at TEXT NOT NULL,
-  updated_at TEXT NOT NULL
+  updated_at TEXT NOT NULL,
+  CHECK (role = 'student' OR (email IS NOT NULL AND length(trim(email)) > 0))
 );
+CREATE UNIQUE INDEX IF NOT EXISTS users_email_unique_idx
+  ON users(email COLLATE NOCASE) WHERE email IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS sessions (
   id TEXT PRIMARY KEY,
@@ -41,10 +49,6 @@ CREATE TABLE IF NOT EXISTS content_entries (
   updated_by TEXT REFERENCES users(id) ON DELETE SET NULL
 );
 CREATE INDEX IF NOT EXISTS content_lookup_idx ON content_entries(type,page_key,status,sort_order);
-DELETE FROM content_entries
-WHERE rowid NOT IN (
-  SELECT MIN(rowid) FROM content_entries GROUP BY type,page_key,section_key
-);
 CREATE UNIQUE INDEX IF NOT EXISTS content_section_unique_idx
   ON content_entries(type,page_key,section_key);
 
@@ -80,9 +84,33 @@ CREATE TABLE IF NOT EXISTS files (
   public_url TEXT NOT NULL,
   kind TEXT NOT NULL CHECK (kind IN ('image','document','video','other')),
   is_public INTEGER NOT NULL DEFAULT 0,
+  purpose TEXT NOT NULL DEFAULT 'cms' CHECK (purpose IN ('cms','profile-avatar')),
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL,
   uploaded_by TEXT REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS student_profiles (
+  user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  department TEXT NOT NULL DEFAULT '',
+  academic_year INTEGER CHECK (academic_year IS NULL OR academic_year BETWEEN 1 AND 6),
+  github_url TEXT,
+  linkedin_url TEXT,
+  hackerrank_url TEXT,
+  description TEXT NOT NULL DEFAULT '',
+  avatar_file_id TEXT REFERENCES files(id) ON DELETE SET NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS student_profiles_directory_idx
+  ON student_profiles(department,academic_year,user_id);
+
+CREATE TABLE IF NOT EXISTS profile_skills (
+  user_id TEXT NOT NULL REFERENCES student_profiles(user_id) ON DELETE CASCADE,
+  skill_name TEXT NOT NULL COLLATE NOCASE,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL,
+  PRIMARY KEY (user_id,skill_name)
 );
 
 CREATE TABLE IF NOT EXISTS settings (
@@ -103,3 +131,6 @@ CREATE TABLE IF NOT EXISTS activity_logs (
   created_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS activity_recent_idx ON activity_logs(created_at DESC);
+
+-- See migration 005 for immutable file-purpose, private-publication,
+-- gallery-eligibility, and avatar-assignment enforcement triggers.

@@ -1,24 +1,9 @@
 import crypto from 'node:crypto';
-import { promisify } from 'node:util';
 import { db, now, json } from './db.js';
-
-const scrypt = promisify(crypto.scrypt);
+import { hashPassword, verifyPassword } from './passwords.js';
+import { hasPermission, isSuperAdmin } from './permissions.js';
 const COOKIE = 'aiclub_session';
 const SESSION_DAYS = 7;
-
-export async function hashPassword(password) {
-  const salt = crypto.randomBytes(16).toString('hex');
-  const derived = await scrypt(password, salt, 64);
-  return `scrypt:${salt}:${Buffer.from(derived).toString('hex')}`;
-}
-
-export async function verifyPassword(password, stored) {
-  const [algorithm, salt, expectedHex] = String(stored).split(':');
-  if (algorithm !== 'scrypt' || !salt || !expectedHex) return false;
-  const derived = Buffer.from(await scrypt(password, salt, 64));
-  const expected = Buffer.from(expectedHex, 'hex');
-  return derived.length === expected.length && crypto.timingSafeEqual(derived, expected);
-}
 
 const tokenHash = token => crypto.createHash('sha256').update(token).digest('hex');
 
@@ -46,24 +31,59 @@ export function destroySession(req, res) {
 export function sessionUser(req) {
   const token = req.cookies?.[COOKIE];
   if (!token) return null;
-  const row = db.prepare(`SELECT u.id,u.member_id,u.email,u.name,u.role,u.status,u.permissions
+  const row = db.prepare(`SELECT u.id,u.member_id,u.email,u.name,u.role,u.status,u.permissions,
+      u.must_change_password,u.password_changed_at
     FROM sessions s JOIN users u ON u.id=s.user_id
     WHERE s.token_hash=? AND s.expires_at>?`).get(tokenHash(token), now());
-  if (!row || row.status !== 'active') return null;
-  return { ...row, permissions:json(row.permissions, []) };
+  if (!row || row.status !== 'active' || (process.env.NODE_ENV === 'production' && /^demo-/i.test(row.member_id))) return null;
+  return { ...row,must_change_password:Boolean(row.must_change_password),permissions:json(row.permissions,[]) };
 }
 
 export function requireUser(req, res, next) {
+  res.setHeader('Cache-Control','private, no-store');
   const user = sessionUser(req);
   if (!user) return res.status(401).json({ error:'Authentication required.' });
   req.user = user;
+  next();
+}
+
+export function requirePasswordChanged(req,res,next) {
+  if (!req.user) return res.status(401).json({ error:'Authentication required.' });
+  if (req.user.must_change_password) {
+    return res.status(403).json({ error:'Change your temporary password before continuing.',code:'PASSWORD_CHANGE_REQUIRED' });
+  }
   next();
 }
 
 export function requireAdmin(req, res, next) {
+  res.setHeader('Cache-Control','private, no-store');
   const user = sessionUser(req);
   if (!user) return res.status(401).json({ error:'Authentication required.' });
   if (user.role !== 'admin') return res.status(403).json({ error:'Administrator access required.' });
   req.user = user;
+  requirePasswordChanged(req,res,next);
+}
+
+export function requirePermission(permission) {
+  return (req,res,next) => {
+    if (!req.user) return res.status(401).json({ error:'Authentication required.' });
+    if (!hasPermission(req.user,permission)) {
+      return res.status(403).json({ error:'You do not have permission to perform this action.',code:'PERMISSION_DENIED' });
+    }
+    next();
+  };
+}
+
+export function requireSuperAdmin(req,res,next) {
+  if (!req.user) return res.status(401).json({ error:'Authentication required.' });
+  if (!isSuperAdmin(req.user)) {
+    return res.status(403).json({ error:'Super Administrator access required.',code:'SUPER_ADMIN_REQUIRED' });
+  }
   next();
 }
+
+export function revokeUserSessions(userId) {
+  return db.prepare('DELETE FROM sessions WHERE user_id=?').run(userId).changes;
+}
+
+export { hashPassword,verifyPassword };

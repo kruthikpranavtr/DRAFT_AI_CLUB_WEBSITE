@@ -6,7 +6,7 @@ import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } fro
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const uploadDir = process.env.UPLOAD_DIR || path.join(here, 'uploads');
+const uploadDir = process.env.UPLOAD_DIR || path.join(here, 'member-platform-uploads');
 fs.mkdirSync(uploadDir, { recursive:true });
 
 const hasS3 = Boolean(process.env.S3_ENDPOINT && process.env.S3_BUCKET && process.env.S3_ACCESS_KEY_ID && process.env.S3_SECRET_ACCESS_KEY);
@@ -34,9 +34,10 @@ export function classifyMime(mime) {
   return 'other';
 }
 
-export async function storeUpload(file) {
-  const storedName = `${Date.now()}-${crypto.randomUUID()}${extensionFor(file.originalname)}`;
-  const key = `cms/${new Date().toISOString().slice(0,7)}/${storedName}`;
+export async function storeUpload(file,{ prefix = 'cms',extension } = {}) {
+  const storedName = `${Date.now()}-${crypto.randomUUID()}${extension || extensionFor(file.originalname)}`;
+  const safePrefix = prefix.replace(/[^a-z0-9/-]/gi,'').replace(/^\/+|\/+$/g,'') || 'cms';
+  const key = `${safePrefix}/${new Date().toISOString().slice(0,7)}/${storedName}`;
   if (s3) {
     await s3.send(new PutObjectCommand({
       Bucket:process.env.S3_BUCKET,

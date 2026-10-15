@@ -2,16 +2,23 @@ import Database from 'better-sqlite3';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { runMigrations } from './migrations/runner.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = process.env.DATA_DIR || path.join(here, 'data');
+if (process.env.NODE_ENV === 'test' && !process.env.DATABASE_PATH) {
+  throw new Error('Tests must set an explicit temporary DATABASE_PATH.');
+}
 fs.mkdirSync(dataDir, { recursive:true });
-const dbPath = process.env.DATABASE_PATH || path.join(dataDir, 'ai-club-cms.db');
+const dbPath = process.env.DATABASE_PATH || path.join(dataDir, 'ai-club-member-platform.db');
 
 export const db = new Database(dbPath);
 db.pragma('foreign_keys = ON');
 db.pragma('journal_mode = WAL');
-db.exec(fs.readFileSync(path.join(here, 'schema.sql'), 'utf8'));
+export const migrationReport = runMigrations(db,{
+  databasePath:dbPath,
+  backupDir:process.env.MIGRATION_BACKUP_DIR || path.join(dataDir,'backups'),
+});
 
 export const now = () => new Date().toISOString();
 export const json = (value, fallback = {}) => {

@@ -29,7 +29,7 @@ router.get('/gallery', (req, res) => {
     FROM gallery_items g
     LEFT JOIN gallery_categories c ON c.id=g.category_id
     JOIN files f ON f.id=g.file_id
-    WHERE g.status='published'
+    WHERE g.status='published' AND f.purpose='cms' AND f.is_public=1 AND f.kind='image'
     ORDER BY g.sort_order,g.created_at DESC`).all();
   const categories = db.prepare('SELECT * FROM gallery_categories ORDER BY name').all();
   res.json({ items, categories });
@@ -69,7 +69,7 @@ router.get('/media/:name', async (req, res, next) => {
 
 router.get('/files/:id', async (req, res, next) => {
   try {
-    const record = db.prepare('SELECT * FROM files WHERE id=? AND is_public=1').get(req.params.id);
+    const record = db.prepare("SELECT * FROM files WHERE id=? AND is_public=1 AND purpose='cms'").get(req.params.id);
     if (!record) return res.status(404).json({ error:'File not found.' });
     const { sendStoredFile } = await import('../storage.js');
     await sendStoredFile(record,res,'inline');

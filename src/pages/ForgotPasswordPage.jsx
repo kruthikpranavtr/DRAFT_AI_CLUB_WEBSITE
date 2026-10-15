@@ -1,7 +1,7 @@
 import { ArrowLeft, ArrowRight, CheckCircle2, Mail, ShieldCheck, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import './AdminLoginPage.css';
+import '../components/PortalAuth.css';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');

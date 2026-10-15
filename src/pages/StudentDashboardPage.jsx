@@ -1,88 +1,55 @@
-import { BookOpenCheck, CalendarDays, CheckCircle2, Clock3, LockKeyhole, ShieldCheck, Sparkles, Target, Trophy, UserRoundCheck } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowRight,CheckCircle2 } from 'lucide-react';
+import { useEffect,useState } from 'react';
+import { Link } from 'react-router-dom';
 import DashboardShell from '../components/DashboardShell';
 import { useAuth } from '../context/AuthContext';
-
-const LEVEL_NAMES = ['AI Foundations','Python Logic','Data Literacy','Machine Learning','Deep Learning','Applied AI','Responsible AI','Build Challenge'];
+import { api } from '../lib/api';
 
 export default function StudentDashboardPage() {
   const { session } = useAuth();
-  const [view, setView] = useState('overview');
-  const completed = (() => {
-    try { return JSON.parse(localStorage.getItem('ai-club-assessment-progress') || '[]'); }
-    catch { return []; }
-  })();
-  const percent = Math.round(completed.length / LEVEL_NAMES.length * 100);
-  const eligible = completed.length === LEVEL_NAMES.length;
-  const currentLevel = Math.min(completed.length + 1, LEVEL_NAMES.length);
+  const [data,setData] = useState(null);
+  const [error,setError] = useState('');
 
-  return <DashboardShell view={view} onViewChange={setView}>
-    {view === 'overview' && <>
-      <PageHead eyebrow="STUDENT WORKSPACE" title={'Welcome, ' + session.name + '.'} text="Track your assessment pathway, club-entry status and upcoming learning activity."/>
-      <div className="dash-grid dash-grid--4">
-        <Stat icon={BookOpenCheck} value={completed.length + '/8'} label="Levels completed"/>
-        <Stat icon={Target} value={percent + '%'} label="Assessment progress"/>
-        <Stat icon={Trophy} value={eligible ? 'Ready' : 'In progress'} label="Entry status"/>
-        <Stat icon={CalendarDays} value="03" label="Upcoming sessions"/>
-      </div>
+  useEffect(() => {
+    let active = true;
+    Promise.all([api('/api/students/me/profile'),api('/api/members?limit=1')])
+      .then(([profile,members]) => { if (active) setData({ profile:profile.profile,total:members.total }); })
+      .catch(cause => { if (active) setError(cause.message); });
+    return () => { active = false; };
+  },[]);
 
-      <section className="dash-card dash-section">
-        <div className="dash-section__head"><div><h2>Assessment pathway</h2><span>LEVEL {String(currentLevel).padStart(2,'0')} / 08</span></div><span className="dash-action" aria-label="Assessment page unavailable">Assessments unavailable</span></div>
-        <div className="dash-progress-track"><span style={{width:percent + '%'}}/></div>
-        <div className="dash-list">
-          {LEVEL_NAMES.slice(Math.max(0,completed.length - 1),Math.min(LEVEL_NAMES.length,completed.length + 2)).map((name,index) => {
-            const actualIndex = Math.max(0,completed.length - 1) + index;
-            const done = completed.includes(actualIndex);
-            const open = actualIndex === 0 || completed.includes(actualIndex - 1);
-            return <div className="dash-list-item" key={name}><span className="dash-list-item__icon">{done ? <CheckCircle2 size={18}/> : open ? <Sparkles size={18}/> : <LockKeyhole size={17}/>}</span><div><h3>{name}</h3><p>{done ? 'Assessment passed' : open ? 'Not currently available' : 'Complete the previous level to unlock'}</p></div><span>{done ? 'PASSED' : open ? 'AVAILABLE' : 'LOCKED'}</span></div>;
-          })}
-        </div>
-      </section>
-
-      <div className="dash-grid dash-grid--2">
-        <section className="dash-card dash-section">
-          <div className="dash-section__head"><h2>Upcoming activity</h2><span>THIS MONTH</span></div>
-          <div className="dash-list">
-            <ListItem icon={CalendarDays} title="Applied AI Lab" text="Hands-on model evaluation session" meta="OCT 18"/>
-            <ListItem icon={Clock3} title="Build Circle" text="Peer project review and feedback" meta="OCT 23"/>
-            <ListItem icon={Trophy} title="Demo Evening" text="Community project showcase" meta="OCT 30"/>
-          </div>
+  return <DashboardShell section="Overview">
+    <PageHead eyebrow="STUDENT WORKSPACE" title="Your workspace." text={`Welcome back, ${session.name}. Make yourself known. Find your people.`}/>
+    {error && <StateMessage tone="error">{error}</StateMessage>}
+    {!data && !error && <StateMessage>Loading your workspace…</StateMessage>}
+    {data && <>
+      <div className="portal-overview-grid">
+        <section className="dash-card portal-identity-panel">
+          <div className="portal-identity"><div className="portal-overview-avatar">{data.profile.avatarUrl ? <img src={data.profile.avatarUrl} alt=""/> : <span aria-hidden="true">{session.name.slice(0,1)}</span>}</div><div><span className="portal-eyebrow">YOUR MEMBER PROFILE</span><h2>{data.profile.name}</h2><p className="portal-metadata">{data.profile.memberId}</p><p>{[data.profile.department,data.profile.academicYear ? `Year ${data.profile.academicYear}` : ''].filter(Boolean).join(' · ') || 'Add your academic details'}</p></div></div>
+          <div className="portal-completion"><div className="dash-section__head"><h3>Profile completeness</h3><strong>{profileCompletion(data.profile)}%</strong></div><div className="dash-progress-track" role="progressbar" aria-label="Profile completeness" aria-valuenow={profileCompletion(data.profile)} aria-valuemin={0} aria-valuemax={100}><span style={{ width:`${profileCompletion(data.profile)}%` }}/></div><p>{missingFields(data.profile).length ? `Still to add: ${missingFields(data.profile).join(', ')}.` : 'Your profile is complete. Keep it up to date as you learn and build.'}</p><Link className="dash-action" to="/student/profile">Edit profile <ArrowRight size={16}/></Link></div>
         </section>
-        <section className="dash-card dash-section">
-          <div className="dash-section__head"><h2>Entry readiness</h2><span>{eligible ? 'COMPLETE' : 'ACTIVE'}</span></div>
-          <div className="dash-notice"><ShieldCheck size={24}/><div><h3>{eligible ? 'Ready for faculty verification' : 'Keep progressing'}</h3><p>{eligible ? 'All eight levels are cleared. Your assessment record is ready for the final club-entry review.' : (8-completed.length) + ' assessment levels remain before your application can enter final review.'}</p></div></div>
-        </section>
+        <section className="dash-card portal-directory-summary"><span className="portal-eyebrow">THE COMMUNITY</span><h2>People worth knowing.</h2><p><strong className="portal-inline-count">{data.total}</strong> active {data.total === 1 ? 'member' : 'members'} in the private directory.</p><p>Discover shared skills and interests through member profiles.</p><Link className="portal-text-link" to="/student/members">Browse members <ArrowRight size={16}/></Link><div className="portal-privacy-note">For signed-in members only.<br/>Your profile and photo stay private.</div></section>
       </div>
-    </>}
-
-    {view === 'assessments' && <>
-      <PageHead eyebrow="ASSESSMENT PATH" title="Eight levels of progress." text="Previously saved assessment results are available to review here. New assessments are not available in this UI."/>
       <section className="dash-card dash-section">
-        <div className="dash-section__head"><h2>All levels</h2><span className="dash-action" aria-label="Assessment page unavailable">Read-only progress</span></div>
-        <div className="dash-list">{LEVEL_NAMES.map((name,index) => {
-          const done = completed.includes(index);
-          const open = index === 0 || completed.includes(index - 1);
-          return <div className="dash-list-item" key={name}><span className="dash-list-item__icon">{done ? <CheckCircle2 size={18}/> : open ? <BookOpenCheck size={18}/> : <LockKeyhole size={17}/>}</span><div><h3>{String(index+1).padStart(2,'0')} · {name}</h3><p>{done ? 'Passed and recorded on this device' : open ? 'Not currently available' : 'Locked until the previous level is passed'}</p></div><span>{done ? 'PASSED' : open ? 'UNAVAILABLE' : 'LOCKED'}</span></div>;
-        })}</div>
-      </section>
-    </>}
-
-    {view === 'membership' && <>
-      <PageHead eyebrow="CLUB ENTRY" title="Your membership journey." text="The complete frontend view of your club-entry status and remaining requirements."/>
-      <div className="dash-notice"><UserRoundCheck size={25}/><div><h3>{eligible ? 'Assessment requirement complete' : 'Assessment requirement in progress'}</h3><p>{eligible ? 'Your demo application is ready for administrator review.' : 'Pass all eight levels to unlock the verification stage.'}</p></div></div>
-      <section className="dash-card dash-section">
-        <div className="dash-section__head"><h2>Entry checklist</h2><span>{eligible ? '3 / 4 COMPLETE' : '2 / 4 COMPLETE'}</span></div>
-        <div className="dash-list">
-          <ListItem icon={CheckCircle2} title="Student account" text="Identity profile created" meta="COMPLETE"/>
-          <ListItem icon={CheckCircle2} title="Interest profile" text="AI domains and learning goals recorded" meta="COMPLETE"/>
-          <ListItem icon={eligible ? CheckCircle2 : Clock3} title="Eight-level assessment" text={eligible ? 'All assessment levels cleared' : percent + '% of pathway completed'} meta={eligible ? 'COMPLETE' : 'ACTIVE'}/>
-          <ListItem icon={LockKeyhole} title="Faculty verification" text="Unlocked after assessment completion" meta={eligible ? 'PENDING' : 'LOCKED'}/>
-        </div>
+        <div className="dash-notice"><CheckCircle2 size={20} aria-hidden="true"/><div><h3>Your account is secured</h3><p>Password setup is complete. Contact an administrator if you lose access. A password reset ends all previous sessions.</p></div><span className="dash-chip is-active">Active</span></div>
       </section>
     </>}
   </DashboardShell>;
 }
 
-function PageHead({ eyebrow, title, text }) { return <div className="dash-page-head"><div><span>{eyebrow}</span><h1>{title}</h1></div><p>{text}</p></div>; }
-function Stat({ icon:Icon, value, label }) { return <article className="dash-card dash-stat"><span className="dash-stat__icon"><Icon size={19}/></span><strong>{value}</strong><span>{label}</span></article>; }
-function ListItem({ icon:Icon, title, text, meta }) { return <div className="dash-list-item"><span className="dash-list-item__icon"><Icon size={18}/></span><div><h3>{title}</h3><p>{text}</p></div><span>{meta}</span></div>; }
+export function PageHead({ eyebrow,title,text,action }) {
+  return <div className="dash-page-head"><div><span className="portal-eyebrow">{eyebrow}</span><h1>{title}</h1><p>{text}</p></div>{action && <div className="portal-head-action">{action}</div>}</div>;
+}
+
+export function StateMessage({ children,tone = 'loading' }) {
+  return <div className={`dash-card dash-empty portal-state is-${tone}`} role={tone === 'error' ? 'alert' : 'status'}>{children}</div>;
+}
+
+function profileCompletion(profile) {
+  const fields = [profile.department,profile.academicYear,profile.githubUrl,profile.linkedinUrl,profile.description,profile.avatarUrl,profile.skills.length];
+  return Math.round(fields.filter(Boolean).length / fields.length * 100);
+}
+
+function missingFields(profile) {
+  return [[profile.department,'department'],[profile.academicYear,'year'],[profile.githubUrl,'GitHub'],[profile.linkedinUrl,'LinkedIn'],[profile.description,'description'],[profile.avatarUrl,'photo'],[profile.skills.length,'skills']].filter(([value]) => !value).map(([,label]) => label);
+}

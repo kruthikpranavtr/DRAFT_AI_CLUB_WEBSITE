@@ -1,17 +1,24 @@
 import crypto from 'node:crypto';
 import { db, now } from './db.js';
-import { hashPassword } from './auth.js';
+import { hashPassword } from './passwords.js';
+import { PERMISSIONS } from './permissions.js';
 
 async function ensureUser({ memberId,email,name,password,role }) {
-  const existing = db.prepare('SELECT id FROM users WHERE member_id=? OR email=?').get(memberId,email);
-  if (existing) return existing.id;
+  const existing = db.prepare(`SELECT id,member_id,role FROM users
+    WHERE member_id=? OR (? IS NOT NULL AND email=?)`).get(memberId,email,email);
+  if (existing) {
+    if (existing.role !== role) throw new Error(`Bootstrap identity ${memberId} has an unexpected role.`);
+    return existing.id;
+  }
+  if (role === 'admin' && !email) throw new Error('Bootstrap administrator email is required.');
+  if (!password) throw new Error(`A bootstrap password is required to create ${memberId}.`);
   const id = crypto.randomUUID();
   const time = now();
   db.prepare(`INSERT INTO users
     (id,member_id,email,name,password_hash,role,status,permissions,created_at,updated_at)
     VALUES (?,?,?,?,?,?,?,?,?,?)`).run(
     id,memberId,email,name,await hashPassword(password),role,'active',
-    JSON.stringify(role === 'admin' ? ['cms:*','users:*','settings:*'] : []),time,time
+    JSON.stringify(role === 'admin' ? [PERMISSIONS.SUPER_ADMIN] : []),time,time
   );
   return id;
 }
@@ -62,10 +69,8 @@ function ensureSettings(adminId) {
 }
 
 export async function seedDatabase() {
-  const production = process.env.NODE_ENV === 'production';
-  const adminPassword = process.env.BOOTSTRAP_ADMIN_PASSWORD || (!production ? 'Admin@123' : '');
-  const studentPassword = process.env.BOOTSTRAP_STUDENT_PASSWORD || (!production ? 'Student@123' : '');
-  if (!adminPassword) throw new Error('BOOTSTRAP_ADMIN_PASSWORD is required for the first production start.');
+  const adminPassword = process.env.BOOTSTRAP_ADMIN_PASSWORD || '';
+  const studentPassword = process.env.BOOTSTRAP_STUDENT_PASSWORD || '';
 
   const adminId = await ensureUser({
     memberId:process.env.BOOTSTRAP_ADMIN_ID || 'ADMIN-01',

@@ -7,12 +7,17 @@
     "node": "^20.19.0 || >=22.12.0"
   },
   "scripts": {
-    "dev": "concurrently -k -n WEB,API -c cyan,yellow \"vite\" \"node --watch server/index.js\"",
-    "dev:web": "vite",
-    "dev:api": "node --watch server/index.js",
+    "dev": "concurrently -k -n WEB,API -c cyan,yellow \"npm:dev:web\" \"npm:dev:api\"",
+    "dev:web": "vite --mode development",
+    "dev:api": "node --env-file=.env.development --watch server/index.js",
     "start": "node server/index.js",
     "build": "vite build",
-    "lint": "oxlint",
+    "lint": "oxlint src server shared test vite.config.js",
+    "test": "node --test --test-concurrency=1",
+    "db:backup": "node --env-file=.env.development server/scripts/backup-database.js",
+    "db:migrate": "node --env-file=.env.development server/scripts/migrate.js",
+    "demo:setup": "node server/scripts/setup-demo.js",
+    "demo:dev": "npm run demo:setup && concurrently -k -n DEMO-WEB,DEMO-API -c cyan,yellow \"vite --mode demo\" \"node --env-file=.env.demo --watch server/index.js\"",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -23,6 +28,7 @@
     "concurrently": "^10.0.6",
     "cookie-parser": "^1.4.7",
     "dotenv": "^18.0.7",
+    "exceljs": "^4.4.0",
     "express": "^5.3.0",
     "express-rate-limit": "^8.7.1",
     "helmet": "^8.3.0",
@@ -39,6 +45,7 @@
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
     "oxlint": "^1.81.0",
+    "playwright-core": "^1.56.1",
     "vite": "^8.3.0"
   }
 }

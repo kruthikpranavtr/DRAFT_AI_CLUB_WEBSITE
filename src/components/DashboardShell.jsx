@@ -1,63 +1,56 @@
-import { BarChart3, BookOpenCheck, ChevronRight, Home, LayoutDashboard, LogOut, Menu, ShieldCheck, X } from 'lucide-react';
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { ClipboardList,Home,LayoutDashboard,LogOut,Menu,UserRound,UsersRound } from 'lucide-react';
+import { useEffect,useRef,useState } from 'react';
+import { Link,useLocation,useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { hasPermission,PERMISSIONS } from '../../shared/permissions';
+import DashboardSheet from './DashboardSheet';
 import './Dashboard.css';
 
-const studentItems = [
-  ['overview','Overview',LayoutDashboard],
-  ['assessments','Assessments',BookOpenCheck],
-  ['membership','Membership',ShieldCheck],
-];
+const navigation = {
+  student:[['/student/dashboard','Overview',LayoutDashboard],['/student/assessments','Assessments',ClipboardList],['/student/profile','My profile',UserRound],['/student/members','Member directory',UsersRound]],
+  admin:[['/admin/dashboard','Overview',LayoutDashboard],['/admin/assessments','Assessments',ClipboardList],['/admin/students','Students',UsersRound,PERMISSIONS.MANAGE_STUDENTS]],
+};
 
-export default function DashboardShell({ view, onViewChange, children }) {
-  const { session, signOut } = useAuth();
+export default function DashboardShell({ section='Overview',children }) {
+  const { session,signOut } = useAuth();
+  const role = session?.role || 'student';
   const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  function choose(nextView) {
-    onViewChange(nextView);
-    setMenuOpen(false);
+  const location = useLocation();
+  const [menuOpen,setMenuOpen] = useState(false);
+  const menuTrigger = useRef(null);
+  useEffect(() => {
+    const desktop = window.matchMedia('(min-width:901px)');
+    const closeOnDesktop = event => { if (event.matches) setMenuOpen(false); };
+    desktop.addEventListener('change',closeOnDesktop);
+    return () => desktop.removeEventListener('change',closeOnDesktop);
+  },[]);
+  async function logout() {
+    await signOut();
+    navigate('/login',{ replace:true });
   }
-
-  function logout() {
-    signOut();
-    navigate('/login', { replace:true });
-  }
-
-  return (
-    <div className="dash-app dash-app--student">
-      <aside className={'dash-sidebar' + (menuOpen ? ' is-open' : '')}>
-        <div className="dash-brand">
-          <img src="/ai-club-emblem.png" alt=""/>
-          <span><strong>AI CLUB</strong><small>STUDENT PORTAL</small></span>
-        </div>
-        <button className="dash-sidebar__close" onClick={() => setMenuOpen(false)} aria-label="Close menu"><X size={19}/></button>
-
-        <nav aria-label="Student dashboard">
-          <span className="dash-nav-label">WORKSPACE</span>
-          {studentItems.map(([id,label,Icon]) => <button className={view === id ? 'active' : ''} onClick={() => choose(id)} key={id}><Icon size={18}/><span>{label}</span><ChevronRight size={14}/></button>)}
-        </nav>
-
-        <div className="dash-sidebar__bottom">
-          <Link to="/"><Home size={17}/> Public website</Link>
-          <button onClick={logout}><LogOut size={17}/> Sign out</button>
-        </div>
-      </aside>
-
-      <div className="dash-main">
-        <header className="dash-topbar">
-          <button className="dash-menu" onClick={() => setMenuOpen(true)} aria-label="Open dashboard menu"><Menu size={20}/></button>
-          <div><span>MEMBER WORKSPACE</span><strong>{view.charAt(0).toUpperCase() + view.slice(1)}</strong></div>
-          <div className="dash-user">
-            <span className="dash-role"><BarChart3 size={13}/>student</span>
-            <div><strong>{session?.name}</strong><small>{session?.id}</small></div>
-            <span className="dash-avatar">ST</span>
-          </div>
-        </header>
-        <main className="dash-content">{children}</main>
-      </div>
-      {menuOpen && <button className="dash-overlay" onClick={() => setMenuOpen(false)} aria-label="Close menu"/>}
+  const sidebarProps = { role,session,pathname:location.pathname,logout,onNavigate:() => setMenuOpen(false) };
+  return <div className={`dash-app dash-app--${role}`}>
+    <a className="dash-skip" href="#workspace-content">Skip to workspace</a>
+    <aside className="dash-sidebar"><SidebarContent {...sidebarProps}/></aside>
+    <div className="dash-main">
+      <header className="dash-topbar">
+        <button ref={menuTrigger} className="dash-menu portal-icon-button" onClick={() => setMenuOpen(true)} aria-label="Open dashboard menu" aria-haspopup="dialog" aria-expanded={menuOpen}><Menu size={20}/></button>
+        <div className="dash-breadcrumb"><span>{role === 'admin' ? 'Administration' : 'Member workspace'}</span><span aria-hidden="true">/</span><strong>{section}</strong></div>
+        <div className="dash-user"><div><strong>{session?.name}</strong><small>{session?.member_id}</small></div><span className="dash-avatar" aria-hidden="true">{session?.name?.split(/\s+/).map(word => word[0]).join('').slice(0,2).toUpperCase()}</span></div>
+      </header>
+      <main className="dash-content" id="workspace-content" tabIndex={-1}>{children}</main>
     </div>
-  );
+    {menuOpen && <DashboardSheet title="Workspace navigation" eyebrow="AI CLUB" navigation returnFocusRef={menuTrigger} onClose={() => setMenuOpen(false)}><SidebarContent {...sidebarProps}/></DashboardSheet>}
+  </div>;
+}
+
+function SidebarContent({ role,session,pathname,logout,onNavigate }) {
+  return <>
+    <Link to={role === 'admin' ? '/admin/dashboard' : '/student/dashboard'} className="dash-brand" onClick={onNavigate}><img src="/ai-club-emblem.png" alt=""/><span><strong>AI CLUB</strong><small>{role === 'admin' ? 'ADMINISTRATION' : 'STUDENT PORTAL'}</small></span></Link>
+    <nav aria-label={role === 'admin' ? 'Administrator dashboard' : 'Student dashboard'}><span className="dash-nav-label">WORKSPACE</span>{navigation[role].filter(([, , ,permission]) => !permission || hasPermission(session,permission)).map(([to,label,Icon]) => {
+      const active = pathname === to || (to === '/student/members' && pathname.startsWith(to+'/'));
+      return <Link key={to} to={to} aria-current={active ? 'page' : undefined} className={active ? 'active' : ''} onClick={onNavigate}><Icon size={18} aria-hidden="true"/><span>{label}</span></Link>;
+    })}</nav>
+    <div className="dash-sidebar__bottom"><div className="dash-sidebar__identity"><span className="dash-nav-label">{role === 'admin' ? 'ADMINISTRATOR' : 'STUDENT MEMBER'}</span><strong>{session?.member_id}</strong></div><Link to="/" onClick={onNavigate}><Home size={17} aria-hidden="true"/> Public website</Link><button onClick={logout}><LogOut size={17} aria-hidden="true"/> Sign out</button></div>
+  </>;
 }
