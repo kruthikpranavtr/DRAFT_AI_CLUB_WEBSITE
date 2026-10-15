@@ -40,8 +40,8 @@ export default function AdminLoginPage() {
         <div className="admin-login__story">
           <div className="admin-login__eyebrow"><Sparkles size={14}/> AI CLUB MEMBER NETWORK</div>
           <h1>One club.<br/><em>One place to begin.</em></h1>
-          <p>A secure workspace where students take assessments, track their progress and build skills together.</p>
-          <div className="admin-login__trust"><span><GraduationCap size={17}/> Student assessment access</span><span><ShieldCheck size={17}/> Protected student progress</span></div>
+          <p>A secure workspace where students follow club activities, check their membership status and build skills together.</p>
+          <div className="admin-login__trust"><span><GraduationCap size={17}/> Student workspace access</span><span><ShieldCheck size={17}/> Protected student progress</span></div>
         </div>
         <footer>AI CLUB MEMBER SYSTEM <span/> SECURE ACCESS</footer>
       </section>

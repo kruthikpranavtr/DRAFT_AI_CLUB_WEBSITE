@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import useHeroEntrance from './useHeroEntrance';
-const links = [['/', 'Home'], ['/gallery', 'Gallery'], ['/news', 'News'], ['/assessment', 'Assessment'], ['/about', 'About']];
+const links = [['/', 'Home'], ['/gallery', 'Gallery'], ['/news', 'News'], ['/about', 'About']];
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();

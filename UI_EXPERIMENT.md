@@ -10,7 +10,7 @@ This branch prototypes a coordinated light, blue-violet visual system for the **
 - `/about` — concise club introduction, mission pillars, faculty and student-team sections, and project showcase
 - `/news` — featured article, editorial cards, category filters, search, and accessible article detail dialog
 
-The navbar changes appearance only when one of these experimental pages is active. The homepage, login, assessment, and student-dashboard designs remain unchanged from the latest local RAGUL project. The previously requested admin-dashboard removal is retained.
+The navbar changes appearance only when one of these experimental pages is active. The homepage and login designs remain unchanged. The Assessment page and public navigation link have been removed on this branch; visiting `/assessment` redirects to the homepage. Previously saved assessment progress remains readable in the student dashboard, without links to start assessments. The previously requested admin-dashboard removal is retained.
 
 ## Local preview
 

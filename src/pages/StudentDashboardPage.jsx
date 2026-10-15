@@ -1,6 +1,5 @@
-import { ArrowRight, BookOpenCheck, CalendarDays, CheckCircle2, Clock3, LockKeyhole, ShieldCheck, Sparkles, Target, Trophy, UserRoundCheck } from 'lucide-react';
+import { BookOpenCheck, CalendarDays, CheckCircle2, Clock3, LockKeyhole, ShieldCheck, Sparkles, Target, Trophy, UserRoundCheck } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import DashboardShell from '../components/DashboardShell';
 import { useAuth } from '../context/AuthContext';
 
@@ -28,14 +27,14 @@ export default function StudentDashboardPage() {
       </div>
 
       <section className="dash-card dash-section">
-        <div className="dash-section__head"><div><h2>Assessment pathway</h2><span>LEVEL {String(currentLevel).padStart(2,'0')} / 08</span></div><Link className="dash-action" to="/assessment">{eligible ? 'Review results' : 'Continue'} <ArrowRight size={15}/></Link></div>
+        <div className="dash-section__head"><div><h2>Assessment pathway</h2><span>LEVEL {String(currentLevel).padStart(2,'0')} / 08</span></div><span className="dash-action" aria-label="Assessment page unavailable">Assessments unavailable</span></div>
         <div className="dash-progress-track"><span style={{width:percent + '%'}}/></div>
         <div className="dash-list">
           {LEVEL_NAMES.slice(Math.max(0,completed.length - 1),Math.min(LEVEL_NAMES.length,completed.length + 2)).map((name,index) => {
             const actualIndex = Math.max(0,completed.length - 1) + index;
             const done = completed.includes(actualIndex);
             const open = actualIndex === 0 || completed.includes(actualIndex - 1);
-            return <div className="dash-list-item" key={name}><span className="dash-list-item__icon">{done ? <CheckCircle2 size={18}/> : open ? <Sparkles size={18}/> : <LockKeyhole size={17}/>}</span><div><h3>{name}</h3><p>{done ? 'Assessment passed' : open ? 'Ready to begin' : 'Complete the previous level to unlock'}</p></div><span>{done ? 'PASSED' : open ? 'AVAILABLE' : 'LOCKED'}</span></div>;
+            return <div className="dash-list-item" key={name}><span className="dash-list-item__icon">{done ? <CheckCircle2 size={18}/> : open ? <Sparkles size={18}/> : <LockKeyhole size={17}/>}</span><div><h3>{name}</h3><p>{done ? 'Assessment passed' : open ? 'Not currently available' : 'Complete the previous level to unlock'}</p></div><span>{done ? 'PASSED' : open ? 'AVAILABLE' : 'LOCKED'}</span></div>;
           })}
         </div>
       </section>
@@ -57,13 +56,13 @@ export default function StudentDashboardPage() {
     </>}
 
     {view === 'assessments' && <>
-      <PageHead eyebrow="ASSESSMENT PATH" title="Eight levels of progress." text="Complete each assessment in sequence. Results on this demo are saved locally in your browser."/>
+      <PageHead eyebrow="ASSESSMENT PATH" title="Eight levels of progress." text="Previously saved assessment results are available to review here. New assessments are not available in this UI."/>
       <section className="dash-card dash-section">
-        <div className="dash-section__head"><h2>All levels</h2><Link className="dash-action" to="/assessment">Open assessment <ArrowRight size={15}/></Link></div>
+        <div className="dash-section__head"><h2>All levels</h2><span className="dash-action" aria-label="Assessment page unavailable">Read-only progress</span></div>
         <div className="dash-list">{LEVEL_NAMES.map((name,index) => {
           const done = completed.includes(index);
           const open = index === 0 || completed.includes(index - 1);
-          return <div className="dash-list-item" key={name}><span className="dash-list-item__icon">{done ? <CheckCircle2 size={18}/> : open ? <BookOpenCheck size={18}/> : <LockKeyhole size={17}/>}</span><div><h3>{String(index+1).padStart(2,'0')} · {name}</h3><p>{done ? 'Passed and recorded on this device' : open ? 'Available now' : 'Locked until the previous level is passed'}</p></div><span>{done ? 'PASSED' : open ? 'START' : 'LOCKED'}</span></div>;
+          return <div className="dash-list-item" key={name}><span className="dash-list-item__icon">{done ? <CheckCircle2 size={18}/> : open ? <BookOpenCheck size={18}/> : <LockKeyhole size={17}/>}</span><div><h3>{String(index+1).padStart(2,'0')} · {name}</h3><p>{done ? 'Passed and recorded on this device' : open ? 'Not currently available' : 'Locked until the previous level is passed'}</p></div><span>{done ? 'PASSED' : open ? 'UNAVAILABLE' : 'LOCKED'}</span></div>;
         })}</div>
       </section>
     </>}

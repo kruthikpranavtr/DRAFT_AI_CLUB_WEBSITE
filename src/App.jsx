@@ -9,7 +9,6 @@ import HomePage from './pages/HomePage';
 import GalleryPage from './pages/GalleryPage';
 import AboutPage from './pages/AboutPage';
 import NewsPage from './pages/NewsPage';
-import AssessmentPage from './pages/AssessmentPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import StudentDashboardPage from './pages/StudentDashboardPage';
@@ -39,7 +38,7 @@ function AppRoutes() {
       <Route path="/gallery" element={<GalleryPage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/news" element={<NewsPage />} />
-      <Route path="/assessment" element={<ProtectedRoute role="student"><AssessmentPage /></ProtectedRoute>} />
+      <Route path="/assessment" element={<Navigate to="/" replace />} />
       <Route path="/login" element={<AdminLoginPage />} />
       <Route path="/admin/login" element={<Navigate to="/login" replace />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
