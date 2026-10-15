@@ -15,3 +15,8 @@ server/member-platform-uploads/
 *.db
 *.db-wal
 *.db-shm
+
+.local-runtime/
+.phase2-data/
+.npm-cache/
+*.log

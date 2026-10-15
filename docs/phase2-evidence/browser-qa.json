@@ -1,0 +1,45 @@
+{
+  "checkedAtUtc": "2026-10-15T16:19:05.984Z",
+  "browser": "Codex in-app Chromium",
+  "preview": "http://127.0.0.1:5182",
+  "checks": [
+    "Student login, navigation, pinned feed, and private thumbnails verified at 1440px.",
+    "Created a post through UI with two secure uploads; reordered, described, removed one, and published.",
+    "Post upvote/switch/undo and a persisted root comment plus nested reply completed through UI.",
+    "Post edit survives reload; image Escape/focus behavior and comment edit/deletion verified; nested reply remains; 390px discussion has no horizontal overflow.",
+    "Moderator: pin, lock/unlock, hide, private media review after reload, restore and report resolve; report status persists; 390px moderation measured.",
+    "Preserved assessment Select All (3) sets question count 3; clear returns automatic selection; 201-question bank disables Select All at existing 200 cap.",
+    "Limited administrator can use Community but sees no moderation or pin controls; direct moderation route redirects to admin dashboard.",
+    "Community feed at 768px and 390px; 768px no overflow; mobile composer, keyboard Tab stays in dialog, Escape dismisses.",
+    "Mobile search empty state, Top/Popular selection and Help tag filter passed; corrected focus assertion for native dialog[open] passes with Tab wrapping to Close panel.",
+    "Existing profile photo upload/save and member directory pass; all three nested comment levels show distinct current authors; student avatar resolves through protected member media; admin byline links to safe member profile.",
+    "Safe admin byline profile verified; author soft-delete removes browser-created post from feed.",
+    {
+      "publicPages": [
+        {
+          "page": "Home",
+          "heading": true
+        },
+        {
+          "page": "Gallery",
+          "url": "http://127.0.0.1:5182/gallery"
+        },
+        {
+          "page": "News",
+          "url": "http://127.0.0.1:5182/news"
+        },
+        {
+          "page": "About",
+          "url": "http://127.0.0.1:5182/about"
+        }
+      ]
+    },
+    "Stopped isolated preview to induce real fetch failure: accessible alert and Try again rendered; restarted preview retained session/data and feed recovered through Vite reconnect reload.",
+    {
+      "check": "Public About smoke",
+      "result": "Pass: rendered About AI Club, mission, people and projects; Home/Gallery/News were also visibly inspected."
+    }
+  ],
+  "pageConsole": [],
+  "note": "Expected network errors arise from the intentional server outage; tool-side Statsig messages are outside the application page console."
+}

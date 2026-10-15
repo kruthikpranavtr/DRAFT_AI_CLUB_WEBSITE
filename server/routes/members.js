@@ -59,6 +59,10 @@ router.get('/',(req,res) => {
 
 router.get('/:id',(req,res) => {
   const row = findStudentProfile(req.params.id);
+  if (!row) {
+    const administrator=db.prepare("SELECT id,name,status,updated_at FROM users WHERE id=? AND role='admin' AND status='active'").get(req.params.id);
+    if(administrator)return res.json({profile:{...profileResponse(administrator),description:'AI Club administrator'}});
+  }
   if (!row || row.status !== 'active') return res.status(404).json({ error:'Member profile not found.' });
   res.json({ profile:profileResponse(row,{ includeIdentity:row.id === req.user.id }) });
 });

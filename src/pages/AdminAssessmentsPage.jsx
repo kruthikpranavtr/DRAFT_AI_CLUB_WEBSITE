@@ -266,6 +266,11 @@ export default function AdminAssessmentsPage() {
           {form.pointsMode==='equal'&&<><span>Points per question</span><strong>{Math.round(Number(form.totalPoints)/Number(form.questionCount)*100)/100 || '—'}</strong></>}</div>
       </div>
       {form.bankId&&<section className="assessment-picker"><h3>Choose specific questions (optional)</h3><p>Without a selection, the first matching questions in the bank will be used. Choose exactly {form.questionCount} to customize the set.</p>
+        <div className="assessment-actions">
+          <Button secondary disabled={!matchingQuestions.length||matchingQuestions.length>200||form.questionIds.length===matchingQuestions.length} onClick={()=>setForm(current=>({ ...current,questionIds:matchingQuestions.map(q=>q.id),questionCount:matchingQuestions.length }))}>Select all questions ({matchingQuestions.length})</Button>
+          <Button secondary disabled={!form.questionIds.length} onClick={()=>setForm(current=>({ ...current,questionIds:[] }))}>Clear selection</Button>
+        </div>
+        {matchingQuestions.length>200&&<p>Assessments support up to 200 questions. Select up to 200 questions individually.</p>}
         {matchingQuestions.length===0&&<p>No {form.kind} questions available in this bank.</p>}
         <div className="assessment-pick-list">{matchingQuestions.map((q,index)=><label key={q.id}><input type="checkbox" checked={form.questionIds.includes(q.id)} onChange={e=>setForm(f=>({...f,questionIds:e.target.checked?[...f.questionIds,q.id]:f.questionIds.filter(id=>id!==q.id)}))}/><span>{index+1}. {q.prompt}</span><small>{q.points} pts</small></label>)}</div>
         <p>Selected: {form.questionIds.length}. {form.questionIds.length===0?'Automatic bank order is active.':''}</p>

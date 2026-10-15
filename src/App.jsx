@@ -19,6 +19,9 @@ import AdminDashboardPage from './pages/AdminDashboardPage';
 import AdminStudentsPage from './pages/AdminStudentsPage';
 import AdminAssessmentsPage from './pages/AdminAssessmentsPage';
 import StudentAssessmentsPage,{ StudentAssessmentAttemptPage } from './pages/StudentAssessmentsPage';
+import CommunityPage from './pages/CommunityPage';
+import CommunityPostPage from './pages/CommunityPostPage';
+import AdminModerationPage from './pages/AdminModerationPage';
 import { PERMISSIONS } from '../shared/permissions';
 import { workspacePath } from './lib/auth-routing';
 
@@ -59,6 +62,12 @@ function AppRoutes() {
       <Route path="/student/assessments" element={<ProtectedRoute role="student"><StudentAssessmentsPage /></ProtectedRoute>} />
       <Route path="/student/assessments/attempt/:attemptId" element={<ProtectedRoute role="student"><StudentAssessmentAttemptPage /></ProtectedRoute>} />
       <Route path="/student/members/:id" element={<ProtectedRoute role="student"><MemberProfilePage /></ProtectedRoute>} />
+      <Route path="/student/community" element={<ProtectedRoute role="student"><CommunityPage /></ProtectedRoute>} />
+      <Route path="/student/community/posts/:postId" element={<ProtectedRoute role="student"><CommunityPostPage /></ProtectedRoute>} />
+      <Route path="/admin/community" element={<ProtectedRoute role="admin"><CommunityPage /></ProtectedRoute>} />
+      <Route path="/admin/community/posts/:postId" element={<ProtectedRoute role="admin"><CommunityPostPage /></ProtectedRoute>} />
+      <Route path="/admin/members/:id" element={<ProtectedRoute role="admin"><MemberProfilePage /></ProtectedRoute>} />
+      <Route path="/admin/moderation" element={<ProtectedRoute role="admin" permission={PERMISSIONS.MODERATE_COMMUNITY}><AdminModerationPage /></ProtectedRoute>} />
       <Route path="/admin/dashboard" element={<ProtectedRoute role="admin"><AdminDashboardPage /></ProtectedRoute>} />
       <Route path="/admin/students" element={<ProtectedRoute role="admin" permission={PERMISSIONS.MANAGE_STUDENTS}><AdminStudentsPage /></ProtectedRoute>} />
       <Route path="/admin/assessments" element={<ProtectedRoute role="admin"><AdminAssessmentsPage /></ProtectedRoute>} />

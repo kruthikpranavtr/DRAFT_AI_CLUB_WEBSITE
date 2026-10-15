@@ -1,0 +1,41 @@
+{
+  "verifiedAtUtc": "2026-10-15T16:18:47.5713341Z",
+  "originalRoot": "C:\\Users\\Krith\\AI_CLUB_TEST",
+  "originalHead": "9e597e58d0e2c817504463cc84c5858f3097d27d",
+  "originalBranch": "main",
+  "originalStatus": [
+    " M .gitignore",
+    " M package-lock.json",
+    " M package.json",
+    " M src/pages/AdminAssessmentsPage.jsx"
+  ],
+  "files": [
+    {
+      "file": ".gitignore",
+      "expected": "79ECF04F0C1B35614D919A7EFBE623A56DB05B85C1E0D4B856D633BC56CC61F5",
+      "actual": "79ECF04F0C1B35614D919A7EFBE623A56DB05B85C1E0D4B856D633BC56CC61F5",
+      "unchanged": true
+    },
+    {
+      "file": "package.json",
+      "expected": "DC02304064A8F603E1E10D1598D413BFD7EF9211625AD8E40052A1DC958C1E0A",
+      "actual": "DC02304064A8F603E1E10D1598D413BFD7EF9211625AD8E40052A1DC958C1E0A",
+      "unchanged": true
+    },
+    {
+      "file": "package-lock.json",
+      "expected": "8B74C8457E9F6C53918B5CCD7F5FDEA52E013B906C346CE6A299FD56AA1A411A",
+      "actual": "8B74C8457E9F6C53918B5CCD7F5FDEA52E013B906C346CE6A299FD56AA1A411A",
+      "unchanged": true
+    },
+    {
+      "file": "src/pages/AdminAssessmentsPage.jsx",
+      "expected": "D2CE8881B496C2FAE61F630E387F3B2C16502C54F926EBCDE21E16E3DDB74654",
+      "actual": "D2CE8881B496C2FAE61F630E387F3B2C16502C54F926EBCDE21E16E3DDB74654",
+      "unchanged": true
+    }
+  ],
+  "isolatedBranch": "codex/phase-2-community-moderation",
+  "isolatedAssessmentSha256": "D2CE8881B496C2FAE61F630E387F3B2C16502C54F926EBCDE21E16E3DDB74654",
+  "remotes": []
+}

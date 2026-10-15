@@ -1,4 +1,4 @@
-import { ClipboardList,Home,LayoutDashboard,LogOut,Menu,UserRound,UsersRound } from 'lucide-react';
+import { ClipboardList,Home,LayoutDashboard,LogOut,Menu,UserRound,UsersRound,MessagesSquare,ShieldCheck } from 'lucide-react';
 import { useEffect,useRef,useState } from 'react';
 import { Link,useLocation,useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -7,8 +7,8 @@ import DashboardSheet from './DashboardSheet';
 import './Dashboard.css';
 
 const navigation = {
-  student:[['/student/dashboard','Overview',LayoutDashboard],['/student/assessments','Assessments',ClipboardList],['/student/profile','My profile',UserRound],['/student/members','Member directory',UsersRound]],
-  admin:[['/admin/dashboard','Overview',LayoutDashboard],['/admin/assessments','Assessments',ClipboardList],['/admin/students','Students',UsersRound,PERMISSIONS.MANAGE_STUDENTS]],
+  student:[['/student/dashboard','Overview',LayoutDashboard],['/student/community','Community',MessagesSquare],['/student/assessments','Assessments',ClipboardList],['/student/profile','My profile',UserRound],['/student/members','Member directory',UsersRound]],
+  admin:[['/admin/dashboard','Overview',LayoutDashboard],['/admin/community','Community',MessagesSquare],['/admin/moderation','Moderation',ShieldCheck,PERMISSIONS.MODERATE_COMMUNITY],['/admin/assessments','Assessments',ClipboardList],['/admin/students','Students',UsersRound,PERMISSIONS.MANAGE_STUDENTS]],
 };
 
 export default function DashboardShell({ section='Overview',children }) {
@@ -48,7 +48,7 @@ function SidebarContent({ role,session,pathname,logout,onNavigate }) {
   return <>
     <Link to={role === 'admin' ? '/admin/dashboard' : '/student/dashboard'} className="dash-brand" onClick={onNavigate}><img src="/ai-club-emblem.png" alt=""/><span><strong>AI CLUB</strong><small>{role === 'admin' ? 'ADMINISTRATION' : 'STUDENT PORTAL'}</small></span></Link>
     <nav aria-label={role === 'admin' ? 'Administrator dashboard' : 'Student dashboard'}><span className="dash-nav-label">WORKSPACE</span>{navigation[role].filter(([, , ,permission]) => !permission || hasPermission(session,permission)).map(([to,label,Icon]) => {
-      const active = pathname === to || (to === '/student/members' && pathname.startsWith(to+'/'));
+      const active = pathname === to || ((to.endsWith('/members') || to.endsWith('/community')) && pathname.startsWith(to+'/'));
       return <Link key={to} to={to} aria-current={active ? 'page' : undefined} className={active ? 'active' : ''} onClick={onNavigate}><Icon size={18} aria-hidden="true"/><span>{label}</span></Link>;
     })}</nav>
     <div className="dash-sidebar__bottom"><div className="dash-sidebar__identity"><span className="dash-nav-label">{role === 'admin' ? 'ADMINISTRATOR' : 'STUDENT MEMBER'}</span><strong>{session?.member_id}</strong></div><Link to="/" onClick={onNavigate}><Home size={17} aria-hidden="true"/> Public website</Link><button onClick={logout}><LogOut size={17} aria-hidden="true"/> Sign out</button></div>

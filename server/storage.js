@@ -21,6 +21,12 @@ const s3 = hasS3 ? new S3Client({
 }) : null;
 
 const extensionFor = name => path.extname(name).toLowerCase().replace(/[^.a-z0-9]/g, '').slice(0, 12);
+function localStoredPath(key) {
+  const target=path.resolve(uploadDir,key);
+  const relative=path.relative(path.resolve(uploadDir),target);
+  if(!relative || relative.startsWith('..') || path.isAbsolute(relative)) throw new Error('Invalid storage key.');
+  return target;
+}
 
 export function classifyMime(mime) {
   if (mime.startsWith('image/')) return 'image';
@@ -64,7 +70,10 @@ export async function sendStoredFile(record, res, disposition = 'inline') {
     if (result.ContentLength) res.setHeader('Content-Length', String(result.ContentLength));
     return result.Body.pipe(res);
   }
-  return res.sendFile(path.resolve(uploadDir, record.storage_key));
+  // The upload root can legitimately live in .phase2-data/.codex. Authorization
+  // is enforced by the caller; only a validated database storage key is accepted.
+  return new Promise((resolve,reject)=>res.sendFile(localStoredPath(record.storage_key),{dotfiles:'allow'},
+    error=>error?reject(error):resolve()));
 }
 
 export async function deleteStoredFile(record) {
@@ -72,8 +81,8 @@ export async function deleteStoredFile(record) {
     await s3.send(new DeleteObjectCommand({ Bucket:process.env.S3_BUCKET, Key:record.storage_key }));
     return;
   }
-  const target = path.resolve(uploadDir, record.storage_key);
-  if (target.startsWith(path.resolve(uploadDir)) && fs.existsSync(target)) fs.unlinkSync(target);
+  const target = localStoredPath(record.storage_key);
+  if (fs.existsSync(target)) fs.unlinkSync(target);
 }
 
 export async function getStoredObjectUrl(key, expiresIn = 3600) {

@@ -32,7 +32,7 @@ test('media scope migration preserves rows and quarantines a legacy avatar galle
     database.prepare(`INSERT INTO gallery_items (id,title,alt_text,file_id,status,created_at,updated_at)
       VALUES ('gallery','Legacy link','Description','avatar','published',?,?)`).run(time,time);
     const report = runMigrations(database,{ databasePath,backupDir:path.join(root,'backups') });
-    assert.deepEqual(report.applied.map(item => item.version),[5,6]);
+    assert.deepEqual(report.applied.map(item => item.version),[5,6,7,8]);
     assert.equal(report.backup.verified,true);
     assert.deepEqual(database.prepare('SELECT purpose,is_public FROM files WHERE id=?').get('avatar'),{ purpose:'profile-avatar',is_public:0 });
     assert.deepEqual(database.prepare('SELECT file_id,status FROM gallery_items WHERE id=?').get('gallery'),{ file_id:null,status:'hidden' });
@@ -60,12 +60,12 @@ test('legacy data is backed up, restored, and migrated without row loss',() => {
       VALUES (?,?,?,?,?,?,?)`).run('content-id','news','news','one','Existing content',now,now);
 
     const report = runMigrations(database,{ databasePath,backupDir });
-    assert.deepEqual(report.applied.map(item => item.version),[1,2,3,4,5,6]);
+    assert.deepEqual(report.applied.map(item => item.version),[1,2,3,4,5,6,7,8]);
     assert.equal(report.backup?.verified,true);
     assert.equal(fs.existsSync(report.backup.backupPath),true);
     assert.equal(database.prepare('SELECT count(*) count FROM users').get().count,2);
     assert.equal(database.prepare('SELECT count(*) count FROM content_entries').get().count,1);
-    assert.equal(database.prepare('SELECT count(*) count FROM schema_migrations').get().count,6);
+    assert.equal(database.prepare('SELECT count(*) count FROM schema_migrations').get().count,8);
     assert.equal(database.prepare('SELECT count(*) count FROM student_profiles').get().count,1);
     assert.ok(JSON.parse(database.prepare(`SELECT permissions FROM users WHERE member_id='ADMIN-01'`).get().permissions)
       .includes('platform:super-admin'));
@@ -98,9 +98,9 @@ test('a blank database migrates to the current schema without requiring a backup
   try {
     database.pragma('foreign_keys = ON');
     const report = runMigrations(database,{ databasePath,backupDir:path.join(root,'backups') });
-    assert.deepEqual(report.applied.map(item => item.version),[1,2,3,4,5,6]);
+    assert.deepEqual(report.applied.map(item => item.version),[1,2,3,4,5,6,7,8]);
     assert.equal(report.backup,null);
-    assert.equal(database.prepare('SELECT count(*) count FROM schema_migrations').get().count,6);
+    assert.equal(database.prepare('SELECT count(*) count FROM schema_migrations').get().count,8);
     assert.equal(verifyDatabase(database).integrity,'ok');
   } finally {
     database.close();

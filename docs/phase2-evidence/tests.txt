@@ -1,0 +1,218 @@
+TAP version 13
+# Subtest: MCQ assessment, Excel preview, role gates, immutable snapshots, attempts and hidden results
+ok 1 - MCQ assessment, Excel preview, role gates, immutable snapshots, attempts and hidden results
+  ---
+  duration_ms: 508.8911
+  type: 'test'
+  ...
+# Subtest: verified server roles select their own workspace
+ok 2 - verified server roles select their own workspace
+  ---
+  duration_ms: 0.8592
+  type: 'test'
+  ...
+# Subtest: temporary passwords take precedence over either workspace
+ok 3 - temporary passwords take precedence over either workspace
+  ---
+  duration_ms: 0.174
+  type: 'test'
+  ...
+# Subtest: only one frontend login exists and legacy login is a redirect
+ok 4 - only one frontend login exists and legacy login is a redirect
+  ---
+  duration_ms: 2.4536
+  type: 'test'
+  ...
+# Subtest: authentication, CSRF, role boundaries, and reset revocation are enforced
+ok 5 - authentication, CSRF, role boundaries, and reset revocation are enforced
+  ---
+  duration_ms: 1019.0749
+  type: 'test'
+  ...
+# Subtest: version 6 upgrade preserves accounts, sessions, profiles, CMS and complete assessment records
+ok 6 - version 6 upgrade preserves accounts, sessions, profiles, CMS and complete assessment records
+  ---
+  duration_ms: 227.1939
+  type: 'test'
+  ...
+# Subtest: Community, private images, moderation and announcements enforce persisted authorization
+    # Subtest: guests, temporary credentials, CSRF and ordinary administrator boundaries
+    ok 1 - guests, temporary credentials, CSRF and ordinary administrator boundaries
+      ---
+      duration_ms: 22.1267
+      type: 'test'
+      ...
+    # Subtest: images fully decode, strip metadata, stage privately and bind only to their owner
+    ok 2 - images fully decode, strip metadata, stage privately and bind only to their owner
+      ---
+      duration_ms: 151.7218
+      type: 'test'
+      ...
+    # Subtest: safe current attribution, ownership, search, sorting and bounded pagination
+    ok 3 - safe current attribution, ownership, search, sorting and bounded pagination
+      ---
+      duration_ms: 36.8917
+      type: 'test'
+      ...
+    # Subtest: nested replies validate ancestry/depth and emit only a Phase 3 event
+    ok 4 - nested replies validate ancestry/depth and emit only a Phase 3 event
+      ---
+      duration_ms: 30.131
+      type: 'test'
+      ...
+    # Subtest: vote retries, switching and concurrent requests preserve one vote and exact aggregates
+    ok 5 - vote retries, switching and concurrent requests preserve one vote and exact aggregates
+      ---
+      duration_ms: 99.195
+      type: 'test'
+      ...
+    # Subtest: announcements enforce capability, limits, ordering, filters and edit review
+    ok 6 - announcements enforce capability, limits, ordering, filters and edit review
+      ---
+      duration_ms: 52.3945
+      type: 'test'
+      ...
+    # Subtest: report queue, content/media moderation, locks and audited resolution
+    ok 7 - report queue, content/media moderation, locks and audited resolution
+      ---
+      duration_ms: 55.5694
+      type: 'test'
+      ...
+    # Subtest: comment moderation preserves descendants and excludes removed text
+    ok 8 - comment moderation preserves descendants and excludes removed text
+      ---
+      duration_ms: 22.2925
+      type: 'test'
+      ...
+    # Subtest: report floods are throttled per user
+    ok 9 - report floods are throttled per user
+      ---
+      duration_ms: 27.4201
+      type: 'test'
+      ...
+    # Subtest: large lists remain bounded, deterministic and indexed with 6000 posts
+    ok 10 - large lists remain bounded, deterministic and indexed with 6000 posts
+      ---
+      duration_ms: 698.5937
+      type: 'test'
+      ...
+    # Subtest: deletion tombstones, revocation, current disabled byline and staged cleanup
+    ok 11 - deletion tombstones, revocation, current disabled byline and staged cleanup
+      ---
+      duration_ms: 60.2834
+      type: 'test'
+      ...
+    1..11
+ok 7 - Community, private images, moderation and announcements enforce persisted authorization
+  ---
+  duration_ms: 1906.6044
+  type: 'test'
+  ...
+# 6000 posts, new first page: 4.2 ms; 20 rows returned
+# 6000 posts, top first page: 9.5 ms; 20 rows returned
+# 6000 posts, popular first page: 14.8 ms; 20 rows returned
+# Subtest: dashboard text, navigation, actions and status palettes meet WCAG AA contrast
+ok 8 - dashboard text, navigation, actions and status palettes meet WCAG AA contrast
+  ---
+  duration_ms: 2.1188
+  type: 'test'
+  ...
+# Subtest: dashboard field boundaries and focus indicators meet non-text contrast
+ok 9 - dashboard field boundaries and focus indicators meet non-text contrast
+  ---
+  duration_ms: 0.21
+  type: 'test'
+  ...
+# Subtest: authentication pages share the editorial palette without cinematic effects
+ok 10 - authentication pages share the editorial palette without cinematic effects
+  ---
+  duration_ms: 0.677
+  type: 'test'
+  ...
+# Subtest: fixed public demo identities are refused in production even with correct passwords or existing sessions
+ok 11 - fixed public demo identities are refused in production even with correct passwords or existing sessions
+  ---
+  duration_ms: 419.8417
+  type: 'test'
+  ...
+# Subtest: development configuration isolates the experimental UI, API, database, and uploads
+ok 12 - development configuration isolates the experimental UI, API, database, and uploads
+  ---
+  duration_ms: 235.5507
+  type: 'test'
+  ...
+# Subtest: additional member pages deduplicate stable IDs and retain the latest profile
+ok 13 - additional member pages deduplicate stable IDs and retain the latest profile
+  ---
+  duration_ms: 2.7413
+  type: 'test'
+  ...
+# Subtest: student provisioning, first login, profiles, directory, and private media are protected
+ok 14 - student provisioning, first login, profiles, directory, and private media are protected
+  ---
+  duration_ms: 1177.2866
+  type: 'test'
+  ...
+# Subtest: media scope migration preserves rows and quarantines a legacy avatar gallery link
+ok 15 - media scope migration preserves rows and quarantines a legacy avatar gallery link
+  ---
+  duration_ms: 218.4561
+  type: 'test'
+  ...
+# Subtest: legacy data is backed up, restored, and migrated without row loss
+ok 16 - legacy data is backed up, restored, and migrated without row loss
+  ---
+  duration_ms: 118.525
+  type: 'test'
+  ...
+# Subtest: a blank database migrates to the current schema without requiring a backup
+ok 17 - a blank database migrates to the current schema without requiring a backup
+  ---
+  duration_ms: 65.5998
+  type: 'test'
+  ...
+# Subtest: passwords use salted scrypt hashes and verify without plaintext storage
+ok 18 - passwords use salted scrypt hashes and verify without plaintext storage
+  ---
+  duration_ms: 242.7149
+  type: 'test'
+  ...
+# Subtest: students never receive administrator permissions
+ok 19 - students never receive administrator permissions
+  ---
+  duration_ms: 0.9198
+  type: 'test'
+  ...
+# Subtest: regular admins receive only explicit or domain wildcard permissions
+ok 20 - regular admins receive only explicit or domain wildcard permissions
+  ---
+  duration_ms: 0.1557
+  type: 'test'
+  ...
+# Subtest: Super Admin permission grants all administrator capabilities
+ok 21 - Super Admin permission grants all administrator capabilities
+  ---
+  duration_ms: 0.1272
+  type: 'test'
+  ...
+# Subtest: bootstrap users require explicit passwords and the first admin is Super Admin
+ok 22 - bootstrap users require explicit passwords and the first admin is Super Admin
+  ---
+  duration_ms: 79.4488
+  type: 'test'
+  ...
+# Subtest: unified login derives roles securely and preserves sessions, forced changes, and shared rate limits
+ok 23 - unified login derives roles securely and preserves sessions, forced changes, and shared rate limits
+  ---
+  duration_ms: 1172.3146
+  type: 'test'
+  ...
+1..23
+# tests 34
+# suites 0
+# pass 34
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 18484.2526
