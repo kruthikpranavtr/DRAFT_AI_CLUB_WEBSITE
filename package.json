@@ -16,6 +16,8 @@
     "test": "node --test --test-concurrency=1",
     "db:backup": "node --env-file=.env.development server/scripts/backup-database.js",
     "db:migrate": "node --env-file=.env.development server/scripts/migrate.js",
+    "db:pg:migrate": "node --env-file=.env.development -e \"import('./server/pg.js').then(m => import('./server/migrations/pg-runner.js').then(r => r.runPostgresMigrations(m.pool)).then(() => m.closePool()))\"",
+    "db:pg:import": "node --env-file=.env.development server/scripts/migrate-sqlite-to-pg.js",
     "demo:setup": "node server/scripts/setup-demo.js",
     "demo:dev": "npm run demo:setup && concurrently -k -n DEMO-WEB,DEMO-API -c cyan,yellow \"vite --mode demo\" \"node --env-file=.env.demo --watch server/index.js\"",
     "preview": "vite preview"
@@ -35,6 +37,7 @@
     "lucide-react": "^1.52.0",
     "mime-types": "^3.0.2",
     "multer": "^2.4.0",
+    "pg": "^8.23.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.4",
@@ -42,10 +45,13 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.10",
+    "@electric-sql/pglite-socket": "^0.2.13",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
     "oxlint": "^1.81.0",
+    "pg-gateway": "^0.3.0-beta.4",
     "playwright-core": "^1.56.1",
     "vite": "^8.3.0"
   }
