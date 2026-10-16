@@ -58,6 +58,27 @@ Executed live against the running backend server connected to the PostgreSQL dat
 9. **Moderation (Pin & Lock):** Admin pinned and locked post via `/api/admin/community/posts/:id/pin` and `/moderate` -> 200 OK.
 10. **Feed Verification:** Verified community feed accurately reflects pinned, locked, and scored post -> 200 OK.
 
+### 2.4 Real Browser Acceptance Verification (Google Chrome)
+Executed using Google Chrome executable (`C:\Program Files\Google\Chrome\Application\chrome.exe` v155.0.8059.40) via `playwright-core` against the live PostgreSQL backend:
+
+| Test Item | Feature / Workflow | Browser Result | Screenshot Reference |
+| :--- | :--- | :---: | :--- |
+| **01** | **Admin Authentication & Dashboard** | **PASS** | [`docs/screenshots/01-admin-dashboard.png`](file:///e:/Final%20ailab%20webpage/DRAFT_AI_CLUB_WEBSITE/docs/screenshots/01-admin-dashboard.png) |
+| **02** | **Question Bank & Excel Import** (validation & preview) | **PASS** | [`docs/screenshots/02-question-bank-excel-imported.png`](file:///e:/Final%20ailab%20webpage/DRAFT_AI_CLUB_WEBSITE/docs/screenshots/02-question-bank-excel-imported.png) |
+| **03** | **Assessment Builder: Select All & Clear Selection** | **PASS** | [`docs/screenshots/03-assessment-builder-selection.png`](file:///e:/Final%20ailab%20webpage/DRAFT_AI_CLUB_WEBSITE/docs/screenshots/03-assessment-builder-selection.png) |
+| **04** | **Assessment Creation & Publishing** | **PASS** | [`docs/screenshots/04-assessment-published.png`](file:///e:/Final%20ailab%20webpage/DRAFT_AI_CLUB_WEBSITE/docs/screenshots/04-assessment-published.png) |
+| **05** | **Student Authentication & Dashboard** | **PASS** | [`docs/screenshots/05-student-dashboard.png`](file:///e:/Final%20ailab%20webpage/DRAFT_AI_CLUB_WEBSITE/docs/screenshots/05-student-dashboard.png) |
+| **06** | **Student Profile Persistence** | **PASS** | [`docs/screenshots/06-student-profile.png`](file:///e:/Final%20ailab%20webpage/DRAFT_AI_CLUB_WEBSITE/docs/screenshots/06-student-profile.png) |
+| **07** | **Member Directory Search** | **PASS** | [`docs/screenshots/07-member-directory.png`](file:///e:/Final%20ailab%20webpage/DRAFT_AI_CLUB_WEBSITE/docs/screenshots/07-member-directory.png) |
+| **08** | **Student Assessment Attempt & Submission** | **PASS** | [`docs/screenshots/08-student-assessment-submitted.png`](file:///e:/Final%20ailab%20webpage/DRAFT_AI_CLUB_WEBSITE/docs/screenshots/08-student-assessment-submitted.png) |
+| **09** | **Community Post Creation with Image & Upvote** | **PASS** | [`docs/screenshots/09-community-post-with-image.png`](file:///e:/Final%20ailab%20webpage/DRAFT_AI_CLUB_WEBSITE/docs/screenshots/09-community-post-with-image.png) |
+| **10** | **Community Comments & Discussion View** | **PASS** | [`docs/screenshots/10-community-comment-and-votes.png`](file:///e:/Final%20ailab%20webpage/DRAFT_AI_CLUB_WEBSITE/docs/screenshots/10-community-comment-and-votes.png) |
+| **11** | **Admin Community Moderation (Pin & Lock)** | **PASS** | [`docs/screenshots/11-admin-moderation-pinned.png`](file:///e:/Final%20ailab%20webpage/DRAFT_AI_CLUB_WEBSITE/docs/screenshots/11-admin-moderation-pinned.png) |
+| **12** | **Mobile Responsiveness (Home 375x812)** | **PASS** | [`docs/screenshots/12-mobile-home.png`](file:///e:/Final%20ailab%20webpage/DRAFT_AI_CLUB_WEBSITE/docs/screenshots/12-mobile-home.png) |
+| **13** | **Mobile Responsiveness (Directory 375x812)** | **PASS** | [`docs/screenshots/13-mobile-directory.png`](file:///e:/Final%20ailab%20webpage/DRAFT_AI_CLUB_WEBSITE/docs/screenshots/13-mobile-directory.png) |
+| **14** | **Mobile Responsiveness (Community 375x812)** | **PASS** | [`docs/screenshots/14-mobile-community.png`](file:///e:/Final%20ailab%20webpage/DRAFT_AI_CLUB_WEBSITE/docs/screenshots/14-mobile-community.png) |
+| **15** | **PostgreSQL Data Persistence Across Server Restart** | **PASS** | Verified bank, assessment, attempts, post, comments, and media all preserved across restart |
+
 ---
 
 ## 3. Identification of SQLite Dependencies in Live Application

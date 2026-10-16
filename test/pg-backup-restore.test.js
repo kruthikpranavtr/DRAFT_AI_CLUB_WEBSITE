@@ -8,7 +8,7 @@ process.env.NODE_ENV = 'test';
 process.env.DATABASE_URL = process.env.TEST_DATABASE_URL || 'postgresql://postgres:postgres@127.0.0.1:5432/aiclub_test';
 
 const { query, queryOne, now, withTransaction } = await import('../server/pg.js');
-const { backupDatabase, restoreDatabase, ORDERED_TABLES } = await import('../server/scripts/backup-restore-pg.js');
+const { backupDatabase, restoreDatabase, backupMedia, restoreMedia, ORDERED_TABLES } = await import('../server/scripts/backup-restore-pg.js');
 
 test('PostgreSQL backup, restore, integrity checksum, and transactional rollback', async () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'pg-backup-test-'));
@@ -40,11 +40,20 @@ test('PostgreSQL backup, restore, integrity checksum, and transactional rollback
     const countEmpty = await queryOne('SELECT count(*)::int as count FROM users');
     assert.equal(countEmpty.count, 0);
 
-    // 4. Restore database
+    // 4. Verify production safeguard blocks destructive restore without ALLOW_PRODUCTION_RESTORE
+    process.env.NODE_ENV = 'production';
+    delete process.env.ALLOW_PRODUCTION_RESTORE;
+    await assert.rejects(
+      async () => restoreDatabase(backupResult.filePath),
+      /Destructive restore blocked: Refusing to restore database in production/i
+    );
+    process.env.NODE_ENV = 'test';
+
+    // 5. Restore database
     const restoreResult = await restoreDatabase(backupResult.filePath);
     assert.equal(restoreResult.ok, true);
 
-    // 5. Verify restored data
+    // 6. Verify restored data
     const userRow = await queryOne('SELECT * FROM users WHERE id = $1', ['backup-user-1']);
     assert.ok(userRow);
     assert.equal(userRow.member_id, '25AM999');
@@ -53,7 +62,7 @@ test('PostgreSQL backup, restore, integrity checksum, and transactional rollback
     assert.ok(profileRow);
     assert.equal(profileRow.department, 'AI & DS');
 
-    // 6. Test rollback behavior on error during transactional restore
+    // 7. Test rollback behavior on error during transactional restore
     let rollbackThrown = false;
     try {
       await withTransaction(async (tx) => {
@@ -70,7 +79,29 @@ test('PostgreSQL backup, restore, integrity checksum, and transactional rollback
     const failUser = await queryOne('SELECT * FROM users WHERE id = $1', ['fail-user']);
     assert.equal(failUser, null, 'transactional rollback must ensure no partially written rows remain');
 
+    // 8. Test separate media backup and restore strategy
+    const fakeUploadDir = path.join(tempDir, 'fake-uploads');
+    fs.mkdirSync(fakeUploadDir, { recursive: true });
+    fs.writeFileSync(path.join(fakeUploadDir, 'avatar-test.webp'), 'fake-webp-image-data-binary', 'utf8');
+    fs.writeFileSync(path.join(fakeUploadDir, 'post-attach.webp'), 'fake-attachment-image-binary', 'utf8');
+
+    const mediaBackup = backupMedia(fakeUploadDir, path.join(tempDir, 'media-backups'));
+    assert.equal(mediaBackup.count, 2);
+    assert.ok(fs.existsSync(path.join(mediaBackup.mediaBackupDir, 'manifest.json')));
+
+    // Clear uploads
+    fs.rmSync(fakeUploadDir, { recursive: true, force: true });
+    assert.ok(!fs.existsSync(fakeUploadDir));
+
+    // Restore media
+    const mediaRestore = restoreMedia(mediaBackup.mediaBackupDir, fakeUploadDir);
+    assert.equal(mediaRestore.ok, true);
+    assert.equal(mediaRestore.restoredCount, 2);
+    assert.ok(fs.existsSync(path.join(fakeUploadDir, 'avatar-test.webp')));
+    assert.ok(fs.existsSync(path.join(fakeUploadDir, 'post-attach.webp')));
+
   } finally {
+    process.env.NODE_ENV = 'test';
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
 });

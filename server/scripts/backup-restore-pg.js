@@ -67,6 +67,10 @@ export async function backupDatabase(targetDir = defaultBackupDir) {
 }
 
 export async function restoreDatabase(filePath) {
+  if (process.env.NODE_ENV === 'production' && process.env.ALLOW_PRODUCTION_RESTORE !== 'true') {
+    throw new Error('Destructive restore blocked: Refusing to restore database in production environment without explicit ALLOW_PRODUCTION_RESTORE=true.');
+  }
+
   if (!fs.existsSync(filePath)) {
     throw new Error(`Backup file not found: ${filePath}`);
   }
@@ -122,4 +126,66 @@ export async function restoreDatabase(filePath) {
   });
 
   return { ok: true, restoredCounts: restoreReport };
+}
+
+export function backupMedia(uploadDir = path.resolve(serverDir, 'member-platform-uploads'), targetDir = defaultBackupDir) {
+  fs.mkdirSync(targetDir, { recursive: true });
+  if (!fs.existsSync(uploadDir)) {
+    return { count: 0, targetDir, message: 'Upload directory does not exist yet. Nothing to backup.' };
+  }
+
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const mediaBackupDir = path.join(targetDir, `media-backup-${timestamp}`);
+  fs.mkdirSync(mediaBackupDir, { recursive: true });
+
+  const files = fs.readdirSync(uploadDir, { withFileTypes: true });
+  let count = 0;
+  const manifest = {};
+
+  for (const entry of files) {
+    if (entry.isFile()) {
+      const srcPath = path.join(uploadDir, entry.name);
+      const destPath = path.join(mediaBackupDir, entry.name);
+      fs.copyFileSync(srcPath, destPath);
+      const content = fs.readFileSync(srcPath);
+      manifest[entry.name] = crypto.createHash('sha256').update(content).digest('hex');
+      count++;
+    }
+  }
+
+  fs.writeFileSync(path.join(mediaBackupDir, 'manifest.json'), JSON.stringify(manifest, null, 2), 'utf8');
+  return { count, mediaBackupDir, manifest };
+}
+
+export function restoreMedia(sourceMediaBackupDir, uploadDir = path.resolve(serverDir, 'member-platform-uploads')) {
+  if (process.env.NODE_ENV === 'production' && process.env.ALLOW_PRODUCTION_RESTORE !== 'true') {
+    throw new Error('Destructive media restore blocked: Refusing to restore media in production without explicit ALLOW_PRODUCTION_RESTORE=true.');
+  }
+
+  if (!fs.existsSync(sourceMediaBackupDir)) {
+    throw new Error(`Media backup directory not found: ${sourceMediaBackupDir}`);
+  }
+
+  const manifestPath = path.join(sourceMediaBackupDir, 'manifest.json');
+  if (!fs.existsSync(manifestPath)) {
+    throw new Error('Invalid media backup: manifest.json missing.');
+  }
+
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  fs.mkdirSync(uploadDir, { recursive: true });
+  let restored = 0;
+
+  for (const [filename, expectedHash] of Object.entries(manifest)) {
+    const srcFile = path.join(sourceMediaBackupDir, filename);
+    if (!fs.existsSync(srcFile)) throw new Error(`Media backup corrupt: missing ${filename}`);
+    const content = fs.readFileSync(srcFile);
+    const actualHash = crypto.createHash('sha256').update(content).digest('hex');
+    if (actualHash !== expectedHash) {
+      throw new Error(`Media checksum mismatch for ${filename}`);
+    }
+    fs.copyFileSync(srcFile, path.join(uploadDir, filename));
+    restored++;
+  }
+
+  return { ok: true, restoredCount: restored };
 }
