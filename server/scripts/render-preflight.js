@@ -65,5 +65,14 @@ catch (error) {
     ? error.message
     : 'Database readiness could not be verified. Check the Render connection and backup restore.';
   console.error('Render preflight blocked startup:',message);
+  // Diagnostic metadata only; never print DATABASE_URL or secrets in deploy logs.
+  const reason=String(error?.code || error?.cause?.code || 'NO_ERROR_CODE').slice(0,64);
+  const type=String(error?.name || 'Error').slice(0,64);
+  console.error('Render safe connection diagnostic:',JSON.stringify({ reason,type,
+    approvedPreview:process.env.AI_CLUB_PREVIEW_MODE === '1',
+    previewBootstrapRequested:process.env.AI_CLUB_PREVIEW_BOOTSTRAP === 'fresh-preview-only' }));
+  if (typeof error?.message === 'string' && error.message.startsWith('Preview database initialization blocked:')) {
+    console.error('Render preview guard:',error.message.slice(0,180));
+  }
   process.exitCode=1;
 } finally { await closePool(); }
