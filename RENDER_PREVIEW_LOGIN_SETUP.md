@@ -16,6 +16,7 @@ This plan targets only Render free web service `ai-club-api-preview` and Postgre
 - `BOOTSTRAP_STUDENT_ID=PREVIEW-STUDENT-01`, `BOOTSTRAP_STUDENT_EMAIL=preview-student@example.invalid`.
 - `BOOTSTRAP_ADMIN_PASSWORD` and `BOOTSTRAP_STUDENT_PASSWORD`: unique random values. They are kept in a local file outside the repository and set in Render environment, **not in Git**.
 - `ALLOWED_ORIGINS`: include the exact HTTPS Vercel preview domain in addition to any other authorized preview aliases. No wildcard origins.
+- `PG_REJECT_UNAUTHORIZED=false` **only on this isolated preview backend**: Render internal PostgreSQL's self-signed TLS certificate cannot be CA-verified by this Node client. This retains encrypted transport; `server/pg.js` refuses the exception unless the preview mode and expected private DB host both match. Never use this flag on the real production database.
 
 The URL must refer specifically to `ai_club_preview_db`. The initializer compares the URL hostname against the authorized Render instance ID and expected host, and refuses to initialize any other database. Existing/partially populated databases are not rewritten, dropped, or truncated.
 

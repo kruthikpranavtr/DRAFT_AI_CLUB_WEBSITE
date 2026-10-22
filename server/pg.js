@@ -8,11 +8,23 @@ function createPoolConfig() {
   const isProduction = process.env.NODE_ENV === 'production';
   const isLocal = connectionString.includes('127.0.0.1') || connectionString.includes('localhost');
   
+  // Render internal Postgres uses a self-signed TLS certificate. The only
+  // exception to CA verification is the isolated, disposable preview DB.
+  const skipCertificateVerification = process.env.PG_REJECT_UNAUTHORIZED === 'false';
+  if (skipCertificateVerification) {
+    let dbHost = '';
+    try { dbHost = new URL(connectionString).hostname; } catch {}
+    const allowedPreviewHost = 'dpg-dbcu193ncjis73dl38mg-a';
+    if (process.env.AI_CLUB_PREVIEW_MODE !== '1' ||
+        dbHost !== allowedPreviewHost ||
+        process.env.RENDER_EXPECTED_DB_HOST !== allowedPreviewHost) {
+      throw new Error('Unverified Postgres TLS is restricted to the isolated Render preview database.');
+    }
+  }
+
   let ssl = false;
   if (process.env.DATABASE_SSL === 'true' || (isProduction && !isLocal)) {
-    ssl = {
-      rejectUnauthorized: process.env.PG_REJECT_UNAUTHORIZED !== 'false',
-    };
+    ssl = { rejectUnauthorized: !skipCertificateVerification };
   }
 
   return {
