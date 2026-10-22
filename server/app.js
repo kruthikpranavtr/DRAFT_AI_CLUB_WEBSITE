@@ -35,6 +35,17 @@ export function createApp() {
   app.use(express.urlencoded({ extended:false,limit:'2mb' }));
   app.use(cookieParser());
 
+  // Disposable login preview: uploaded files would be lost on the free instance's ephemeral disk.
+  if (process.env.AI_CLUB_PREVIEW_MODE === '1') {
+    app.use((req,res,next) => {
+      if (['POST','PUT','PATCH'].includes(req.method) &&
+          /^multipart\/form-data\b/i.test(req.get('content-type') || '')) {
+        return res.status(503).json({ error:'File uploads are disabled in the temporary login preview.' });
+      }
+      next();
+    });
+  }
+
   app.use((req,res,next) => {
     if (!['POST','PUT','PATCH','DELETE'].includes(req.method)) return next();
     const origin = req.get('origin');

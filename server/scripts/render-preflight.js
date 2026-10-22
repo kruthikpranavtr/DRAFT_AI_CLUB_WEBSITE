@@ -1,6 +1,7 @@
-// Render production startup gate. This script performs READ-ONLY checks.
-// It does not create a database, migrate schemas, seed accounts, or copy files.
+// Render startup gate. Normal production checks are read-only.
+// An explicit, tightly scoped disposable preview flag may initialize only the authorized fresh preview database.
 import { pool, closePool } from '../pg.js';
+import { initializeFreshPreviewIfApproved } from './initialize-render-preview.js';
 
 class PreflightError extends Error {}
 function requireValue(name) {
@@ -24,15 +25,23 @@ async function main() {
   assert(['postgres:','postgresql:'].includes(dbUrl.protocol),'DATABASE_URL must use PostgreSQL.');
   assert(dbUrl.hostname === expectedHost,'DATABASE_URL host does not match the reviewed Render destination.');
   assert(!['localhost','127.0.0.1','::1'].includes(dbUrl.hostname),'A production database cannot be local.');
-  const s3Endpoint=requireValue('S3_ENDPOINT');
-  let objectUrl;
-  try { objectUrl=new URL(s3Endpoint); }
-  catch { throw new PreflightError('S3_ENDPOINT is not a valid URL.'); }
-  assert(objectUrl.protocol === 'https:','Object storage endpoint must use HTTPS.');
-  for (const name of ['S3_BUCKET','S3_ACCESS_KEY_ID','S3_SECRET_ACCESS_KEY','S3_REGION'])
-    requireValue(name);
+  const previewMode=process.env.AI_CLUB_PREVIEW_MODE === '1';
+  if (previewMode) {
+    assert(process.env.AI_CLUB_PREVIEW_BOOTSTRAP === 'fresh-preview-only',
+      'Preview setup requires explicit one-time isolated-database approval.');
+    await initializeFreshPreviewIfApproved();
+    console.warn('DISPOSABLE PREVIEW: external object storage is not configured; do not upload real files.');
+  } else {
+    const s3Endpoint=requireValue('S3_ENDPOINT');
+    let objectUrl;
+    try { objectUrl=new URL(s3Endpoint); }
+    catch { throw new PreflightError('S3_ENDPOINT is not a valid URL.'); }
+    assert(objectUrl.protocol === 'https:','Object storage endpoint must use HTTPS.');
+    for (const name of ['S3_BUCKET','S3_ACCESS_KEY_ID','S3_SECRET_ACCESS_KEY','S3_REGION'])
+      requireValue(name);
+  }
 
-  // This must be a restored database, not an empty newly provisioned database.
+  // Normal production requires a restored database. The explicit disposable preview may initialize only the named empty instance.
   const result=await pool.query('SELECT version FROM schema_migrations WHERE version IN (1,2,3) ORDER BY version');
   assert(result.rows.length===3 && result.rows.every((r,i)=>Number(r.version)===i+1),
     'Destination schema migrations 001, 002 and 003 must be verified before startup.');
@@ -45,7 +54,9 @@ async function main() {
   assert(admin.rowCount===1,'Reviewed administrator identity was not found in the restored database.');
   const content=await pool.query('SELECT COUNT(*)::int AS n FROM content_entries');
   assert(content.rows[0].n>0,'Destination content is empty; review and restore the source backup.');
-  console.log('Render preflight passed: reviewed database host, restored schema, administrator, content and durable storage settings.');
+  console.log(previewMode
+    ? 'Render preflight passed for disposable preview database and dedicated test administrator.'
+    : 'Render preflight passed: reviewed database host, restored schema, administrator, content and durable storage settings.');
 }
 
 try { await main(); }
