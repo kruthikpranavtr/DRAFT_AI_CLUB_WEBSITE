@@ -14,12 +14,16 @@ services:
     region: singapore
     plan: free
     autoDeployTrigger: "off"
-    buildCommand: npm ci && npm run build
+    buildCommand: npm ci --include=dev && npm run build
     startCommand: node server/scripts/render-preflight.js && npm start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
+      - key: NODE_VERSION
+        value: "22.12.0"
+      - key: NPM_CONFIG_INCLUDE
+        value: "dev"
       - key: PG_POOL_MAX
         value: "10"
       # All secrets and destination-specific values must be supplied in Render.
