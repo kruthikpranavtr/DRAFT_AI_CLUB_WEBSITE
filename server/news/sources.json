@@ -1,0 +1,126 @@
+[
+  {
+    "id": "arxiv-research",
+    "name": "arXiv research metadata",
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.LG+OR+cat:cs.SE&sortBy=submittedDate&sortOrder=descending&max_results=30",
+    "access": "api-atom",
+    "verified": true,
+    "verifiedAt": "2026-10-22",
+    "termsUrl": "https://info.arxiv.org/help/api/tou.html",
+    "license": "CC0-1.0 metadata only",
+    "attribution": "Thank you to arXiv for use of its open access interoperability.",
+    "articleHosts": [
+      "arxiv.org"
+    ],
+    "category": "AI News",
+    "contentType": "research",
+    "intervalHours": 6,
+    "requestGapMs": 3500,
+    "summaryMode": "research-metadata"
+  },
+  {
+    "id": "nasa-technology",
+    "name": "NASA Technology",
+    "url": "https://www.nasa.gov/technology/feed/",
+    "access": "rss",
+    "verified": true,
+    "verifiedAt": "2026-10-22",
+    "termsUrl": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+    "license": "NASA public-information metadata only; exclude third-party works and protected marks",
+    "attribution": "Source: NASA Technology. NASA does not endorse AI Club.",
+    "articleHosts": [
+      "www.nasa.gov",
+      "nasa.gov",
+      "science.nasa.gov"
+    ],
+    "category": "Technology News",
+    "categoryPolicy": "fixed",
+    "contentType": "article",
+    "intervalHours": 6,
+    "requestGapMs": 1500,
+    "summaryMode": "metadata"
+  },
+  {
+    "id": "nist-information-technology",
+    "name": "NIST Information Technology",
+    "url": "https://www.nist.gov/news-events/information%20technology/rss.xml",
+    "access": "rss",
+    "verified": true,
+    "verifiedAt": "2026-10-22",
+    "termsUrl": "https://www.nist.gov/copyrights-disclaimers",
+    "license": "NIST public information metadata only; exclude marked third-party copyrighted works",
+    "attribution": "Source: National Institute of Standards and Technology (NIST); no endorsement implied.",
+    "articleHosts": [
+      "www.nist.gov",
+      "nist.gov"
+    ],
+    "category": "Technology News",
+    "categoryPolicy": "fixed",
+    "contentType": "article",
+    "intervalHours": 6,
+    "requestGapMs": 1500,
+    "summaryMode": "metadata"
+  },
+  {
+    "id": "nist-events",
+    "name": "NIST Events",
+    "url": "https://www.nist.gov/news-events/events/rss.xml",
+    "access": "rss",
+    "verified": true,
+    "verifiedAt": "2026-10-22",
+    "termsUrl": "https://www.nist.gov/copyrights-disclaimers",
+    "license": "NIST public information event listings only; no third-party material",
+    "attribution": "Source: National Institute of Standards and Technology (NIST); no endorsement implied.",
+    "articleHosts": [
+      "www.nist.gov",
+      "nist.gov"
+    ],
+    "category": "Events and Opportunities",
+    "categoryPolicy": "fixed",
+    "contentType": "event",
+    "intervalHours": 6,
+    "requestGapMs": 1500,
+    "summaryMode": "metadata",
+    "feedDateMeaning": "event-start"
+  },
+  {
+    "id": "google-news",
+    "name": "Google News RSS",
+    "url": null,
+    "verified": false,
+    "termsUrl": "https://policies.google.com/terms",
+    "reason": "Publisher redistribution rights not verified."
+  },
+  {
+    "id": "django",
+    "name": "Django weblog",
+    "url": "https://www.djangoproject.com/rss/weblog/",
+    "verified": false,
+    "termsUrl": "https://www.djangoproject.com/weblog/",
+    "reason": "Official feed exists, but a content redistribution license was not established. Code and trademark licenses do not license blog content."
+  },
+  {
+    "id": "devpost",
+    "name": "Devpost",
+    "url": null,
+    "verified": false,
+    "termsUrl": "https://info.devpost.com/terms",
+    "reason": "No suitable authorized feed/API and redistribution permission verified."
+  },
+  {
+    "id": "mlh",
+    "name": "Major League Hacking",
+    "url": null,
+    "verified": false,
+    "termsUrl": "https://mlh.io/",
+    "reason": "Organizer redistribution permission not verified."
+  },
+  {
+    "id": "unstop",
+    "name": "Unstop",
+    "url": null,
+    "verified": false,
+    "termsUrl": "https://unstop.com/",
+    "reason": "No suitable authorized feed/API and redistribution permission verified."
+  }
+]

@@ -12,6 +12,8 @@ import assessmentRoutes from './routes/assessments.js';
 import communityRoutes from './routes/community.js';
 import communityModerationRoutes from './routes/community-moderation.js';
 import { csrfProtection } from './csrf.js';
+import { publicNewsRouter,adminNewsRouter } from './news/routes.js';
+import { schedulerNewsRouter } from './news/scheduler.js';
 
 export function createApp() {
   const app = express();
@@ -40,11 +42,14 @@ export function createApp() {
     if (process.env.NODE_ENV === 'production' && origin === `${req.protocol}://${req.get('host')}`) return next();
     return res.status(403).json({ error:'Request origin is not allowed.',code:'ORIGIN_DENIED' });
   });
+  app.use('/api/internal/news',schedulerNewsRouter);
   app.use(csrfProtection);
 
   app.get('/api/health',(req,res) => res.json({ status:'ok',time:new Date().toISOString() }));
   app.use('/api/auth',authRoutes);
   app.use('/api/public',publicRoutes);
+  app.use('/api/public/news',publicNewsRouter);
+  app.use('/api/admin/news',adminNewsRouter);
   app.use('/api/community',communityRoutes);
   app.use('/api/admin/community',communityModerationRoutes);
   app.use('/api/admin',adminRoutes);

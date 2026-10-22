@@ -22,6 +22,7 @@ import StudentAssessmentsPage,{ StudentAssessmentAttemptPage } from './pages/Stu
 import CommunityPage from './pages/CommunityPage';
 import CommunityPostPage from './pages/CommunityPostPage';
 import AdminModerationPage from './pages/AdminModerationPage';
+import AdminNewsPage from './pages/AdminNewsPage';
 import { PERMISSIONS } from '../shared/permissions';
 import { workspacePath } from './lib/auth-routing';
 
@@ -69,6 +70,7 @@ function AppRoutes() {
       <Route path="/admin/members/:id" element={<ProtectedRoute role="admin"><MemberProfilePage /></ProtectedRoute>} />
       <Route path="/admin/moderation" element={<ProtectedRoute role="admin" permission={PERMISSIONS.MODERATE_COMMUNITY}><AdminModerationPage /></ProtectedRoute>} />
       <Route path="/admin/dashboard" element={<ProtectedRoute role="admin"><AdminDashboardPage /></ProtectedRoute>} />
+      <Route path="/admin/news" element={<ProtectedRoute role="admin" permission={PERMISSIONS.CONTENT_NEWS}><AdminNewsPage /></ProtectedRoute>} />
       <Route path="/admin/students" element={<ProtectedRoute role="admin" permission={PERMISSIONS.MANAGE_STUDENTS}><AdminStudentsPage /></ProtectedRoute>} />
       <Route path="/admin/assessments" element={<ProtectedRoute role="admin"><AdminAssessmentsPage /></ProtectedRoute>} />
       <Route path="*" element={<HomePage />} />

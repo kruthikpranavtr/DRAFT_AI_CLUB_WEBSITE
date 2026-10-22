@@ -1,0 +1,10 @@
+# Opt-in configuration for a SEPARATE cron service; do not use for the web API.
+# No service has been created or deployed by this implementation.
+[build]
+builder = "NIXPACKS"
+buildCommand = "npm ci --omit=dev"
+
+[deploy]
+startCommand = "npm run news:collect"
+cronSchedule = "0 */6 * * *"
+restartPolicyType = "NEVER"

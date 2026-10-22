@@ -160,6 +160,8 @@ router.put('/content/:id', async (req, res, next) => {
     const input = contentSchema.parse(req.body);
     const existing = await queryOne('SELECT * FROM content_entries WHERE id = $1', [req.params.id]);
     if (!existing) return res.status(404).json({ error: 'Content entry not found.' });
+    const aggregated = await queryOne('SELECT source_id FROM news_details WHERE content_id=$1 AND source_id IS NOT NULL',[req.params.id]);
+    if (aggregated) return res.status(409).json({ error:'Use News Management to edit aggregated news and preserve its moderation and attribution.' });
     if (!hasPermission(req.user, permissionForContent(existing)) || !hasPermission(req.user, permissionForContent(input))) {
       return res.status(403).json({ error: 'You do not have permission to manage this content area.', code: 'PERMISSION_DENIED' });
     }

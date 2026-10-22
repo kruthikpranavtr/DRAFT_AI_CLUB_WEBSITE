@@ -1,0 +1,45 @@
+# PREPARATION ONLY — do not sync or deploy until backup and code review.
+# The database is intentionally NOT created by this Blueprint: it must be
+# provisioned and restored independently after verifying the source backup.
+# Automatic deploys and preview generation are deliberately disabled.
+previews:
+  generation: "off"
+
+services:
+  - type: web
+    name: ai-club-render-preview
+    runtime: node
+    repo: https://github.com/kruthikpranavtr/DRAFT_AI_CLUB_WEBSITE
+    branch: deploy/render-preserve-data-20261022
+    region: singapore
+    plan: free
+    autoDeployTrigger: "off"
+    buildCommand: npm ci && npm run build
+    startCommand: node server/scripts/render-preflight.js && npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PG_POOL_MAX
+        value: "10"
+      # All secrets and destination-specific values must be supplied in Render.
+      # Never copy the old Railway DATABASE_URL into this service.
+      - key: DATABASE_URL
+        sync: false
+      - key: RENDER_EXPECTED_DB_HOST
+        sync: false
+      - key: BOOTSTRAP_ADMIN_ID
+        sync: false
+      - key: BOOTSTRAP_ADMIN_EMAIL
+        sync: false
+      # Durable object storage is required before accepting media uploads.
+      - key: S3_ENDPOINT
+        sync: false
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false
+      - key: S3_REGION
+        sync: false

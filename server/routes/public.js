@@ -1,6 +1,7 @@
 import { Readable } from 'node:stream';
 import { Router } from 'express';
 import { queryOne, queryRows, json } from '../db.js';
+import { approvedSourceIds } from '../news/service.js';
 
 const router = Router();
 
@@ -14,8 +15,10 @@ const siteVideos = new Set([
 router.get('/content', async (req, res, next) => {
   try {
     const { page, type } = req.query;
-    const filters = ["status = 'published'"];
-    const values = [];
+    const filters = ["status = 'published'",`NOT EXISTS (SELECT 1 FROM news_details n LEFT JOIN news_sources s ON s.id=n.source_id
+      WHERE n.content_id=content_entries.id AND (n.approval<>'approved' OR n.archived=TRUE OR
+        (n.source_id IS NOT NULL AND (s.enabled IS NOT TRUE OR NOT (n.source_id=ANY($1::text[]))))))`];
+    const values = [approvedSourceIds];
     if (page) {
       values.push(String(page));
       filters.push(`page_key = $${values.length}`);

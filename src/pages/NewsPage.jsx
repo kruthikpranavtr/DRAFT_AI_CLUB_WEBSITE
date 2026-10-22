@@ -1,17 +1,13 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowRight, Newspaper, Search, X } from 'lucide-react';
-import { EVENTS } from '../data/eventsData';
-import { usePublishedContent } from '../lib/useCms';
+import { useNews } from '../lib/useNews';
+import { NEWS_CATEGORIES,LEGACY_NEWS_CATEGORIES,newsCategory,safeNewsUrl } from '../../shared/news';
 import { conceptPhotos, ConceptCTA, ConceptFooter } from '../concept/InnerCommon';
 
-const FILTERS = ['All','Announcements','Events','Workshops','Achievements'];
+const FILTERS = ['All',...LEGACY_NEWS_CATEGORIES,...NEWS_CATEGORIES];
 const imageSet = [conceptPhotos[0],conceptPhotos[2],conceptPhotos[4],conceptPhotos[6],conceptPhotos[8],conceptPhotos[3]];
 function groupOf(value) {
-  const text = String(value||'').toLowerCase();
-  if (text.includes('achiev')||text.includes('award')||text.includes('contest'))return 'Achievements';
-  if (text.includes('workshop')||text.includes('training')||text.includes('lab'))return 'Workshops';
-  if (text.includes('announc')||text.includes('update'))return 'Announcements';
-  return 'Events';
+  return newsCategory(value);
 }
 function truncate(text,limit=165) {
   if(!text)return '';
@@ -19,47 +15,48 @@ function truncate(text,limit=165) {
 }
 
 export default function NewsPage() {
-  const { items } = usePublishedContent({ page:'news' });
   const [filter,setFilter] = useState('All');
   const [search,setSearch] = useState('');
+  const [archived,setArchived] = useState(false);
+  const {items,total,loading,error,more,retry}=useNews({filter,search,archived});
   const [selected,setSelected] = useState(null);
-  const cms = items.filter(item=>['news','announcement','event','achievement'].includes(item.type));
+  const storyDialog=useRef(null);
 
   const stories = useMemo(()=>{
-    const published = cms.map((item,index)=>({
+    return items.map((item,index)=>({
       id:item.id,title:item.title,
       description:item.body || item.excerpt || '',
       summary:item.excerpt || truncate(item.body || ''),
-      date:[item.payload.date,item.payload.month].filter(Boolean).join(' ') || '',
-      category:item.payload.category || item.type,
+      date:item.news?.publishedAt ? new Date(item.news.publishedAt).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}) : [item.payload.date,item.payload.month].filter(Boolean).join(' ') || '',
+      category:item.news?.category || item.payload.category || item.type,
       image:item.payload.imageUrl || item.payload.image || imageSet[index%imageSet.length],
-      featured:!!item.payload.featured || item.sort_order===0,
+      featured:item.news?.featured ?? !!item.payload.featured,
+      news:item.news,
       demo:false,
     }));
-    // Keep the experimental layout testable when the CMS has only a few posts.
-    // Sample entries are always marked DEMO and disappear once real posts grow.
-    if(published.length >= 4)return published;
-    const samples=EVENTS.map((item,index)=>({
-      id:item.id,title:item.t,description:item.desc,summary:truncate(item.desc),
-      date:[item.mo,item.d].filter(Boolean).join(' '),
-      category:item.c,image:imageSet[(index+1)%imageSet.length],
-      featured:!published.length && index===0,demo:true,
-    }));
-    return [...published,...samples.slice(0,Math.max(0,5-published.length))];
-  },[cms]);
+  },[items]);
 
   const featured = stories.find(item=>item.featured)||stories[0];
   const latest = stories.filter(item=>item.id!==featured?.id);
-  const results = latest.filter(item=>(filter==='All'||groupOf(item.category)===filter)
-    && (item.title+' '+item.description+' '+item.category).toLowerCase().includes(search.toLowerCase().trim()));
+  const results = latest;
 
   useEffect(()=>{
     if(!selected)return undefined;
-    const esc=event=>{if(event.key==='Escape')setSelected(null);};
+    const previousFocus=document.activeElement;
+    const esc=event=>{
+      if(event.key==='Escape')setSelected(null);
+      if(event.key==='Tab') {
+        const controls=[...storyDialog.current.querySelectorAll('a[href],button:not(:disabled)')];
+        const first=controls[0],last=controls.at(-1);
+        if(event.shiftKey && document.activeElement===first) {event.preventDefault();last?.focus();}
+        else if(!event.shiftKey && document.activeElement===last) {event.preventDefault();first?.focus();}
+      }
+    };
     const saved=document.body.style.overflow;
     document.body.style.overflow='hidden';
     document.addEventListener('keydown',esc);
-    return()=>{document.body.style.overflow=saved;document.removeEventListener('keydown',esc);};
+    storyDialog.current.querySelector('button')?.focus();
+    return()=>{document.body.style.overflow=saved;document.removeEventListener('keydown',esc);previousFocus?.focus();};
   },[selected]);
 
   return <main className="concept-page concept-news">
@@ -85,6 +82,7 @@ export default function NewsPage() {
           <span className="concept-kicker">{groupOf(featured.category)}{featured.date ? ' / '+featured.date : ''}</span>
           <h2>{featured.title}</h2>
           <p>{truncate(featured.description,240)}</p>
+          <NewsAttribution item={featured}/>
           <button type="button" className="concept-button concept-button--solid" onClick={()=>setSelected(featured)}>
             Read story <ArrowRight size={17}/>
           </button>
@@ -102,14 +100,17 @@ export default function NewsPage() {
 
       <div className="concept-news-filters">
         <div className="concept-pills" role="group" aria-label="Filter news">
-          {FILTERS.map(item=><button type="button" key={item} className={filter===item?'is-active':''} aria-pressed={filter===item} onClick={()=>setFilter(item)}>{item}</button>)}
+          {FILTERS.map(item=><button type="button" key={item} className={filter===item?'is-active':''} aria-pressed={filter===item} onClick={()=>{setSelected(null);setFilter(item);}}>{item}</button>)}
         </div>
         <label className="concept-news-search"><Search size={18}/><span className="sr-only">Search news</span><input value={search} onChange={event=>setSearch(event.target.value)} placeholder="Search club updates"/></label>
       </div>
+      <label className="concept-demo-note"><input type="checkbox" checked={archived} onChange={event=>setArchived(event.target.checked)}/> Show archived/completed opportunities</label>
+      {loading && <p role="status" className="concept-empty">Loading news…</p>}
+      {error && <div role="alert" className="concept-empty">News could not be loaded. <button type="button" className="concept-button concept-button--outline" onClick={retry}>Try again</button></div>}
 
       <div className="concept-section-head concept-news-list-head">
         <div><span className="concept-kicker">FROM THE CLUB</span><h2>Latest <em>stories.</em></h2></div>
-        <span className="concept-results">{results.length} {results.length===1?'update':'updates'}</span>
+        <span className="concept-results">{total} {total===1?'update':'updates'}</span>
       </div>
 
       <div className="concept-news-grid">
@@ -120,11 +121,14 @@ export default function NewsPage() {
           <div className="concept-news-card__content">
             <div className="concept-news-card__meta"><span>{groupOf(item.category)}{item.demo ? ' · Demo' : ''}</span><time>{item.date}</time></div>
             <h3>{item.title}</h3><p>{truncate(item.summary,130)}</p>
+            <NewsAttribution item={item}/>
             <button type="button" className="concept-news-card__action" onClick={()=>setSelected(item)}>Read more <ArrowRight size={15}/></button>
           </div>
         </article>)}
       </div>
-      {!results.length && <div className="concept-empty">No matching updates. Try another category or search.</div>}
+      {!stories.length && !loading && !error && <div className="concept-empty">No matching updates. Try another category or search.</div>}
+      {items.length<total && <button type="button" className="concept-button concept-button--outline" disabled={loading} onClick={more}>{loading?'Loading…':'Load more updates'}</button>}
+      {stories.some(item=>item.news?.sourceId==='arxiv-research') && <p className="concept-demo-note">Thank you to arXiv for use of its open access interoperability. Research metadata: CC0. AI Club is independent and is not endorsed by arXiv. Illustrations are club images, not publisher images.</p>}
       {stories.some(item => item.demo) && <p className="concept-demo-note">Entries marked Demo are preview content, not official announcements. They disappear as more club news is published.</p>}
     </section>
 
@@ -132,16 +136,36 @@ export default function NewsPage() {
     <ConceptFooter/>
 
     {selected && <div className="concept-story-overlay" role="presentation" onMouseDown={event=>{if(event.target===event.currentTarget)setSelected(null);}}>
-      <article role="dialog" aria-modal="true" aria-labelledby="concept-story-title" className="concept-story-dialog">
+      <article ref={storyDialog} role="dialog" aria-modal="true" aria-labelledby="concept-story-title" className="concept-story-dialog">
         <button type="button" className="concept-story-dialog__close" onClick={()=>setSelected(null)} aria-label="Close story"><X size={22}/></button>
         <img src={selected.image} alt=""/>
         <div><span className="concept-kicker">{groupOf(selected.category)} · {selected.date}</span>
           <h2 id="concept-story-title">{selected.title}</h2>
           <p>{selected.description}</p>
+          <NewsAttribution item={selected} detailed/>
           {selected.demo && <small>Demonstration content, not an official club announcement.</small>}
           <button type="button" className="concept-button concept-button--outline" onClick={()=>setSelected(null)}>Back to news <ArrowRight size={16}/></button>
         </div>
       </article>
     </div>}
   </main>;
+}
+
+function NewsAttribution({item,detailed=false}) {
+  const news=item.news;
+  if (!news) return null;
+  const original=safeNewsUrl(news.sourceUrl);
+  const registration=safeNewsUrl(news.opportunity?.registrationUrl);
+  return <div className="concept-demo-note">
+    {original && <p><a href={original} target="_blank" rel="noopener noreferrer">Read original at {news.sourceName || new URL(original).hostname} ↗</a>{news.contentType==='research'?' · Research preprint (not necessarily peer reviewed)':''}</p>}
+    {news.opportunity?.registrationDeadline && <p>{news.expired?'Registration closed':'Registration deadline'}: {new Date(news.opportunity.registrationDeadline).toLocaleString()} · {news.verified?'Organizer information verified':'Unverified — confirm with organizer'}</p>}
+    {news.category==='Hackathons' && !news.opportunity?.registrationDeadline && <p>Registration deadline unknown — confirm with organizer.</p>}
+    {news.archived && <p>Archived/completed opportunity</p>}
+    {detailed && <>
+      {Object.entries({name:'Event',organizer:'Organizer',format:'Format',location:'Location',eligibility:'Eligibility',teamSize:'Team size',prizeDetails:'Prize details'}).map(([key,label])=>news.opportunity?.[key]?<p key={key}>{label}: {news.opportunity[key]}</p>:null)}
+      {Object.entries({registrationOpen:'Registration opens',startDate:'Event starts',endDate:'Event ends',lastVerified:'Last organizer verification'}).map(([key,label])=>news.opportunity?.[key]?<p key={key}>{label}: {new Date(news.opportunity[key]).toLocaleString()}</p>:null)}
+      {registration && <p><a href={registration} target="_blank" rel="noopener noreferrer">Official registration ↗</a></p>}
+      {news.license && <p>{news.license} · {news.attribution}</p>}
+    </>}
+  </div>;
 }

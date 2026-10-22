@@ -15,7 +15,7 @@ export default function ForgotPasswordPage() {
   return <main className="admin-login">
     <section className="admin-login__visual" aria-label="Account recovery">
       <div className="admin-login__ambient" aria-hidden="true"><span className="admin-node admin-node--one"/><span className="admin-node admin-node--two"/><span className="admin-node admin-node--three"/><i className="admin-orbit admin-orbit--one"/><i className="admin-orbit admin-orbit--two"/></div>
-      <Link to="/" className="admin-brand"><img src="/ai-club-emblem.png" alt=""/><span><strong>AI CLUB</strong><small>SRI SHAKTHI</small></span></Link>
+      <Link to="/" className="admin-brand"><img src="/ai-club-new-logo.png" onError={event => { event.currentTarget.onerror = null; event.currentTarget.src = "/ai-club-emblem.png"; }} alt=""/><span><strong>AI CLUB</strong><small>SRI SHAKTHI</small></span></Link>
       <div className="admin-login__story">
         <div className="admin-login__eyebrow"><Sparkles size={14}/> ACCOUNT RECOVERY</div>
         <h1>Find your way<br/><em>back to the network.</em></h1>

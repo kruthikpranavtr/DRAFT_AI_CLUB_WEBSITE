@@ -19,7 +19,7 @@ export function ConceptFooter() {
   return <footer className="concept-footer">
     <div className="concept-wrap concept-footer__inner">
       <Link to="/" className="concept-footer__brand">
-        <span className="concept-footer__symbol">AI</span>
+        <span className="concept-footer__symbol"><img src="/ai-club-new-logo.png" alt="" onError={event => { event.currentTarget.onerror = null; event.currentTarget.src = "/ai-club-emblem.png"; }}/></span>
         <span><strong>AI CLUB</strong><small>Ideas. People. Impact.</small></span>
       </Link>
       <nav aria-label="Footer navigation">

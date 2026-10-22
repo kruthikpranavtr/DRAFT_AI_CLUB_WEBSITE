@@ -5,7 +5,7 @@ import './PortalAuth.css';
 export function PortalLoginLayout({ eyebrow,title,story,backLabel,backTo,children }) {
   return <main className="admin-login">
     <section className="admin-login__visual" aria-label={eyebrow}>
-      <Link to="/" className="admin-brand"><img src="/ai-club-emblem.png" alt=""/><span><strong>AI CLUB</strong><small>SRI SHAKTHI</small></span></Link>
+      <Link to="/" className="admin-brand"><img src="/ai-club-new-logo.png" onError={event => { event.currentTarget.onerror = null; event.currentTarget.src = "/ai-club-emblem.png"; }} alt=""/><span><strong>AI CLUB</strong><small>SRI SHAKTHI</small></span></Link>
       <div className="admin-login__story"><span className="admin-login__eyebrow">{eyebrow}</span><h2>{title}</h2><p>{story}</p><div className="admin-login__trust"><span><ShieldCheck size={17} aria-hidden="true"/> Protected member spaces</span><span><KeyRound size={17} aria-hidden="true"/> Server-enforced access</span></div></div>
       <footer>AI CLUB MEMBER PLATFORM <span aria-hidden="true">/</span> SRI SHAKTHI</footer>
     </section>
