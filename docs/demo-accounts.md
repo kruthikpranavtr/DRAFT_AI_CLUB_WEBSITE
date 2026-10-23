@@ -15,14 +15,14 @@ These accounts are **fixed mock identities**, reproducible on Windows, macOS, an
 
 Both accounts are active without first-login password changes; the administrator has Super Admin permissions to test the assessment builder, question bank, and grading; the demo student has academic year 2 so they can take the preloaded **Demo — AI Fundamentals Quiz**. Sample questions, an active MCQ assessment, and published question snapshots are included automatically. The same demo credentials are printed in the terminal and displayed on the **demo login screen only**.
 
-`npm run demo:setup` creates or verifies the two accounts without starting servers. Running setup again is safe: it does not duplicate accounts, question banks, assessments, or attempts. It restores the documented demo passwords if a tester changed them. Use `npm run demo:dev` to seed and start the demo frontend and API in one command.
+`npm run demo:setup` initializes the embedded PostgreSQL-compatible database and demo accounts without starting servers. Running setup again preserves existing accounts, customized passwords, profiles, assessments, and attempts. Use `npm run demo:dev` to run both the Vite frontend and Express API against this isolated local database.
 
 ## Isolation and safeguards
 
 - Demo frontend: `http://localhost:5175`; demo API: `http://localhost:3003`.
-- Demo database: `server/data/ai-club-portable-demo.db`; demo uploads and backups are separate.
+- Demo database: `server/data/portable-demo-postgres/` (embedded PGlite); demo uploads and backups are separate.
 - Normal experimental frontend (`5174`), API (`3002`), and database are not modified by demo setup.
-- Generated `.env.demo`, databases, uploads and secrets are excluded from version control via `.gitignore`.
+- Generated databases, uploads and secrets are excluded from version control via `.gitignore`. No `.env.demo` file or external PostgreSQL server is required.
 - These **public, deliberately weak demo passwords** are unsuitable for actual club members or deployment. Demo setup refuses `NODE_ENV=production`; production authentication rejects `DEMO-` member IDs.
 - The original `DRAFT_AI_CLUB_WEBSITE` project is not modified.
 - Do not expose the demo server on a public network or production host. It is bound to loopback for local testing.
