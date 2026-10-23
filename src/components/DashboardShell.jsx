@@ -8,7 +8,7 @@ import DashboardSheet from './DashboardSheet';
 import './Dashboard.css';
 
 const navigation = {
-  student:[['/student/dashboard','Overview',LayoutDashboard],['/notifications','Notifications',Bell],['/student/community','Community',MessagesSquare],['/student/assessments','Assessments',ClipboardList],['/student/profile','My profile',UserRound],['/student/members','Member directory',UsersRound]],
+  student:[['/student/dashboard','Overview',LayoutDashboard],['/student/community','Community',MessagesSquare],['/student/assessments','Assessments',ClipboardList],['/student/profile','My profile',UserRound],['/student/members','Member directory',UsersRound]],
   admin:[['/admin/dashboard','Overview',LayoutDashboard],['/notifications','Notifications',Bell],['/admin/news','News management',Newspaper,PERMISSIONS.CONTENT_NEWS],['/admin/community','Community',MessagesSquare],['/admin/moderation','Moderation',ShieldCheck,PERMISSIONS.MODERATE_COMMUNITY],['/admin/assessments','Assessments',ClipboardList],['/admin/students','Students',UsersRound,PERMISSIONS.MANAGE_STUDENTS]],
 };
 
@@ -38,7 +38,7 @@ export default function DashboardShell({ section='Overview',children }) {
       <header className="dash-topbar">
         <button ref={menuTrigger} className="dash-menu portal-icon-button" onClick={() => setMenuOpen(true)} aria-label="Open dashboard menu" aria-haspopup="dialog" aria-expanded={menuOpen}><Menu size={20}/></button>
         <div className="dash-breadcrumb"><span>{role === 'admin' ? 'Administration' : 'Member workspace'}</span><span aria-hidden="true">/</span><strong>{section}</strong></div>
-        <Link to="/notifications" className="dash-notification-link" aria-label={unread ? `Notifications, ${unread} unread` : 'Notifications'}><Bell size={19}/>{unread>0&&<span className="dash-notification-dot" aria-hidden="true"/>}</Link>
+        <Link to="/notifications" className={`dash-notification-link${location.pathname === '/notifications' ? ' is-active' : ''}`} aria-current={location.pathname === '/notifications' ? 'page' : undefined} aria-label={unread > 0 ? `Open notifications, ${unread} unread` : 'Open notifications'}><Bell size={19} aria-hidden="true"/>{unread>0&&<span className="dash-notification-badge" aria-hidden="true">{unread>99?'99+':unread}</span>}</Link>
         <div className="dash-user"><div><strong>{session?.name}</strong><small>{session?.member_id}</small></div><span className="dash-avatar" aria-hidden="true">{session?.name?.split(/\s+/).map(word => word[0]).join('').slice(0,2).toUpperCase()}</span></div>
       </header>
       <main className="dash-content" id="workspace-content" tabIndex={-1}>{children}</main>

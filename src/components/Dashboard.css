@@ -41,5 +41,6 @@
 .dash-sidebar nav a.active .dash-notification-count{background:white;color:#5049e7}
 .dash-notification-link{position:relative;flex:none;display:grid;place-items:center;width:42px;height:42px;margin-left:auto;border:1px solid #a9b2c9;border-radius:10px;color:#25295a;background:#fff}
 .dash-notification-link:focus-visible{outline:3px solid #5049e7;outline-offset:2px}
-.dash-notification-dot{position:absolute;right:6px;top:5px;width:10px;height:10px;background:#e34a5a;border-radius:50%;border:1px solid white}
+.dash-notification-badge{position:absolute;right:-7px;top:-7px;display:grid;place-items:center;min-width:19px;height:19px;padding:0 4px;background:#5049e7;border:2px solid white;border-radius:999px;color:white;font-size:10px;font-weight:700;line-height:1;pointer-events:none}
+.dash-notification-link.is-active{background:#eeedff;border-color:#aaa5f6;color:#453dce}
 @media(max-width:900px){.dash-notification-link{margin-left:auto}.dash-user{margin-left:0}}
