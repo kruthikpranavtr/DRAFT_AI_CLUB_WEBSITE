@@ -7,6 +7,8 @@ const app=fs.readFileSync(new URL('../src/App.jsx',import.meta.url),'utf8');
 const page=fs.readFileSync(new URL('../src/pages/NotificationsPage.jsx',import.meta.url),'utf8');
 const css=fs.readFileSync(new URL('../src/components/Dashboard.css',import.meta.url),'utf8');
 const notifications=fs.readFileSync(new URL('../src/lib/useNotifications.js',import.meta.url),'utf8');
+const gallery=fs.readFileSync(new URL('../src/pages/GalleryPage.jsx',import.meta.url),'utf8');
+const collection=fs.readFileSync(new URL('../src/pages/StudentCollectionPage.jsx',import.meta.url),'utf8');
 
 test('student sidebar keeps the six requested sections without notifications or directory',()=>{
   const student=shell.match(/student:\[(.*?)\],\s*admin:/s)?.[1];
@@ -24,6 +26,16 @@ test('student sidebar keeps the six requested sections without notifications or 
   assert.match(app,/<Route path="\/student\/gallery" element=\{<ProtectedRoute role="student"><StudentCollectionPage mode="gallery"/);
   assert.match(app,/<Route path="\/student\/members" element=\{<ProtectedRoute role="student"><MemberDirectoryPage/);
   assert.match(shell,/admin:\[.*\['\/notifications','Notifications',Bell\]/);
+});
+
+test('student gallery and achievements share published data with main website and link to corresponding public views',()=>{
+  assert.match(gallery,/get\('\/api\/public\/gallery'\)/);
+  assert.match(gallery,/usePublishedContent\(\{ page:'gallery' \}\)/);
+  assert.match(gallery,/const mode = embedded \? initialMode/);
+  assert.match(gallery,/useSearchParams/);
+  assert.match(gallery,/setSearchParams/);
+  assert.match(collection,/isAchievements \? '\/gallery\?tab=achievements' : '\/gallery'/);
+  assert.match(collection,/<GalleryPage embedded initialMode=\{mode\}/);
 });
 
 test('dashboard header bell uses a router link, accessible label, active state, and real unread count',()=>{

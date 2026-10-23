@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, CalendarDays, Images, Trophy, X } from 'lucide-react';
 import { GALLERY } from '../data/galleryData';
 import { EVENTS } from '../data/eventsData';
@@ -18,7 +19,15 @@ const classify = text => {
 };
 
 export default function GalleryPage({ embedded=false, initialMode='gallery' }) {
-  const [mode, setMode] = useState(initialMode);
+  const [searchParams,setSearchParams] = useSearchParams();
+  const publicMode = searchParams.get('tab');
+  const mode = embedded ? initialMode : (['events','achievements'].includes(publicMode) ? publicMode : 'gallery');
+  const selectMode = nextMode => setSearchParams(previous => {
+    const next = new URLSearchParams(previous);
+    if (nextMode === 'gallery') next.delete('tab');
+    else next.set('tab',nextMode);
+    return next;
+  },{ preventScrollReset:true });
   const [category, setCategory] = useState('All');
   const [gallery, setGallery] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -98,9 +107,9 @@ export default function GalleryPage({ embedded=false, initialMode='gallery' }) {
 
     <section className="concept-wrap concept-gallery__body" aria-label="Gallery collection">
       {!embedded && <div className="concept-modes" role="group" aria-label="Gallery views">
-        <button type="button" className={mode==='gallery'?'is-selected':''} onClick={()=>setMode('gallery')}><Images size={16}/> Photos</button>
-        <button type="button" className={mode==='events'?'is-selected':''} onClick={()=>setMode('events')}><CalendarDays size={16}/> Events</button>
-        <button type="button" className={mode==='achievements'?'is-selected':''} onClick={()=>setMode('achievements')}><Trophy size={16}/> Achievements</button>
+        <button type="button" className={mode==='gallery'?'is-selected':''} onClick={()=>selectMode('gallery')}><Images size={16}/> Photos</button>
+        <button type="button" className={mode==='events'?'is-selected':''} onClick={()=>selectMode('events')}><CalendarDays size={16}/> Events</button>
+        <button type="button" className={mode==='achievements'?'is-selected':''} onClick={()=>selectMode('achievements')}><Trophy size={16}/> Achievements</button>
       </div>}
 
       {mode === 'gallery' && <>
