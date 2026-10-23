@@ -17,8 +17,8 @@ const classify = text => {
   return 'Events';
 };
 
-export default function GalleryPage() {
-  const [mode, setMode] = useState('gallery');
+export default function GalleryPage({ embedded=false, initialMode='gallery' }) {
+  const [mode, setMode] = useState(initialMode);
   const [category, setCategory] = useState('All');
   const [gallery, setGallery] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -54,11 +54,11 @@ export default function GalleryPage() {
       alt:item.alt_text || item.title,
       index,
     }))
-    : GALLERY.map((item,index) => ({
+    : (embedded ? [] : GALLERY).map((item,index) => ({
       id:item.id, image:conceptPhotos[index % conceptPhotos.length],
       title:item.t, category:item.c, caption:item.desc || '',
       alt:item.t, index, demo:true,
-    })),[gallery]);
+    })),[gallery,embedded]);
 
   const filtered = photos.filter(item => category === 'All' || classify(item.category) === category);
   const cmsEvents = content.filter(item => item.type === 'event');
@@ -73,7 +73,7 @@ export default function GalleryPage() {
   const cmsAchievements = content.filter(item => item.type === 'achievement');
   const achievements = cmsAchievements.length ? cmsAchievements.map(item => ({
     id:item.id,title:item.title,description:item.body,year:item.payload.year || YEAR,
-  })) : ACHIEVEMENTS.map(item => ({
+  })) : (embedded ? [] : ACHIEVEMENTS).map(item => ({
     id:item.id,title:item.t,description:item.long,year:item.yr,
   }));
 
@@ -83,8 +83,9 @@ export default function GalleryPage() {
     setSelected(photos[(index + delta + photos.length) % photos.length]);
   }
 
-  return <main className="concept-page concept-gallery">
-    <section className="concept-gallery-hero">
+  const Wrapper = embedded ? 'div' : 'main';
+  return <Wrapper className={embedded ? 'concept-gallery concept-gallery--embedded' : 'concept-page concept-gallery'}>
+    {!embedded && <section className="concept-gallery-hero">
       <div className="concept-wrap concept-gallery-hero__content">
         <div className="concept-hero-copy">
           <span className="concept-kicker concept-kicker--light">MOMENTS / PEOPLE / IDEAS</span>
@@ -93,14 +94,14 @@ export default function GalleryPage() {
         </div>
         <span className="concept-gallery-hero__side">IDEAS<br/>PEOPLE<br/>IMPACT</span>
       </div>
-    </section>
+    </section>}
 
     <section className="concept-wrap concept-gallery__body" aria-label="Gallery collection">
-      <div className="concept-modes" role="group" aria-label="Gallery views">
+      {!embedded && <div className="concept-modes" role="group" aria-label="Gallery views">
         <button type="button" className={mode==='gallery'?'is-selected':''} onClick={()=>setMode('gallery')}><Images size={16}/> Photos</button>
         <button type="button" className={mode==='events'?'is-selected':''} onClick={()=>setMode('events')}><CalendarDays size={16}/> Events</button>
         <button type="button" className={mode==='achievements'?'is-selected':''} onClick={()=>setMode('achievements')}><Trophy size={16}/> Achievements</button>
-      </div>
+      </div>}
 
       {mode === 'gallery' && <>
         <div className="concept-filter-row">
@@ -124,7 +125,7 @@ export default function GalleryPage() {
           </button>)}
         </div>
         {!filtered.length && <div className="concept-empty">No photos in this category yet. Try another filter.</div>}
-        {!gallery.length && <p className="concept-demo-note">Preview images and captions are samples. Your published club photographs will appear here when available.</p>}
+        {!embedded && !gallery.length && <p className="concept-demo-note">Preview images and captions are samples. Your published club photographs will appear here when available.</p>}
       </>}
 
       {mode==='events' && <div className="concept-info-list">
@@ -135,6 +136,7 @@ export default function GalleryPage() {
         </article>)}
       </div>}
       {mode==='achievements' && <div className="concept-info-list">
+        {!achievements.length && <div className="concept-empty">No published achievements yet.</div>}
         {achievements.map((item,index)=><article key={item.id} className="concept-info-row">
           <span className="concept-info-index">{String(index+1).padStart(2,'0')}</span>
           <div><small>Achievement · {item.year}</small><h2>{item.title}</h2><p>{item.description}</p></div>
@@ -143,8 +145,7 @@ export default function GalleryPage() {
       </div>}
     </section>
 
-    <ConceptCTA title="More moments. Better tomorrows." subtitle="Every workshop, experiment and shared idea adds something to our story."/>
-    <ConceptFooter/>
+    {!embedded && <><ConceptCTA title="More moments. Better tomorrows." subtitle="Every workshop, experiment and shared idea adds something to our story."/><ConceptFooter/></>}
 
     {selected && <div className="concept-lightbox" role="presentation" onMouseDown={event=>{if(event.target===event.currentTarget)setSelected(null);}}>
       <div className="concept-lightbox__dialog" role="dialog" aria-modal="true" aria-label={selected.title}>
@@ -157,5 +158,5 @@ export default function GalleryPage() {
         </div>
       </div>
     </div>}
-  </main>;
+  </Wrapper>;
 }

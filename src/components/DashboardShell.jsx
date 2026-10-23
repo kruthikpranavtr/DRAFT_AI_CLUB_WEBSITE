@@ -1,4 +1,4 @@
-import { Bell,ClipboardList,Home,LayoutDashboard,LogOut,Menu,UserRound,UsersRound,MessagesSquare,ShieldCheck,Newspaper } from 'lucide-react';
+import { Bell,ClipboardList,Images,Trophy,Home,LayoutDashboard,LogOut,Menu,UserRound,UsersRound,MessagesSquare,ShieldCheck,Newspaper } from 'lucide-react';
 import { useEffect,useRef,useState } from 'react';
 import { Link,useLocation,useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -8,7 +8,7 @@ import DashboardSheet from './DashboardSheet';
 import './Dashboard.css';
 
 const navigation = {
-  student:[['/student/dashboard','Overview',LayoutDashboard],['/student/community','Community',MessagesSquare],['/student/assessments','Assessments',ClipboardList],['/student/profile','My profile',UserRound],['/student/members','Member directory',UsersRound]],
+  student:[['/student/dashboard','Overview',LayoutDashboard],['/student/community','Community',MessagesSquare],['/student/assessments','Assessments',ClipboardList],['/student/achievements','Achievements',Trophy],['/student/gallery','Gallery',Images],['/student/profile','My profile',UserRound]],
   admin:[['/admin/dashboard','Overview',LayoutDashboard],['/notifications','Notifications',Bell],['/admin/news','News management',Newspaper,PERMISSIONS.CONTENT_NEWS],['/admin/community','Community',MessagesSquare],['/admin/moderation','Moderation',ShieldCheck,PERMISSIONS.MODERATE_COMMUNITY],['/admin/assessments','Assessments',ClipboardList],['/admin/students','Students',UsersRound,PERMISSIONS.MANAGE_STUDENTS]],
 };
 

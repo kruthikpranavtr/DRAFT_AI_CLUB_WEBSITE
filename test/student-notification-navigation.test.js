@@ -8,17 +8,21 @@ const page=fs.readFileSync(new URL('../src/pages/NotificationsPage.jsx',import.m
 const css=fs.readFileSync(new URL('../src/components/Dashboard.css',import.meta.url),'utf8');
 const notifications=fs.readFileSync(new URL('../src/lib/useNotifications.js',import.meta.url),'utf8');
 
-test('student sidebar keeps the five existing sections in the original order without notifications',()=>{
+test('student sidebar keeps the six requested sections without notifications or directory',()=>{
   const student=shell.match(/student:\[(.*?)\],\s*admin:/s)?.[1];
   assert.ok(student,'Student navigation is defined');
   assert.deepEqual(Array.from(student.matchAll(/\['([^']+)','([^']+)'/g),x=>[x[1],x[2]]),[
     ['/student/dashboard','Overview'],
     ['/student/community','Community'],
     ['/student/assessments','Assessments'],
+    ['/student/achievements','Achievements'],
+    ['/student/gallery','Gallery'],
     ['/student/profile','My profile'],
-    ['/student/members','Member directory'],
   ]);
-  assert.doesNotMatch(student,/['"]Notifications['"]/);
+  assert.doesNotMatch(student,/['"]Notifications['"]|['"]Member directory['"]/);
+  assert.match(app,/<Route path="\/student\/achievements" element=\{<ProtectedRoute role="student"><StudentCollectionPage mode="achievements"/);
+  assert.match(app,/<Route path="\/student\/gallery" element=\{<ProtectedRoute role="student"><StudentCollectionPage mode="gallery"/);
+  assert.match(app,/<Route path="\/student\/members" element=\{<ProtectedRoute role="student"><MemberDirectoryPage/);
   assert.match(shell,/admin:\[.*\['\/notifications','Notifications',Bell\]/);
 });
 
