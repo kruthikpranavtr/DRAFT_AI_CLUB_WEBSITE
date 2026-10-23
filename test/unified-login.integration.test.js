@@ -102,7 +102,11 @@ test('unified login derives roles securely and preserves sessions, forced change
     assert.equal(result.response.status, 200);
     assert.equal(result.data.user.role, 'admin');
     assert.equal((await admin.request(base, '/api/admin/overview')).response.status, 200);
-    assert.match(result.response.headers.getSetCookie().find(cookie => cookie.startsWith('aiclub_session=')), /Max-Age=604800/i);
+    assert.match(result.response.headers.getSetCookie().find(cookie => cookie.startsWith('aiclub_session=')), /Max-Age=2592000/i);
+    const refreshedBrowser = new Client();
+    refreshedBrowser.cookies = new Map(admin.cookies);
+    assert.equal((await refreshedBrowser.request(base, '/api/auth/me')).data.user.member_id, 'ADMIN-01',
+      'a remembered login must survive a fresh client using saved cookies');
     result = await login(admin, 'ADMIN@EXAMPLE.EDU');
     assert.equal(result.response.status, 200);
     assert.equal(result.data.user.member_id, 'ADMIN-01');

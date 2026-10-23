@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "concurrently -k -n WEB,API -c cyan,yellow \"npm:dev:web\" \"npm:dev:api\"",
     "dev:web": "vite --mode development",
+    "dev:preview": "vite --mode preview-local",
     "dev:api": "node --env-file=.env.development --watch server/index.js",
     "start": "node server/index.js",
     "build": "vite build",

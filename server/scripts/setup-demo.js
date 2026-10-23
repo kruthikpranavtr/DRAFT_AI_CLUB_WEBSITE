@@ -62,22 +62,13 @@ async function ensureAccount(account) {
       account.role,'active',permissions,0,time,time);
     return 'created';
   }
+  // Never reset a password or destroy sessions during demo startup.
+  // Demo accounts may have been customized by the user between runs.
   if(!await verifyPassword(account.password,existing.password_hash)) {
-    const hash=await hashPassword(account.password);
-    db.transaction(()=>{
-      db.prepare('UPDATE users SET password_hash=?,name=?,status=?,permissions=?,must_change_password=0,updated_at=? WHERE id=?')
-        .run(hash,account.name,'active',permissions,time,account.id);
-      db.prepare('DELETE FROM sessions WHERE user_id=?').run(account.id);
-    })();
-    return 'password restored';
+    return 'already present (custom password preserved)';
   }
-  if(existing.status!=='active' || existing.must_change_password || existing.name!==account.name ||
-    existing.permissions!==permissions) {
-    db.prepare('UPDATE users SET name=?,status=?,permissions=?,must_change_password=0,updated_at=? WHERE id=?')
-      .run(account.name,'active',permissions,time,account.id);
-    return 'active identity restored';
-  }
-  return 'already present';
+  // Respect changes to existing demo profiles, roles and account status too.
+  return 'already present (unchanged)';
 }
 function ensureAssessmentExample() {
   const time=now();
@@ -132,8 +123,11 @@ try {
   }
   db.transaction(()=>{
     ensureStudentProfile(credentials.student.id);
-    db.prepare('UPDATE student_profiles SET department=?,academic_year=?,description=?,updated_at=? WHERE user_id=?')
-      .run('Artificial Intelligence',2,'Portable demonstration student account.',now(),credentials.student.id);
+    // Only populate the default demo profile once; never overwrite later edits.
+    if (results.includes('student: created')) {
+      db.prepare('UPDATE student_profiles SET department=?,academic_year=?,description=?,updated_at=? WHERE user_id=?')
+        .run('Artificial Intelligence',2,'Portable demonstration student account.',now(),credentials.student.id);
+    }
     ensureAssessmentExample();
   })();
   if(db.pragma('integrity_check')[0].integrity_check!=='ok') {

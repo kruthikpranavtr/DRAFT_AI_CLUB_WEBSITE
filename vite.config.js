@@ -15,7 +15,8 @@ export default defineConfig(({ mode }) => {
       proxy: {
         '/api': {
           target: env.VITE_API_ORIGIN || `http://127.0.0.1:${apiPort}`,
-          changeOrigin: false,
+          // HTTPS preview needs the upstream Host/SNI; browser Origin remains localhost.
+          changeOrigin: Boolean(env.VITE_API_ORIGIN?.startsWith('https://')),
         },
       },
     },

@@ -5,7 +5,7 @@ import { LoginForm, PortalLoginLayout } from '../components/PortalAuth';
 import { workspacePath } from '../lib/auth-routing';
 
 export default function LoginPage() {
-  const { signIn, session, loading } = useAuth();
+  const { signIn, session, loading, connectionError, refreshSession } = useAuth();
   const navigate = useNavigate();
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
@@ -32,6 +32,7 @@ export default function LoginPage() {
     <div className="admin-login__label-row"><span className="admin-login__label">MEMBER PLATFORM</span><span className="admin-demo-badge">SECURE SIGN-IN</span></div>
     <h1>Welcome back.</h1>
     <p className="admin-login__intro">Students use their roll number. Administrators can use their ID or email address.</p>
+    {connectionError && <div className="portal-banner is-error" role="alert">Your saved login could not be checked because the server is temporarily unavailable. This does not mean your password is wrong. <button type="button" className="portal-text-link" onClick={refreshSession}>Retry connection</button></div>}
     {import.meta.env.DEV && import.meta.env.VITE_DEMO_MODE === "true" && <aside className="admin-login__demo-accounts" aria-label="Local demo credentials">
       <strong>LOCAL DEMO ACCOUNTS</strong>
       <p>Admin: <code>DEMO-ADMIN</code> / <code>DemoAdmin@2026!</code></p>

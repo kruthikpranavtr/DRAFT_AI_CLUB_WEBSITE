@@ -4,7 +4,8 @@ import { hashPassword, verifyPassword } from './passwords.js';
 import { hasPermission, isSuperAdmin } from './permissions.js';
 
 const COOKIE = 'aiclub_session';
-const SESSION_DAYS = 7;
+// Remembered sessions survive browser restarts for 30 days; sign-out and password resets revoke them.
+const SESSION_DAYS = 30;
 
 const tokenHash = (token) => crypto.createHash('sha256').update(token).digest('hex');
 

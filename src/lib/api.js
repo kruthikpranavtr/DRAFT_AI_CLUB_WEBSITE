@@ -23,7 +23,10 @@ export async function api(path, options = {}) {
   const response = await fetch(path, requestOptions);
   const data = response.status === 204 ? null : await response.json().catch(() => null);
   if (!response.ok) {
-    if (response.status === 401 && typeof window !== 'undefined') window.dispatchEvent(new Event('aiclub:session-expired'));
+    // Failed sign-in or an initial session check is not an authenticated session expiry.
+    if (response.status === 401 && !['/api/auth/login','/api/auth/admin/login','/api/auth/me'].includes(path) && typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('aiclub:session-expired'));
+    }
     const error = new Error(data?.error || 'The request could not be completed.');
     error.status = response.status;
     error.issues = data?.issues;
