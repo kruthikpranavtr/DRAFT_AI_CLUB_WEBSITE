@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LoginForm, PortalLoginLayout } from '../components/PortalAuth';
 import { workspacePath } from '../lib/auth-routing';
 
 export default function LoginPage() {
-  const { signIn } = useAuth();
+  const { signIn, session, loading } = useAuth();
   const navigate = useNavigate();
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
@@ -24,6 +24,9 @@ export default function LoginPage() {
     if (!result.ok) return setStatus({ type: 'error', text: result.message });
     navigate(workspacePath(result.user), { replace: true });
   }
+
+  if (loading) return <div className="dash-auth-loading" role="status">Checking your session...</div>;
+  if (session) return <Navigate to={workspacePath(session)} replace />;
 
   return <PortalLoginLayout eyebrow="AI CLUB WORKSPACE" title={<>Your club</>} story="Profiles, people, and club operations. One secure sign-in for the AI Club community, with access determined by your account." backLabel="Back to website" backTo="/">
     <div className="admin-login__label-row"><span className="admin-login__label">MEMBER PLATFORM</span><span className="admin-demo-badge">SECURE SIGN-IN</span></div>
