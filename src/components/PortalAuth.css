@@ -190,3 +190,115 @@
 .admin-field > svg {position:absolute;left:13px;color:#64748B;pointer-events:none;}
 .admin-field:has(> svg) input {padding-left:40px;}
 .admin-field:has(> svg) input::placeholder {font-size:12px;}
+
+/* Reference screenshot fidelity: static 61/39 split, wide card, no hover animation. */
+.admin-login {
+  grid-template-columns:minmax(0,61fr) minmax(0,39fr);
+  background:#f6f7ff;
+}
+.admin-login__visual {
+  background:
+    radial-gradient(ellipse at 76% 46%,rgba(165,181,255,.16),transparent 66%),
+    linear-gradient(125deg,#fff 0%,#fff 54%,#fafbff 100%);
+  border-right:1px solid #e1e5f3;
+}
+.admin-login__story {width:min(39%,410px);}
+.admin-login__story h2 {
+  font-size:clamp(35px,2.8vw,48px);
+  color:#0b1238;
+  letter-spacing:-.045em;
+}
+.admin-login__story h2 em {color:#5935ff;font-style:normal;}
+.admin-login__story > p {color:#64748b;font-size:14px;}
+.admin-login__trust {gap:9px;margin-top:26px;padding-top:20px;}
+.admin-login__trust span {gap:14px;font-size:13px;}
+.admin-login__trust svg {
+  width:40px;height:40px;padding:10px;
+  box-sizing:border-box;flex:none;
+  background:#f1efff;color:#5935ff;border-radius:12px;
+}
+.admin-login__form-side {
+  padding-inline:clamp(24px,3.3vw,58px);
+  background:radial-gradient(ellipse at 89% 16%,rgba(220,226,255,.29),transparent 50%),#f6f7ff;
+}
+.admin-login__back {color:#5935ff;}
+.admin-login__back:hover {color:#5935ff;text-decoration:none;}
+.admin-login__card {
+  width:min(520px,100%);
+  padding:30px 32px 32px;
+  border:1px solid #e1e5f3;
+  border-radius:16px;
+  box-shadow:0 18px 48px rgba(57,76,135,.038);
+}
+.admin-login__card h1 {
+  font-size:34px;
+  color:#0b1238;
+  margin-bottom:14px;
+}
+.admin-login__intro {
+  font-size:13.5px;
+  line-height:1.7;
+  color:#64748b;
+  margin-bottom:25px;
+}
+.admin-login__card form > label:not(.admin-remember):not(.portal-field),
+.admin-password-row label {font-size:13px;color:#0b1238;margin-bottom:9px;}
+.admin-password-row {margin-top:19px;}
+.admin-field {
+  min-height:52px;
+  border:1px solid #c8d1e4;
+  border-radius:9px;
+  transition:none;
+}
+.admin-field:hover {border-color:#c8d1e4;}
+.admin-field input {min-height:52px;padding-block:12px;color:#0b1238;}
+.admin-field:has(> svg) input {padding-left:42px;}
+.admin-field > svg {left:14px;color:#64748b;}
+.admin-password-toggle {min-width:52px;min-height:52px;}
+.admin-password-toggle:hover {background:transparent;color:#626d87;}
+.admin-login__card form > .admin-remember {
+  font-size:13px;color:#64748b;
+  min-height:48px;margin:14px 0 15px;
+}
+.admin-login__submit {
+  min-height:55px;
+  padding:12px 15px;
+  border:1px solid #5935ff;
+  border-radius:9px;
+  background:linear-gradient(103deg,#5935ff 0%,#4f46e5 100%);
+  color:#fff;
+  font-size:14px;
+  box-shadow:0 6px 18px rgba(72,63,228,.09);
+  transition:none;
+}
+.admin-login__submit:hover:not(:disabled),
+.admin-login__submit:active:not(:disabled) {
+  filter:none;transform:none;
+  box-shadow:0 6px 18px rgba(72,63,228,.09);
+}
+.admin-login__security {margin-top:20px;padding-top:18px;font-size:12px;line-height:1.65;}
+.admin-login__recovery {margin-top:15px;font-size:12px;line-height:1.65;color:#64748b;}
+.admin-login__help {width:min(520px,100%);font-size:12px;color:#64748b;}
+.admin-login__back,.admin-login__card,.admin-login__submit,
+.admin-field,.admin-password-toggle {animation:none!important;}
+@media(min-width:1400px) {
+  .admin-login__story {width:min(39%,410px);}
+}
+@media(max-width:1180px) and (min-width:768px) {
+  .admin-login {grid-template-columns:minmax(0,1.04fr) minmax(400px,1fr);}
+  .admin-login__story {width:55%;}
+  .admin-login__story h2 {font-size:35px;}
+  .admin-login__story > p {font-size:12.5px;}
+  .admin-login__form-side {padding-inline:24px;}
+  .admin-login__card {padding:26px 24px;}
+}
+@media(max-width:767px) {
+  .admin-login {grid-template-columns:minmax(0,1fr);}
+  .admin-login__card {width:min(520px,100%);}
+  .admin-login__back,.admin-login__help {width:min(520px,100%);}
+}
+@media(max-width:480px) {
+  .admin-login__card {padding:25px 20px;}
+  .admin-login__card h1 {font-size:29px;}
+  .admin-field input {font-size:16px;}
+}

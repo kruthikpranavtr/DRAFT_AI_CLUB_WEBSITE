@@ -28,7 +28,7 @@ export default function LoginPage() {
   if (loading) return <div className="dash-auth-loading" role="status">Checking your session...</div>;
   if (session) return <Navigate to={workspacePath(session)} replace />;
 
-  return <PortalLoginLayout eyebrow="AI CLUB WORKSPACE" title={<>Your club</>} story="Profiles, people, and club operations. One secure sign-in for the AI Club community, with access determined by your account." backLabel="Back to website" backTo="/">
+  return <PortalLoginLayout eyebrow="AI CLUB WORKSPACE" title="Your club" story="Profiles, people, and club operations. One secure sign-in for the AI Club community, with access determined by your account." backLabel="Back to website" backTo="/">
     <div className="admin-login__label-row"><span className="admin-login__label">MEMBER PLATFORM</span><span className="admin-demo-badge">SECURE SIGN-IN</span></div>
     <h1>Welcome back.</h1>
     <p className="admin-login__intro">Students use their roll number. Administrators can use their ID or email address.</p>
