@@ -23,8 +23,8 @@ test('dashboard field boundaries and focus indicators meet non-text contrast',()
 test('AI Club reference-inspired light sign-in keeps contrast, access and responsive portal animation',() => {
   const authCss = fs.readFileSync(new URL('../src/components/PortalAuth.css',import.meta.url),'utf8');
   const authJsx = fs.readFileSync(new URL('../src/components/PortalAuth.jsx',import.meta.url),'utf8');
-  const portalCss = fs.readFileSync(new URL('../src/components/InnovationPortal.css',import.meta.url),'utf8');
-  const portalJsx = fs.readFileSync(new URL('../src/components/InnovationPortal.jsx',import.meta.url),'utf8');
+  const portalCss = fs.readFileSync(new URL('../src/components/InnovationCampus.css',import.meta.url),'utf8');
+  const portalJsx = fs.readFileSync(new URL('../src/components/InnovationCampus.jsx',import.meta.url),'utf8');
   for (const color of ['#111833','#f8faff','#5049e7','#e5e9f5','#8490aa']) {
     assert.ok(authCss.includes(color),`Light auth palette must include ${color}`);
   }
@@ -34,11 +34,16 @@ test('AI Club reference-inspired light sign-in keeps contrast, access and respon
   assert.match(authCss,/:focus-visible/);
   assert.match(authCss,/@media\(max-width:767px\)/);
   assert.match(portalCss,/@media\(prefers-reduced-motion: reduce\)/);
-  assert.match(portalCss,/innovation-portal--paused/);
+  assert.match(portalCss,/innovation-campus--paused/);
+  assert.match(portalJsx,/INNOVATE/);
+  assert.match(portalJsx,/COLLABORATE/);
+  assert.match(portalJsx,/campus-world-clip/);
+  assert.match(portalJsx,/CampusTree/);
+  assert.match(portalJsx,/campus-stairs/);
   assert.match(portalJsx,/visibilitychange/);
   assert.match(portalJsx,/pointermove/);
   assert.match(portalJsx,/aria-hidden="true"/);
-  assert.match(authJsx,/<InnovationPortal\s*\/>/);
+  assert.match(authJsx,/<InnovationCampus\s*\/>/);
   assert.match(authJsx,/autoComplete="username"/);
   assert.match(authJsx,/autoComplete="current-password"/);
   assert.match(authJsx,/aria-label=\{showPassword \? 'Hide password' : 'Show password'\}/);

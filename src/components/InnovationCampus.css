@@ -1,0 +1,142 @@
+/* Illustrated AI innovation campus, composited with CSS/SVG only.
+   No WebGL, image requests, timer loops or per-frame React state. */
+.innovation-campus {
+  --campus-x: 0px;
+  --campus-y: 0px;
+  position:absolute;
+  z-index:1;
+  top:48%;
+  right:-1.8%;
+  width:min(76%,760px);
+  aspect-ratio:700 / 710;
+  pointer-events:none;
+  transform:translate3d(var(--campus-x),calc(-50% + var(--campus-y)),0);
+  transition:transform .34s ease-out;
+  isolation:isolate;
+  contain:layout style paint;
+}
+.innovation-campus__aura {
+  position:absolute;
+  z-index:-1;
+  inset:7% 0 0;
+  border-radius:50%;
+  background:radial-gradient(ellipse at 52% 51%,rgba(147,176,255,.2) 0%,rgba(183,155,255,.13) 36%,transparent 68%);
+  filter:blur(20px);
+}
+.innovation-campus__art {display:block;width:100%;height:100%;overflow:visible;}
+.innovation-campus__globe-float {
+  transform-box:fill-box;
+  transform-origin:center;
+  animation:campus-globe-hover 7.3s ease-in-out infinite;
+}
+.innovation-campus__continents {
+  transform-origin:351px 283px;
+  animation:campus-world-turn 29s ease-in-out infinite alternate;
+}
+.innovation-campus__globe-grid {
+  transform-origin:351px 283px;
+  animation:campus-globe-grid 25s ease-in-out infinite alternate;
+}
+.innovation-campus__globe-orbits {
+  transform-origin:351px 291px;
+  animation:campus-world-orbit 38s linear infinite;
+}
+.innovation-campus__panel {
+  transform-box:fill-box;
+  transform-origin:center;
+}
+.innovation-campus__panel--people {animation:campus-float-a 6.4s ease-in-out infinite;}
+.innovation-campus__panel--analytics {animation:campus-float-b 7.2s ease-in-out infinite;}
+.innovation-campus__panel--cloud {animation:campus-float-c 7.5s ease-in-out infinite;}
+.innovation-campus__panel--code {animation:campus-float-d 8.1s ease-in-out infinite;}
+.innovation-campus__light-strip {
+  animation:campus-runway 28s linear infinite;
+}
+.innovation-campus__platform-trail {
+  animation:campus-platform-orbit 36s linear infinite;
+  transform-origin:354px 495px;
+}
+.innovation-campus__halo {
+  transform-origin:354px 452px;
+  animation:campus-halo-glow 6s ease-in-out infinite alternate;
+}
+.innovation-campus__central-pulse {
+  transform-origin:354px 452px;
+  animation:campus-beam-pulse 5s ease-in-out infinite alternate;
+}
+.innovation-campus__particles {
+  animation:campus-dust 12s ease-in-out infinite alternate;
+}
+@keyframes campus-globe-hover {
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-7px)}
+}
+@keyframes campus-world-turn {
+  0%{transform:translateX(-6px) scaleX(.93)}
+  100%{transform:translateX(12px) scaleX(.89)}
+}
+@keyframes campus-globe-grid {
+  0%{transform:rotate(-2deg)}
+  100%{transform:rotate(2deg)}
+}
+@keyframes campus-world-orbit {
+  to{transform:rotate(360deg)}
+}
+@keyframes campus-float-a {
+  0%,100%{translate:0 0}
+  50%{translate:0 -11px}
+}
+@keyframes campus-float-b {
+  0%,100%{translate:0 0}
+  50%{translate:0 -8px}
+}
+@keyframes campus-float-c {
+  0%,100%{translate:0 0}
+  50%{translate:-2px -10px}
+}
+@keyframes campus-float-d {
+  0%,100%{translate:0 0}
+  50%{translate:1px -12px}
+}
+@keyframes campus-runway {
+  to{stroke-dashoffset:-1200}
+}
+@keyframes campus-platform-orbit {
+  to{transform:rotate(360deg)}
+}
+@keyframes campus-halo-glow {
+  from{opacity:.58;stroke-width:6}
+  to{opacity:.92;stroke-width:11}
+}
+@keyframes campus-beam-pulse {
+  from{opacity:.18;scale:.86}
+  to{opacity:.48;scale:1.25}
+}
+@keyframes campus-dust {
+  from{opacity:.63;translate:0 -5px}
+  to{opacity:1;translate:0 6px}
+}
+.innovation-campus--paused *,
+.innovation-campus--paused svg * {animation-play-state:paused!important;}
+@media(min-width:1700px){
+  .innovation-campus {right:-2.5%;width:min(74%,775px);}
+}
+@media(max-width:1350px){
+  .innovation-campus {width:78%;right:-6%;top:47%;}
+}
+@media(max-width:1023px){
+  .innovation-campus {width:79%;right:-10%;top:42%;opacity:.94;}
+}
+@media(max-width:767px){
+  .innovation-campus {top:8px;right:1.5%;width:165px;opacity:.88;transform:none;}
+  .innovation-campus__aura {filter:blur(10px);}
+  .innovation-campus__panel,.innovation-campus__particles,.innovation-campus__globe-orbits {animation:none!important;}
+}
+@media(max-width:430px){
+  .innovation-campus {top:3px;right:0;width:135px;opacity:.81;}
+}
+@media(prefers-reduced-motion: reduce){
+  .innovation-campus,.innovation-campus * {animation:none!important;transition:none!important;}
+  .innovation-campus {transform:translateY(-50%);}
+  @media(max-width:767px){.innovation-campus {transform:none;}}
+}

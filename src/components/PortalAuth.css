@@ -7,7 +7,7 @@
   --auth-line: #e5e9f5;
   --auth-field-border: #8490aa;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.34fr) minmax(0, 1fr);
   min-height: 100vh;
   min-height: 100dvh;
   background: #f8faff;
@@ -59,7 +59,7 @@
 .admin-login__story {
   position:relative;
   z-index:2;
-  width:min(48%,410px);
+  width:min(41%,410px);
   margin:auto 0;
   padding:44px 0 48px;
 }
@@ -147,11 +147,11 @@
 .admin-login__card h2 {color:#111833;}
 .admin-login__card .portal-field input {color:#111833;background:#fff;}
 @media(min-width:1400px) {
-  .admin-login__story {width:min(50%,430px);}
+  .admin-login__story {width:min(42%,430px);}
 }
 @media(max-width:1180px) {
   .admin-login__visual {padding-inline:clamp(25px,3.5vw,48px);}
-  .admin-login__story {width:52%;}
+  .admin-login__story {width:47%;}
 }
 @media(max-width:1023px) {
   .admin-login {grid-template-columns:minmax(0, .88fr) minmax(390px, 1.12fr);}

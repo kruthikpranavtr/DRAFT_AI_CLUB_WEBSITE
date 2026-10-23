@@ -1,6 +1,6 @@
 import { ArrowLeft, ArrowRight, Eye, EyeOff, KeyRound, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import InnovationPortal from './InnovationPortal';
+import InnovationCampus from './InnovationCampus';
 import './PortalAuth.css';
 
 export function PortalLoginLayout({ eyebrow, title, story, backLabel, backTo, children }) {
@@ -10,7 +10,7 @@ export function PortalLoginLayout({ eyebrow, title, story, backLabel, backTo, ch
         <img src="/ai-club-new-logo.png" onError={event => { event.currentTarget.onerror = null; event.currentTarget.src = '/ai-club-emblem.png'; }} alt=""/>
         <span><strong>AI CLUB</strong><small>SRI SHAKTHI</small></span>
       </Link>
-      <InnovationPortal />
+      <InnovationCampus />
       <div className="admin-login__story">
         <span className="admin-login__eyebrow">{eyebrow}</span>
         <h2>{title}</h2>
