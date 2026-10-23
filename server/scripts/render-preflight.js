@@ -2,6 +2,7 @@
 // An explicit, tightly scoped disposable preview flag may initialize only the authorized fresh preview database.
 import { pool, closePool } from '../pg.js';
 import { initializeFreshPreviewIfApproved } from './initialize-render-preview.js';
+import { createPreviewTestAccounts } from './create-preview-test-accounts.js';
 
 class PreflightError extends Error {}
 function requireValue(name) {
@@ -30,6 +31,7 @@ async function main() {
     assert(process.env.AI_CLUB_PREVIEW_BOOTSTRAP === 'fresh-preview-only',
       'Preview setup requires explicit one-time isolated-database approval.');
     await initializeFreshPreviewIfApproved();
+    await createPreviewTestAccounts();
     console.warn('DISPOSABLE PREVIEW: external object storage is not configured; do not upload real files.');
   } else {
     const s3Endpoint=requireValue('S3_ENDPOINT');
