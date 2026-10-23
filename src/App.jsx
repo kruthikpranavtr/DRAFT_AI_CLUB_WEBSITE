@@ -7,7 +7,8 @@ import SiteAnnouncement from './components/SiteAnnouncement';
 import ProtectedRoute from './components/ProtectedRoute';
 import HomePage from './pages/HomePage';
 import GalleryPage from './pages/GalleryPage';
-import StudentCollectionPage from './pages/StudentCollectionPage';
+import StudentAchievementsPage from './pages/StudentAchievementsPage';
+import StudentGalleryPage from './pages/StudentGalleryPage';
 import AboutPage from './pages/AboutPage';
 import NewsPage from './pages/NewsPage';
 import LoginPage from './pages/LoginPage';
@@ -61,8 +62,8 @@ function AppRoutes() {
       <Route path="/dashboard" element={<DashboardRedirect />} />
       <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
       <Route path="/student/dashboard" element={<ProtectedRoute role="student"><StudentDashboardPage /></ProtectedRoute>} />
-      <Route path="/student/achievements" element={<ProtectedRoute role="student"><StudentCollectionPage mode="achievements" /></ProtectedRoute>} />
-      <Route path="/student/gallery" element={<ProtectedRoute role="student"><StudentCollectionPage mode="gallery" /></ProtectedRoute>} />
+      <Route path="/student/achievements" element={<ProtectedRoute role="student"><StudentAchievementsPage /></ProtectedRoute>} />
+      <Route path="/student/gallery" element={<ProtectedRoute role="student"><StudentGalleryPage /></ProtectedRoute>} />
       <Route path="/student/profile" element={<ProtectedRoute role="student"><StudentProfilePage /></ProtectedRoute>} />
       <Route path="/student/members" element={<ProtectedRoute role="student"><MemberDirectoryPage /></ProtectedRoute>} />
       <Route path="/student/assessments" element={<ProtectedRoute role="student"><StudentAssessmentsPage /></ProtectedRoute>} />

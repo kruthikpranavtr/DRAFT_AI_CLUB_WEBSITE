@@ -4,9 +4,11 @@ import { Link } from 'react-router-dom';
 import DashboardShell from '../components/DashboardShell';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
+import { useStudentAssessments } from '../lib/useStudentAssessments';
 
 export default function StudentDashboardPage() {
   const { session } = useAuth();
+  const {items:assessments,loading:assessmentsLoading,error:assessmentsError}=useStudentAssessments();
   const [data,setData] = useState(null);
   const [error,setError] = useState('');
 
@@ -30,6 +32,16 @@ export default function StudentDashboardPage() {
         </section>
         <section className="dash-card portal-directory-summary"><span className="portal-eyebrow">THE COMMUNITY</span><h2>People worth knowing.</h2><p><strong className="portal-inline-count">{data.total}</strong> active {data.total === 1 ? 'member' : 'members'} in the private directory.</p><p>Discover shared skills and interests through member profiles.</p><Link className="portal-text-link" to="/student/members">Browse members <ArrowRight size={16}/></Link><div className="portal-privacy-note">For signed-in members only.<br/>Your profile and photo stay private.</div></section>
       </div>
+      <section className="dash-card dash-section" aria-label="Your available assessments">
+        <div className="dash-section__head"><h2>Assessments</h2><span>{assessmentsError?'NOT AVAILABLE':assessmentsLoading?'CHECKING':assessments.length+' PUBLISHED'}</span></div>
+        {assessmentsError&&<StateMessage tone="error">{assessmentsError}</StateMessage>}
+        {assessmentsLoading&&!assessmentsError&&<p>Checking your assessments...</p>}
+        {!assessmentsLoading&&!assessmentsError&&(assessments.length ? <>
+          <p>{assessments.length} published assessment{assessments.length!==1?'s':''} available to you.</p>
+          <div className="portal-assessment-summary">{assessments.slice(0,3).map(a=><div key={a.id}><strong>{a.title}</strong><span>{a.availability==='upcoming'?'Upcoming':a.availability==='active'?'Open now':'Closed'}</span></div>)}</div>
+        </> : <p>No assessments available yet. New assessments will appear here once published.</p>)}
+        <Link className="portal-text-link" to="/student/assessments">View assessments <ArrowRight size={16}/></Link>
+      </section>
       <section className="dash-card dash-section">
         <div className="dash-notice"><CheckCircle2 size={20} aria-hidden="true"/><div><h3>Your account is secured</h3><p>Password setup is complete. Contact an administrator if you lose access. A password reset ends all previous sessions.</p></div><span className="dash-chip is-active">Active</span></div>
       </section>

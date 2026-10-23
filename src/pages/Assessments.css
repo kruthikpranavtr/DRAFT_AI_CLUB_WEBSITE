@@ -17,6 +17,11 @@
 .assessment-tag.is-active,.assessment-tag.is-published,.assessment-tag.is-submitted,.assessment-tag.is-results_published{background:#eaf6ef;color:#18794e;border-color:#b4d9c4}
 .assessment-tag.is-upcoming,.assessment-tag.is-scheduled,.assessment-tag.is-draft{background:#f1f0ff;color:#5049e7;border-color:#d8d5ff}
 .assessment-tag.is-closed,.assessment-tag.is-ended,.assessment-tag.is-archived{background:#f3f4f8;color:#626d87}
+.assessment-status-group{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px}
+.assessment-tag.is-unpublished{background:#fff4de;color:#8a5100;border-color:#e9d2ab}
+.portal-assessment-summary{display:grid;gap:8px;margin:14px 0}
+.portal-assessment-summary>div{display:flex;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--portal-line);border-radius:8px}
+.portal-assessment-summary span{font-size:12px;color:var(--portal-muted)}
 .assessment-facts{display:flex;flex-wrap:wrap;gap:16px 25px;padding:17px 0;margin-top:14px;border-top:1px solid #e5e9f5;font-size:12px;color:#626d87}
 .assessment-facts strong{color:#111833;font-weight:750}
 .assessment-actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
@@ -85,6 +90,7 @@
 .assessment-student-icon{width:40px;height:40px;border-radius:10px;background:#efedff;display:grid;place-items:center;color:#5049e7;margin-bottom:12px}
 .assessment-student-card h2{font-size:21px;margin:8px 0 10px}
 .assessment-student-card>p{font-size:13px;flex:1}
+.assessment-student-instructions{white-space:pre-wrap;overflow-wrap:anywhere}
 .assessment-student-metrics{display:flex;flex-wrap:wrap;gap:13px;font-size:12px;font-weight:700;padding:15px 0;margin-top:14px}
 .assessment-student-metrics span{display:inline-flex;align-items:center;gap:5px}
 .assessment-student-dates{border-top:1px solid #e5e9f5;padding:14px 0;margin-bottom:15px;display:grid;gap:6px;font-size:12px;color:#626d87}

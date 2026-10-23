@@ -1,0 +1,5 @@
+.student-collection-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:300px;padding:40px 24px;text-align:center}
+.student-collection-empty__icon{display:grid;place-items:center;width:66px;height:66px;margin-bottom:18px;border-radius:16px;color:var(--portal-accent);background:#eeedff}
+.student-collection-empty h2{margin:0 0 10px;font-size:20px}
+.student-collection-empty p{max-width:460px;margin:0;color:var(--portal-muted);font-size:14px}
+@media(max-width:650px){.student-collection-empty{min-height:260px;padding:32px 18px}}

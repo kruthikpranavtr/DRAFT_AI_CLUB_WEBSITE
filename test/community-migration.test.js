@@ -40,7 +40,7 @@ test('version 6 upgrade preserves accounts, sessions, profiles, CMS and complete
   const names=database.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name<>'schema_migrations' ORDER BY name").all().map(r=>r.name);
   const before=Object.fromEntries(names.map(name=>[name,database.prepare('SELECT * FROM "'+name+'" ORDER BY rowid').all()]));
   const report=runMigrations(database,{databasePath,backupDir:path.join(root,'backups')});
-  assert.deepEqual(report.applied.map(item=>item.version),[7,8]);
+  assert.deepEqual(report.applied.map(item=>item.version),[7,8,9]);
   assert.equal(report.backup.verified,true);
   for(const name of names)assert.deepEqual(database.prepare('SELECT * FROM "'+name+'" ORDER BY rowid').all(),before[name],name+' unchanged');
   assert.equal(verifyDatabase(database).integrity,'ok');

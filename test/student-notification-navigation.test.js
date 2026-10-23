@@ -7,8 +7,8 @@ const app=fs.readFileSync(new URL('../src/App.jsx',import.meta.url),'utf8');
 const page=fs.readFileSync(new URL('../src/pages/NotificationsPage.jsx',import.meta.url),'utf8');
 const css=fs.readFileSync(new URL('../src/components/Dashboard.css',import.meta.url),'utf8');
 const notifications=fs.readFileSync(new URL('../src/lib/useNotifications.js',import.meta.url),'utf8');
-const gallery=fs.readFileSync(new URL('../src/pages/GalleryPage.jsx',import.meta.url),'utf8');
-const collection=fs.readFileSync(new URL('../src/pages/StudentCollectionPage.jsx',import.meta.url),'utf8');
+const achievementsPage=fs.readFileSync(new URL('../src/pages/StudentAchievementsPage.jsx',import.meta.url),'utf8');
+const studentGalleryPage=fs.readFileSync(new URL('../src/pages/StudentGalleryPage.jsx',import.meta.url),'utf8');
 
 test('student sidebar keeps the six requested sections without notifications or directory',()=>{
   const student=shell.match(/student:\[(.*?)\],\s*admin:/s)?.[1];
@@ -22,20 +22,21 @@ test('student sidebar keeps the six requested sections without notifications or 
     ['/student/profile','My profile'],
   ]);
   assert.doesNotMatch(student,/['"]Notifications['"]|['"]Member directory['"]/);
-  assert.match(app,/<Route path="\/student\/achievements" element=\{<ProtectedRoute role="student"><StudentCollectionPage mode="achievements"/);
-  assert.match(app,/<Route path="\/student\/gallery" element=\{<ProtectedRoute role="student"><StudentCollectionPage mode="gallery"/);
+  assert.match(app,/<Route path="\/student\/achievements" element=\{<ProtectedRoute role="student"><StudentAchievementsPage/);
+  assert.match(app,/<Route path="\/student\/gallery" element=\{<ProtectedRoute role="student"><StudentGalleryPage/);
   assert.match(app,/<Route path="\/student\/members" element=\{<ProtectedRoute role="student"><MemberDirectoryPage/);
   assert.match(shell,/admin:\[.*\['\/notifications','Notifications',Bell\]/);
 });
 
-test('student gallery and achievements share published data with main website and link to corresponding public views',()=>{
-  assert.match(gallery,/get\('\/api\/public\/gallery'\)/);
-  assert.match(gallery,/usePublishedContent\(\{ page:'gallery' \}\)/);
-  assert.match(gallery,/const mode = embedded \? initialMode/);
-  assert.match(gallery,/useSearchParams/);
-  assert.match(gallery,/setSearchParams/);
-  assert.match(collection,/isAchievements \? '\/gallery\?tab=achievements' : '\/gallery'/);
-  assert.match(collection,/<GalleryPage embedded initialMode=\{mode\}/);
+test('student achievements and gallery are two independent protected pages',()=>{
+  assert.match(achievementsPage,/<DashboardShell section="Achievements">/);
+  assert.match(studentGalleryPage,/<DashboardShell section="Gallery">/);
+  assert.match(achievementsPage,/No student achievements yet/);
+  assert.match(studentGalleryPage,/No student gallery photos yet/);
+  for (const page of [achievementsPage,studentGalleryPage]) {
+    assert.doesNotMatch(page,/<GalleryPage|from ['"]\.\/GalleryPage|Navigate|usePublishedContent|\/api\/public\/|\/gallery\?tab=/);
+  }
+  assert.match(app,/<Route path="\/gallery" element=\{<GalleryPage/);
 });
 
 test('dashboard header bell uses a router link, accessible label, active state, and real unread count',()=>{

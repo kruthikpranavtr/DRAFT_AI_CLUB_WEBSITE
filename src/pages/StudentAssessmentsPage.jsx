@@ -4,21 +4,16 @@ import { Link,useNavigate,useParams } from 'react-router-dom';
 import DashboardShell from '../components/DashboardShell';
 import { api } from '../lib/api';
 import { PageHead,StateMessage } from './StudentDashboardPage';
+import { useStudentAssessments } from '../lib/useStudentAssessments';
 import './Assessments.css';
 
 function Status({ value }) {return <span className={'assessment-tag is-'+value}>{value.replaceAll('_',' ')}</span>;}
 function prettyDate(value) {return value ? new Date(value).toLocaleString() : 'No deadline';}
 export default function StudentAssessmentsPage() {
-  const [items,setItems]=useState([]),[loading,setLoading]=useState(true),[error,setError]=useState(''),[busy,setBusy]=useState('');
+  const {items,loading,error:listError}=useStudentAssessments();
+  const [error,setError]=useState(''),[busy,setBusy]=useState('');
   const [history,setHistory]=useState({});
   const navigate=useNavigate();
-  const load=useCallback(async()=>{
-    setLoading(true);
-    try {const response=await api('/api/assessments/student');setItems(response.items);setError('');}
-    catch(cause){setError(cause.message);}
-    finally{setLoading(false);}
-  },[]);
-  useEffect(()=>{load();},[load]);
   async function openHistory(id) {
     if (history[id]) {setHistory(old=>({...old,[id]:null}));return;}
     try {const data=await api('/api/assessments/student/'+id+'/history');setHistory(old=>({...old,[id]:data.items}));}
@@ -34,13 +29,13 @@ export default function StudentAssessmentsPage() {
   }
   return <DashboardShell section="Assessments">
     <PageHead eyebrow="YOUR ASSESSMENTS" title="Assessments." text="Find available tests, continue an attempt, and view results when your administrator releases them."/>
-    {error&&<StateMessage tone="error">{error}</StateMessage>}
+    {(error||listError)&&<StateMessage tone="error">{error||listError}</StateMessage>}
     {loading&&<StateMessage>Loading assessments...</StateMessage>}
-    {!loading&&!items.length&&<StateMessage>No assessments are available for your academic year yet.</StateMessage>}
+    {!loading&&!listError&&!items.length&&<StateMessage>No assessments available yet. New assessments will appear here once published.</StateMessage>}
     <div className="assessment-student-grid">{items.map(a=><article className="dash-card assessment-student-card" key={a.id}>
       <div className="assessment-student-icon">{a.kind==='mcq'?<FileQuestion size={20}/>:<Code2 size={20}/>}</div>
       <div className="assessment-section-top"><span className="assessment-kicker">{a.kind==='mcq'?'MULTIPLE CHOICE':'CODING / MANUAL REVIEW'}</span><Status value={a.availability}/></div>
-      <h2>{a.title}</h2><p>{a.description||'Read the instructions before starting.'}</p>
+      <h2>{a.title}</h2><p>{a.description||'Read the instructions before starting.'}</p>{a.instructions&&<p className="assessment-student-instructions"><strong>Instructions:</strong> {a.instructions}</p>}
       <div className="assessment-student-metrics"><span>{a.questionCount} questions</span><span>{a.totalPoints} points</span><span><Clock3 size={14}/>{a.durationMinutes} min</span></div>
       <div className="assessment-student-dates"><div>Opens: <strong>{a.startAt?prettyDate(a.startAt):'Immediately'}</strong></div><div>Closes: <strong>{prettyDate(a.endAt)}</strong></div>
         <div>Attempts: <strong>{a.attemptsUsed} / {a.attemptLimit}</strong></div></div>

@@ -47,7 +47,7 @@ export default function AdminAssessmentsPage() {
   const activeBankData=useMemo(()=>banks.find(item=>item.id===activeBank),[banks,activeBank]);
   const filteredAssessments=useMemo(()=>assessments.filter(a=>
     (!filters.search||a.title.toLowerCase().includes(filters.search.toLowerCase())) &&
-    (!filters.kind||a.kind===filters.kind) && (!filters.status||displayStatus(a)===filters.status) &&
+    (!filters.kind||a.kind===filters.kind) && (!filters.status||a.status===filters.status||displayStatus(a)===filters.status) &&
     (!filters.year||String(a.bankYear)===filters.year) &&
     (!filters.batch||(a.bankBatch||'').toLowerCase().includes(filters.batch.toLowerCase()))
   ),[assessments,filters]);
@@ -71,7 +71,7 @@ export default function AdminAssessmentsPage() {
   },[activeBank]);
   async function perform(action,success) {
     setBusy(true);setMessage('');setError('');
-    try { await action();setMessage(success);await load(); }
+    try { await action();setMessage(success);await load();window.dispatchEvent(new Event('aiclub:assessments-changed')); }
     catch(cause){setError(cause.message+(cause.issues?.length?' '+cause.issues.slice(0,8).map(item=>'Row '+item.row+': '+item.error).join('; '):''));}
     finally{setBusy(false);}
   }
@@ -139,12 +139,13 @@ export default function AdminAssessmentsPage() {
     },'Assessment draft saved. Publish it when ready.');
   }
   async function operate(id,action) {
-    const prompt={publish:'Publish this assessment? Its questions and marks will be locked.',
+    const prompt={publish:'Publish this assessment for eligible students? Its questions and marks will be locked.',
+      unpublish:'Unpublish this assessment? It will disappear from student pages. In-progress attempts will be submitted, and previous results will be preserved.',
       close:'Close this assessment and submit all remaining attempts?',
       'release-results':'Make results visible to students?',
       archive:'Archive this assessment?'}[action];
     if (!window.confirm(prompt)) return;
-    await perform(()=>api('/api/assessments/admin/'+id+'/'+action,{method:'POST'}),action==='release-results'?'Results are now published.':'Assessment updated.');
+    await perform(()=>api('/api/assessments/admin/'+id+'/'+action,{method:'POST'}),action==='release-results'?'Results are now published.':action==='publish'?'Assessment published for eligible students.':action==='unpublish'?'Assessment unpublished. Student attempts have been preserved.':'Assessment updated.');
     if(expanded===id) await openAttempts(id);
   }
   async function openAttempts(id) {
@@ -177,7 +178,7 @@ export default function AdminAssessmentsPage() {
     {!loading&&tab==='assessments'&&<div className="assessment-stack">
       <div className="dash-card assessment-filters"><label className="assessment-field"><span>Search</span><input value={filters.search} placeholder="Assessment title" onChange={e=>update(setFilters,'search',e.target.value)}/></label>
         <label className="assessment-field"><span>Type</span><select value={filters.kind} onChange={e=>update(setFilters,'kind',e.target.value)}><option value="">All types</option><option value="mcq">MCQ</option><option value="coding">Coding</option></select></label>
-        <label className="assessment-field"><span>Status</span><select value={filters.status} onChange={e=>update(setFilters,'status',e.target.value)}><option value="">All statuses</option>{['draft','scheduled','active','ended','closed','archived'].map(s=><option key={s} value={s}>{s}</option>)}</select></label>
+        <label className="assessment-field"><span>Status</span><select value={filters.status} onChange={e=>update(setFilters,'status',e.target.value)}><option value="">All statuses</option>{['draft','published','scheduled','active','ended','unpublished','closed','archived'].map(s=><option key={s} value={s}>{s}</option>)}</select></label>
         <label className="assessment-field"><span>Year</span><select value={filters.year} onChange={e=>update(setFilters,'year',e.target.value)}><option value="">All years</option>{[1,2,3,4,5,6].map(y=><option key={y} value={y}>Year {y}</option>)}</select></label>
         <label className="assessment-field"><span>Batch</span><input value={filters.batch} placeholder="Batch" onChange={e=>update(setFilters,'batch',e.target.value)}/></label>
       </div>
@@ -185,11 +186,12 @@ export default function AdminAssessmentsPage() {
       {assessments.length>0&&!filteredAssessments.length&&<StateMessage>No assessments match these filters.</StateMessage>}
       {filteredAssessments.map(a=><article className="dash-card assessment-list-card" key={a.id}>
         <div className="assessment-list-card__top"><div><div className="assessment-kicker">{a.kind.toUpperCase()} · {a.bankTitle||'Question bank unavailable'}</div>
-          <h2>{a.title}</h2><p>{a.description||'No description provided.'}</p></div>{tag(displayStatus(a))}</div>
+          <h2>{a.title}</h2><p>{a.description||'No description provided.'}</p></div><div className="assessment-status-group">{tag(a.status)}{a.status==='published'&&tag(displayStatus(a))}</div></div>
         <div className="assessment-facts"><span><strong>{a.questionCount}</strong> questions</span><span><strong>{a.totalPoints}</strong> points</span><span><strong>{a.durationMinutes}</strong> min</span><span><strong>{a.attemptCount}</strong> attempts</span></div>
         <div className="assessment-actions">
-          {canManage&&a.status==='draft'&&<><Button secondary onClick={()=>editDraft(a)}>Edit draft</Button><Button disabled={busy} onClick={()=>operate(a.id,'publish')}><ShieldCheck size={15}/>Publish</Button></>}
-          {canManage&&a.status==='published'&&<Button disabled={busy} secondary onClick={()=>operate(a.id,'close')}>Close assessment</Button>}
+          {canManage&&a.status==='draft'&&<><Button secondary onClick={()=>editDraft(a)}>Edit draft</Button><Button disabled={busy} onClick={()=>operate(a.id,'publish')}><ShieldCheck size={15}/>Publish Assessment</Button></>}
+          {canManage&&a.status==='unpublished'&&<Button disabled={busy} onClick={()=>operate(a.id,'publish')}><ShieldCheck size={15}/>Republish Assessment</Button>}
+          {canManage&&a.status==='published'&&<><Button disabled={busy} secondary onClick={()=>operate(a.id,'unpublish')}>Unpublish Assessment</Button><Button disabled={busy} secondary onClick={()=>operate(a.id,'close')}>Close assessment</Button></>}
           {canRelease&&a.status==='closed'&&!a.resultsPublishedAt&&<Button disabled={busy} onClick={()=>operate(a.id,'release-results')}>Publish results</Button>}
           {a.resultsPublishedAt&&tag('results_published')}
           {canManage&&['draft','closed'].includes(a.status)&&<Button disabled={busy} secondary onClick={()=>operate(a.id,'archive')}>Archive</Button>}

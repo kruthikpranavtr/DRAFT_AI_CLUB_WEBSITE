@@ -423,7 +423,8 @@ async function saveAssessment(req, res, isUpdate) {
   const old = isUpdate ? await getAssessment(req.params.id) : null;
   if (isUpdate && !old) return error(res, 'Assessment not found.', 404);
   if (old && old.status !== 'draft') return error(res, 'Only drafts may be edited.', 409);
-  await selectedQuestions(input);
+  // Drafts may be saved before the question bank is complete. Validate questions at publish time.
+  if (!(await getBank(input.bankId))) return error(res, 'Question bank not found.');
   const id = old?.id || uuid(), time = now();
   const values = [
     input.title,
@@ -464,7 +465,8 @@ router.put('/admin/:id', adminOnly, manage, withError((req, res) => saveAssessme
 router.post('/admin/:id/publish', adminOnly, manage, withError(async (req, res) => {
   const assessment = await getAssessment(req.params.id);
   if (!assessment) return error(res, 'Assessment not found.', 404);
-  if (assessment.status !== 'draft') return error(res, 'Only draft assessments may be published.', 409);
+  if (!['draft','unpublished'].includes(assessment.status)) return error(res, 'Only draft or unpublished assessments may be published.', 409);
+  if (!assessment.title?.trim() || !Number.isInteger(Number(assessment.duration_minutes)) || Number(assessment.duration_minutes)<1 || Number(assessment.total_points)<=0 || Number(assessment.question_count)<1) return error(res, 'Complete the title, duration, questions and marks before publishing.');
   const input = {
     bankId: assessment.bank_id,
     kind: assessment.kind,
@@ -473,7 +475,11 @@ router.post('/admin/:id/publish', adminOnly, manage, withError(async (req, res) 
     pointsMode: assessment.points_mode,
     totalPoints: Number(assessment.total_points)
   };
-  const selected = await selectedQuestions(input);
+  const selected = assessment.status === 'draft' ? await selectedQuestions(input) : [];
+  if (assessment.status === 'unpublished') {
+    const snapshots = await queryRows('SELECT id FROM assessment_questions WHERE assessment_id=?', [assessment.id]);
+    if (snapshots.length !== Number(assessment.question_count)) return error(res, 'The published question snapshot is incomplete.', 409);
+  }
   await withTransaction(async (tx) => {
     for (let index = 0; index < selected.length; index++) {
       const question = selected[index];
@@ -498,14 +504,32 @@ router.post('/admin/:id/publish', adminOnly, manage, withError(async (req, res) 
       );
     }
     await tx.query("UPDATE assessments SET status='published',updated_at=? WHERE id=?", [now(), assessment.id]);
-    await addNotification(tx,{
+    const recipients = await tx.queryRows(
+      "SELECT u.id FROM users u WHERE u.role='student' AND u.status='active' AND (?::int IS NULL OR EXISTS (SELECT 1 FROM student_profiles p WHERE p.user_id=u.id AND p.academic_year=?::int))",
+      [assessment.eligibility_year,assessment.eligibility_year]
+    );
+    for (const recipient of recipients) await addNotification(tx,{
       type:'assessment_update',title:'New assessment available',
       body:String(assessment.title || 'An AI Club assessment has been published.').slice(0,180),
-      link:'/assessments',actorId:req.user.id,
+      link:'/student/assessments',actorId:req.user.id,recipientId:recipient.id,
     });
   });
   await audit(req.user.id, 'assessment.published', 'assessment', assessment.id);
   res.json({ ok: true });
+}));
+
+router.post('/admin/:id/unpublish', adminOnly, manage, withError(async (req, res) => {
+  const assessment = await getAssessment(req.params.id);
+  if (!assessment) return error(res, 'Assessment not found.', 404);
+  if (assessment.status !== 'published') return error(res, 'Only published assessments may be unpublished.', 409);
+  // Match the existing close policy: settle in-progress attempts without deleting work.
+  await withTransaction(async (tx) => {
+    const pending = await tx.queryRows("SELECT * FROM assessment_attempts WHERE assessment_id=? AND status='in_progress'", [assessment.id]);
+    for (const attempt of pending) await finishAttempt(attempt, tx);
+    await tx.query("UPDATE assessments SET status='unpublished',updated_at=? WHERE id=? AND status='published'", [now(), assessment.id]);
+  });
+  await audit(req.user.id, 'assessment.unpublished', 'assessment', assessment.id);
+  res.json({ ok:true });
 }));
 
 router.post('/admin/:id/close', adminOnly, manage, withError(async (req, res) => {
@@ -705,7 +729,7 @@ function attemptView(attempt, assessment) {
 }
 
 router.get('/student', studentOnly, withError(async (req, res) => {
-  const rows = await queryRows("SELECT * FROM assessments WHERE status IN ('published','closed') ORDER BY created_at DESC");
+  const rows = await queryRows("SELECT * FROM assessments WHERE status='published' AND (end_at IS NULL OR end_at > ?) ORDER BY created_at DESC", [now()]);
   const eligible = [];
   for (const a of rows) {
     if (await studentEligible(a, req.user.id)) {
@@ -735,7 +759,7 @@ router.get('/student', studentOnly, withError(async (req, res) => {
 
 router.post('/student/:id/start', studentOnly, withError(async (req, res) => {
   const assessment = await getAssessment(req.params.id);
-  if (!assessment || !(await studentEligible(assessment, req.user.id))) return error(res, 'Assessment not available.', 404);
+  if (!assessment || assessment.status !== 'published' || !(await studentEligible(assessment, req.user.id))) return error(res, 'Assessment not available.', 404);
   if (clockAvailability(assessment) !== 'active') return error(res, 'This assessment is not currently open.', 409);
 
   const attempt = await withTransaction(async (tx) => {
@@ -771,6 +795,10 @@ async function ownedAttempt(req, res) {
   }
   const settled = await maybeExpire(attempt);
   const assessment = await getAssessment(settled.assessment_id);
+  if (!assessment || !['published','closed'].includes(assessment.status) || !(await studentEligible(assessment, req.user.id))) {
+    error(res, 'Attempt not found.', 404);
+    return null;
+  }
   return { attempt: settled, assessment };
 }
 
@@ -873,7 +901,7 @@ router.post('/student/attempts/:attemptId/submit', studentOnly, withError(async 
 
 router.get('/student/:id/history', studentOnly, withError(async (req, res) => {
   const assessment = await getAssessment(req.params.id);
-  if (!assessment || !(await studentEligible(assessment, req.user.id)) || assessment.status === 'draft') {
+  if (!assessment || !['published','closed'].includes(assessment.status) || !(await studentEligible(assessment, req.user.id))) {
     return error(res, 'Assessment not found.', 404);
   }
   const rawAttempts = await queryRows(

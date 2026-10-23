@@ -148,14 +148,24 @@ test('MCQ assessment, Excel preview, role gates, immutable snapshots, attempts a
     assert.equal(result.data.issues[0].row, 2);
     
     const invalid = { ...assessmentBody(bankId), pointsMode: 'custom', totalPoints: 3 };
-    assert.equal((await admin.request(base, adminPath, data(invalid))).status, 400);
+    const incompleteDraft = await admin.request(base, adminPath, data(invalid));
+    assert.equal(incompleteDraft.status, 201, 'Incomplete question selection is allowed for drafts');
+    assert.equal((await admin.request(base, adminPath+'/'+incompleteDraft.data.id+'/publish', {method:'POST'})).status, 400, 'Invalid marks are blocked at publishing');
+    assert.equal((await queryOne('SELECT status FROM assessments WHERE id=?',[incompleteDraft.data.id])).status, 'draft');
     
     result = await admin.request(base, adminPath, data(assessmentBody(bankId)));
     assert.equal(result.status, 201);
     const assessmentId = result.data.id;
     
+    assert.equal((await queryOne('SELECT status FROM assessments WHERE id=?',[assessmentId])).status,'draft');
+    assert.equal((await admin.request(base, adminPath)).data.items.find(a=>a.id===assessmentId).status,'draft','draft is visible to admins');
     assert.equal((await student.request(base, studentPath)).data.items.length, 0);
+    assert.equal((await student.request(base, studentPath + '/' + assessmentId + '/start',{method:'POST'})).status,404);
+    assert.equal((await student.request(base, studentPath + '/' + assessmentId + '/history')).status,404);
+    assert.equal((await restricted.request(base, adminPath + '/' + assessmentId + '/publish',{method:'POST'})).status,403);
+    assert.equal((await student.request(base, adminPath + '/' + assessmentId + '/publish',{method:'POST'})).status,403);
     assert.equal((await admin.request(base, adminPath + '/' + assessmentId + '/publish', { method: 'POST' })).status, 200);
+    assert.equal((await queryOne('SELECT status FROM assessments WHERE id=?',[assessmentId])).status,'published');
     
     await admin.request(base, bankPath + '/' + bankId + '/questions/' + questions[0].id, { method: 'PUT', body: { ...questionA, prompt: 'Edited after publishing', correctOption: 3 } });
     const snapshot = (await admin.request(base, adminPath + '/' + assessmentId)).data.questions;
@@ -193,10 +203,38 @@ test('MCQ assessment, Excel preview, role gates, immutable snapshots, attempts a
     assert.equal((await admin.request(base, adminPath + '/' + assessmentId + '/close', { method: 'POST' })).status, 200);
     assert.equal((await admin.request(base, adminPath + '/' + assessmentId + '/release-results', { method: 'POST' })).status, 200);
     assert.equal((await student.request(base, studentPath + '/attempts/' + attemptId)).data.attempt.score, 4);
-    assert.equal((await student.request(base, studentPath + '/' + assessmentId + '/start', { method: 'POST' })).status, 409);
+    assert.equal((await student.request(base, studentPath + '/' + assessmentId + '/start', { method: 'POST' })).status, 404);
     
     const countRow = await queryOne('SELECT count(*) n FROM assessment_attempts');
     assert.equal(Number(countRow.n), 1);
+
+    // Unpublishing must hide the record and prevent access while retaining past work.
+    result = await admin.request(base, adminPath, data({ ...assessmentBody(bankId), title:'Withdrawal lifecycle' }));
+    assert.equal(result.status, 201);
+    const withdrawnId=result.data.id;
+    assert.equal((await admin.request(base, adminPath+'/'+withdrawnId+'/publish',{method:'POST'})).status,200);
+    assert.equal((await student.request(base, studentPath)).data.items.length,1);
+    const startedWithdrawal=await student.request(base,studentPath+'/'+withdrawnId+'/start',{method:'POST'});
+    assert.equal(startedWithdrawal.status,201);
+    const withdrawnAttemptId=startedWithdrawal.data.attempt.id;
+    const beforeWithdraw=await student.request(base,studentPath+'/attempts/'+withdrawnAttemptId);
+    assert.equal(beforeWithdraw.status,200);
+    assert.equal((await restricted.request(base,adminPath+'/'+withdrawnId+'/unpublish',{method:'POST'})).status,403);
+    assert.equal((await student.request(base,adminPath+'/'+withdrawnId+'/unpublish',{method:'POST'})).status,403);
+    assert.equal((await admin.request(base,adminPath+'/'+withdrawnId+'/unpublish',{method:'POST'})).status,200);
+    assert.equal((await queryOne('SELECT status FROM assessments WHERE id=?',[withdrawnId])).status,'unpublished');
+    assert.equal((await student.request(base,studentPath)).data.items.length,0);
+    assert.equal((await student.request(base,studentPath+'/'+withdrawnId+'/history')).status,404);
+    assert.equal((await student.request(base,studentPath+'/'+withdrawnId+'/start',{method:'POST'})).status,404);
+    assert.equal((await student.request(base,studentPath+'/attempts/'+withdrawnAttemptId)).status,404);
+    assert.equal((await student.request(base,studentPath+'/attempts/'+withdrawnAttemptId+'/submit',{method:'POST'})).status,404);
+    assert.equal((await queryOne('SELECT status FROM assessment_attempts WHERE id=?',[withdrawnAttemptId])).status,'submitted');
+    assert.equal((await admin.request(base,adminPath+'/'+withdrawnId+'/publish',{method:'POST'})).status,200);
+    assert.equal((await student.request(base,studentPath)).data.items.length,1);
+    const republished=await admin.request(base,adminPath+'/'+withdrawnId);
+    assert.equal(republished.data.questions.length,2,'Republishing reuses immutable question snapshots');
+    assert.equal(Number((await queryOne('SELECT count(*) AS count FROM assessment_attempts WHERE assessment_id=?',[withdrawnId])).count),1);
+    assert.equal((await student.request(base,studentPath+'/attempts/'+withdrawnAttemptId)).status,200);
 
     // Coding submissions require administrator marking before results can be released
     result = await admin.request(base, bankPath, data({ title: 'Coding Bank', academicYear: 2, batch: '2025-2029', description: '' }));

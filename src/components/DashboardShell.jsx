@@ -4,6 +4,7 @@ import { Link,useLocation,useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { hasPermission,PERMISSIONS } from '../../shared/permissions';
 import { useUnreadNotifications } from '../lib/useNotifications';
+import { useStudentAssessments } from '../lib/useStudentAssessments';
 import DashboardSheet from './DashboardSheet';
 import './Dashboard.css';
 
@@ -16,6 +17,8 @@ export default function DashboardShell({ section='Overview',children }) {
   const { session,signOut } = useAuth();
   const { unread } = useUnreadNotifications(session?.id);
   const role = session?.role || 'student';
+  const {items:availableAssessments,loading:assessmentsLoading,error:assessmentsError}=useStudentAssessments(role==='student');
+  const showAssessments=role==='student'&&!assessmentsLoading&&!assessmentsError&&availableAssessments.some(a=>a.status==='published'&&a.availability!=='closed');
   const navigate = useNavigate();
   const location = useLocation();
   const [menuOpen,setMenuOpen] = useState(false);
@@ -30,7 +33,7 @@ export default function DashboardShell({ section='Overview',children }) {
     await signOut();
     navigate('/login',{ replace:true });
   }
-  const sidebarProps = { role,session,unread,pathname:location.pathname,logout,onNavigate:() => setMenuOpen(false) };
+  const sidebarProps = { role,session,unread,pathname:location.pathname,logout,onNavigate:() => setMenuOpen(false),showAssessments,assessmentsLoading };
   return <div className={`dash-app dash-app--${role}`}>
     <a className="dash-skip" href="#workspace-content">Skip to workspace</a>
     <aside className="dash-sidebar"><SidebarContent {...sidebarProps}/></aside>
@@ -47,13 +50,13 @@ export default function DashboardShell({ section='Overview',children }) {
   </div>;
 }
 
-function SidebarContent({ role,session,unread,pathname,logout,onNavigate }) {
+function SidebarContent({ role,session,unread,pathname,logout,onNavigate,showAssessments,assessmentsLoading }) {
   return <>
     <Link to={role === 'admin' ? '/admin/dashboard' : '/student/dashboard'} className="dash-brand" onClick={onNavigate}><img src="/ai-club-new-logo.png" onError={event => { event.currentTarget.onerror = null; event.currentTarget.src = "/ai-club-emblem.png"; }} alt=""/><span><strong>AI CLUB</strong><small>{role === 'admin' ? 'ADMINISTRATION' : 'STUDENT PORTAL'}</small></span></Link>
-    <nav aria-label={role === 'admin' ? 'Administrator dashboard' : 'Student dashboard'}><span className="dash-nav-label">WORKSPACE</span>{navigation[role].filter(([, , ,permission]) => !permission || hasPermission(session,permission)).map(([to,label,Icon]) => {
+    <nav aria-label={role === 'admin' ? 'Administrator dashboard' : 'Student dashboard'}><span className="dash-nav-label">WORKSPACE</span>{navigation[role].filter(([to,,,permission]) => (to!=='/student/assessments'||showAssessments)&&(!permission||hasPermission(session,permission))).map(([to,label,Icon]) => {
       const active = pathname === to || ((to.endsWith('/members') || to.endsWith('/community')) && pathname.startsWith(to+'/'));
       return <Link key={to} to={to} aria-current={active ? 'page' : undefined} className={active ? 'active' : ''} onClick={onNavigate}><Icon size={18} aria-hidden="true"/><span>{label}</span>{label==='Notifications'&&unread>0&&<span className="dash-notification-count">{unread>99?'99+':unread}</span>}</Link>;
-    })}</nav>
+    })}{role==='student'&&assessmentsLoading&&<span className="dash-assessment-loading" role="status">Checking assessments...</span>}</nav>
     <div className="dash-sidebar__bottom"><div className="dash-sidebar__identity"><span className="dash-nav-label">{role === 'admin' ? 'ADMINISTRATOR' : 'STUDENT MEMBER'}</span><strong>{session?.member_id}</strong></div><Link to="/" onClick={onNavigate}><Home size={17} aria-hidden="true"/> Public website</Link><button onClick={logout}><LogOut size={17} aria-hidden="true"/> Sign out</button></div>
   </>;
 }
