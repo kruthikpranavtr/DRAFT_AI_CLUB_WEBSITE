@@ -20,10 +20,20 @@ test('dashboard text, navigation, actions and status palettes meet WCAG AA contr
 test('dashboard field boundaries and focus indicators meet non-text contrast',() => {
   verifyPairs([['8490aa','ffffff'],['8490aa','f8faff'],['5049e7','ffffff'],['5049e7','f8faff'],['c4c1ff','111833']],3);
 });
-test('authentication pages share the editorial palette without cinematic effects',() => {
+test('AI Club sign-in theme preserves readable contrast, keyboard focus and mobile layout',() => {
   const authCss = fs.readFileSync(new URL('../src/components/PortalAuth.css',import.meta.url),'utf8');
-  for (const color of ['#111833','#f8faff','#5049e7','#e5e9f5','#8490aa']) assert.ok(authCss.includes(color),`Authentication palette must include ${color}`);
-  assert.doesNotMatch(authCss,/gradient\(|drop-shadow\(|backdrop-filter|admin-orbit/);
+  const authJsx = fs.readFileSync(new URL('../src/components/PortalAuth.jsx',import.meta.url),'utf8');
+  for (const color of ['#080e20','#eef3ff','#f6f8ff','#aebfdf','#a8a5ff']) {
+    assert.ok(authCss.includes(color),`New authentication theme should include ${color}`);
+  }
+  assert.ok(contrast('f6f8ff','1e274b') >= 4.5,'Card heading must be legible');
+  assert.ok(contrast('aebfdf','1e274b') >= 4.5,'Card supporting text must be legible');
+  assert.ok(contrast('ffffff','6561f3') >= 4.5,'Submit label must contrast against its background');
   assert.match(authCss,/:focus-visible/);
   assert.match(authCss,/prefers-reduced-motion/);
+  assert.match(authCss,/@media\(max-width:830px\)/);
+  assert.match(authCss,/@media\(max-width:480px\)/);
+  assert.match(authJsx,/autocomplete|autoComplete="username"/i);
+  assert.match(authJsx,/autoComplete="current-password"/);
+  assert.match(authJsx,/aria-label=\{showPassword \? 'Hide password' : 'Show password'\}/);
 });
