@@ -23,6 +23,7 @@ import CommunityPage from './pages/CommunityPage';
 import CommunityPostPage from './pages/CommunityPostPage';
 import AdminModerationPage from './pages/AdminModerationPage';
 import AdminNewsPage from './pages/AdminNewsPage';
+import NotificationsPage from './pages/NotificationsPage';
 import { PERMISSIONS } from '../shared/permissions';
 import { workspacePath } from './lib/auth-routing';
 
@@ -41,7 +42,7 @@ function DashboardRedirect() {
 
 function AppRoutes() {
   const { pathname } = useLocation();
-  const standalone = pathname === '/login' || pathname === '/forgot-password' || pathname === '/change-password' || pathname.startsWith('/admin') || pathname.startsWith('/student');
+  const standalone = pathname === '/notifications' || pathname === '/login' || pathname === '/forgot-password' || pathname === '/change-password' || pathname.startsWith('/admin') || pathname.startsWith('/student');
 
   return <>
     {!standalone && <><Navbar/><SiteAnnouncement/></>}
@@ -57,6 +58,7 @@ function AppRoutes() {
       <Route path="/forgot-password" element={<Navigate to="/login" replace />} />
       <Route path="/change-password" element={<ProtectedRoute><ChangePasswordPage /></ProtectedRoute>} />
       <Route path="/dashboard" element={<DashboardRedirect />} />
+      <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
       <Route path="/student/dashboard" element={<ProtectedRoute role="student"><StudentDashboardPage /></ProtectedRoute>} />
       <Route path="/student/profile" element={<ProtectedRoute role="student"><StudentProfilePage /></ProtectedRoute>} />
       <Route path="/student/members" element={<ProtectedRoute role="student"><MemberDirectoryPage /></ProtectedRoute>} />

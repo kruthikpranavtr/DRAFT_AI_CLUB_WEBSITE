@@ -7,6 +7,7 @@ import { requireAdmin,requirePermission } from '../auth.js';
 import { PERMISSIONS } from '../permissions.js';
 import { NEWS_CATEGORIES,LEGACY_NEWS_CATEGORIES,safeNewsUrl,opportunityState } from '../../shared/news.js';
 import { plainText } from './normalize.js';
+import { addNotification } from '../notifications.js';
 import { sourceCatalog,approvedSourceIds,publicNewsCondition,createNewsService } from './service.js';
 
 const service=createNewsService(db);
@@ -163,6 +164,12 @@ async function save(req,res,next) {
         archived=EXCLUDED.archived,auto_archive=EXCLUDED.auto_archive,expires_at=EXCLUDED.expires_at,opportunity=EXCLUDED.opportunity,updated_at=NOW()`,
       [id,canonicalUrl,input.category,input.category==='Hackathons'?'hackathon':input.category==='Events and Opportunities'?'event':'manual',input.approval,input.featured,input.archived,input.autoArchive,input.expiresAt,JSON.stringify(opportunity)]);
       await db.audit(req.user.id,existing?'news.updated':'news.created','content',id,{status:input.status,approval:input.approval},tx);
+      if (input.status === 'published' && input.approval === 'approved') {
+        await addNotification(tx, {
+          type:'news_update',title:existing?.status === 'published' ? 'News updated' : 'New AI Club news',
+          body:plainText(input.title,220),link:'/news',actorId:req.user.id,
+        });
+      }
     });
     res.status(req.params.id?200:201).json({id});
   } catch(error) {

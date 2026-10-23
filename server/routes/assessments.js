@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { query, queryOne, queryRows, withTransaction, now, json, audit } from '../pg.js';
 import { requireUser, requirePasswordChanged } from '../auth.js';
 import { hasPermission, PERMISSIONS } from '../permissions.js';
+import { addNotification } from '../notifications.js';
 
 const router = Router();
 router.use(requireUser, requirePasswordChanged);
@@ -497,6 +498,11 @@ router.post('/admin/:id/publish', adminOnly, manage, withError(async (req, res) 
       );
     }
     await tx.query("UPDATE assessments SET status='published',updated_at=? WHERE id=?", [now(), assessment.id]);
+    await addNotification(tx,{
+      type:'assessment_update',title:'New assessment available',
+      body:String(assessment.title || 'An AI Club assessment has been published.').slice(0,180),
+      link:'/assessments',actorId:req.user.id,
+    });
   });
   await audit(req.user.id, 'assessment.published', 'assessment', assessment.id);
   res.json({ ok: true });
@@ -620,6 +626,11 @@ router.post('/admin/:id/release-results', adminOnly, release, withError(async (r
   if (pending) return error(res, 'Grade all submitted attempts before publishing results.');
   await query('UPDATE assessments SET results_published_at=?,updated_at=? WHERE id=?', [now(), now(), assessment.id]);
   await audit(req.user.id, 'assessment.results_published', 'assessment', assessment.id);
+  await withTransaction(tx=>addNotification(tx,{
+    type:'assessment_update',title:'Assessment results released',
+    body:String(assessment.title || 'New assessment results are available.').slice(0,180),
+    link:'/assessments',actorId:req.user.id,
+  }));
   res.json({ ok: true });
 }));
 

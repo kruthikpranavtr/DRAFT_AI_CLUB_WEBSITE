@@ -1,0 +1,43 @@
+.club-inbox{max-width:970px;margin:0 auto}
+.club-inbox__count{display:flex;align-items:center;gap:9px;padding:12px 16px;background:#eeedff;color:#292275;border-radius:12px}
+.club-inbox__count strong{font-size:22px;line-height:1}
+.club-inbox__count span{font-size:12px;font-weight:600}
+.club-inbox__list{overflow:hidden}
+.club-inbox__toolbar{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 20px;border-bottom:1px solid #e5e9f5}
+.club-inbox__filters{display:flex;flex-wrap:wrap;gap:7px}
+.club-inbox__filters button{border:1px solid transparent;padding:9px 14px;border-radius:8px;font-size:13px;color:#445070;font-weight:600}
+.club-inbox__filters button.active{background:#5049e7;color:#fff}
+.club-inbox__empty{display:flex;flex-direction:column;align-items:center;gap:10px;padding:72px 24px;text-align:center;color:#626d87}
+.club-inbox__empty h2{color:#111833;font-size:20px}
+.club-inbox__entries{list-style:none;margin:0;padding:0}
+.club-inbox__entry{display:flex;align-items:flex-start;gap:14px;position:relative;padding:18px 22px;border-bottom:1px solid #e9ecf5}
+.club-inbox__entry:last-child{border-bottom:0}
+.club-inbox__entry.is-unread{background:#f1f2ff}
+.club-inbox__entry-icon{flex:none;display:grid;place-items:center;width:41px;height:41px;border-radius:10px;background:#e5e8f5;color:#5049e7}
+.club-inbox__entry.is-unread .club-inbox__entry-icon{background:#dedaff}
+.club-inbox__entry-text{min-width:0;flex:1}
+.club-inbox__entry-meta{display:flex;align-items:center;flex-wrap:wrap;gap:10px;color:#626d87;font-size:11px}
+.club-inbox__entry-meta>span{font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#453dce}
+.club-inbox__entry h2{font-size:16px;margin:4px 0 5px;overflow-wrap:anywhere}
+.club-inbox__entry p{font-size:13px;white-space:pre-wrap;overflow-wrap:anywhere;color:#55617c}
+.club-inbox__entry-actions{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px}
+.club-inbox__entry-actions button{font-size:12px;font-weight:600;min-height:35px;padding:5px 2px;color:#453dce}
+.club-inbox__entry-actions button:hover{text-decoration:underline;text-underline-offset:3px}
+.club-inbox__dot{width:10px;height:10px;border-radius:50%;background:#5049e7;flex:none;margin-top:10px}
+.club-inbox__more{padding:15px 22px;text-align:center;font-size:12px;color:#626d87}
+.club-inbox__broadcast{margin-top:22px;padding:24px}
+.club-inbox__broadcast h2{font-size:20px;margin:6px 0}
+.club-inbox__broadcast p{font-size:13px;max-width:670px}
+.club-inbox__broadcast form{display:grid;gap:16px;max-width:690px;margin-top:22px}
+.club-inbox__broadcast .dash-action{justify-self:start}
+.club-inbox__footnote{margin:18px 2px;font-size:12px;color:#626d87}
+.club-inbox__footnote a{color:#453dce;text-decoration:underline}
+.club-inbox button:focus-visible{outline:3px solid #5049e7;outline-offset:2px}
+@media(max-width:620px){
+.club-inbox__toolbar{align-items:stretch;flex-direction:column;padding:14px}
+.club-inbox__toolbar>.portal-secondary-button{align-self:flex-start}
+.club-inbox__entry{gap:10px;padding:16px 13px}
+.club-inbox__entry-icon{width:34px;height:34px}
+.club-inbox__count{align-self:flex-start}
+.club-inbox__broadcast{padding:18px}
+}

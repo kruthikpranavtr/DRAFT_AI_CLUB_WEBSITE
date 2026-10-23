@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ChevronDown, LayoutDashboard, LogOut, Menu, UserRound, X } from 'lucide-react';
+import { Bell, ChevronDown, LayoutDashboard, LogOut, Menu, UserRound, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { workspacePath } from '../lib/auth-routing';
+import { useUnreadNotifications } from '../lib/useNotifications';
 import useHeroEntrance from './useHeroEntrance';
 import './PublicAccount.css';
 
@@ -16,6 +17,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const { session, loading, signOut } = useAuth();
+  const { unread } = useUnreadNotifications(session?.id);
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const home = pathname === '/';
@@ -68,6 +70,7 @@ export default function Navbar() {
     </nav>
     {loading ? <div className="site-nav__account-loading" role="status" aria-label="Checking member session"/> : session ? (
       <div ref={accountRef} className={'site-nav__account' + (home ? ' hero-appear hero-appear--scale' : '')} style={home ? { '--d': '.34s' } : undefined}>
+        <Link to="/notifications" className="site-nav__notification-link" onClick={() => { setOpen(false); setAccountOpen(false); }} aria-label={unread ? `Notifications, ${unread} unread` : 'Notifications'}><Bell size={19} aria-hidden="true"/>{unread>0&&<span className="site-nav__notification-count">{unread>99?'99+':unread}</span>}</Link>
         <button type="button" className="site-nav__profile-trigger" onClick={() => { setOpen(false); setAccountOpen(current => !current); }} aria-haspopup="true" aria-expanded={accountOpen} aria-controls="site-account-panel" aria-label={'Account: ' + displayName}>
           <span className="site-nav__avatar" aria-hidden="true">{initials(displayName)}</span>
           <span className="site-nav__profile-name">{displayName}</span>

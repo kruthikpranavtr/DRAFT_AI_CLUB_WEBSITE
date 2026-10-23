@@ -1,6 +1,7 @@
 // Render startup gate. Normal production checks are read-only.
 // An explicit, tightly scoped disposable preview flag may initialize only the authorized fresh preview database.
 import { pool, closePool } from '../pg.js';
+import { runPostgresMigrations } from '../migrations/pg-runner.js';
 import { initializeFreshPreviewIfApproved } from './initialize-render-preview.js';
 import { createPreviewTestAccounts } from './create-preview-test-accounts.js';
 import { ensurePreviewCreators } from './ensure-preview-creators.js';
@@ -34,6 +35,7 @@ async function main() {
     await initializeFreshPreviewIfApproved();
     await createPreviewTestAccounts();
     await ensurePreviewCreators();
+    await runPostgresMigrations(pool); // Apply additive migrations only on the verified disposable preview.
     console.warn('DISPOSABLE PREVIEW: external object storage is not configured; do not upload real files.');
   } else {
     const s3Endpoint=requireValue('S3_ENDPOINT');

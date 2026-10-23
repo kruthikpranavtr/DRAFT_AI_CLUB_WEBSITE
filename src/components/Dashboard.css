@@ -36,3 +36,10 @@
 .dash-sidebar :focus-visible,.portal-sheet--navigation :focus-visible{outline-color:#c4c1ff}
 @media(max-width:650px){.portal-field input,.portal-field select,.portal-field textarea,.portal-search input{font-size:16px}}
 @media(min-width:901px) and (max-width:1100px){.dash-table td:last-child{width:190px}.cms-row-actions button{flex:1}.dash-table td:first-child{min-width:120px}}
+
+.dash-notification-count{margin-left:auto;display:grid;place-items:center;min-width:23px;height:23px;padding:2px 5px;background:#5049e7;color:#fff;border-radius:12px;font-size:11px;font-weight:700}
+.dash-sidebar nav a.active .dash-notification-count{background:white;color:#5049e7}
+.dash-notification-link{position:relative;flex:none;display:grid;place-items:center;width:42px;height:42px;margin-left:auto;border:1px solid #a9b2c9;border-radius:10px;color:#25295a;background:#fff}
+.dash-notification-link:focus-visible{outline:3px solid #5049e7;outline-offset:2px}
+.dash-notification-dot{position:absolute;right:6px;top:5px;width:10px;height:10px;background:#e34a5a;border-radius:50%;border:1px solid white}
+@media(max-width:900px){.dash-notification-link{margin-left:auto}.dash-user{margin-left:0}}

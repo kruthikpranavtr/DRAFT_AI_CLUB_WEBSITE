@@ -134,3 +134,11 @@ body:has(.concept-page) .site-nav--reference .site-nav__profile-trigger[aria-exp
   .site-nav--reference .site-nav__profile-name { display:none; }
   .site-nav--reference .site-nav__account-loading { width:55px; }
 }
+
+.site-nav--reference .site-nav__account{display:flex;align-items:center;gap:8px}
+.site-nav--reference .site-nav__notification-link{position:relative;flex:none;display:grid;place-items:center;width:42px;height:42px;border:1px solid #ffffff55;border-radius:50%;background:#101425c9;color:#fff;text-decoration:none}
+.site-nav--reference .site-nav__notification-link:hover{background:#272b49}
+.site-nav--reference .site-nav__notification-count{position:absolute;top:-6px;right:-7px;min-width:20px;height:20px;border-radius:12px;padding:1px 4px;background:#ed4b56;color:white;font-size:10px;font-weight:800;line-height:18px;text-align:center}
+body:has(.concept-page) .site-nav--reference .site-nav__notification-link{background:#edf0ff;color:#24285a;border-color:#d8d9ef}
+.site-nav--reference .site-nav__notification-link:focus-visible{outline:3px solid #9bb2ff;outline-offset:2px}
+@media(max-width:900px){.site-nav--reference .site-nav__account{gap:5px}.site-nav--reference .site-nav__notification-link{width:38px;height:38px}}

@@ -5,6 +5,7 @@ import rateLimit from 'express-rate-limit';
 import { query, queryOne, queryRows, withTransaction, now, audit } from '../db.js';
 import { requireUser, requirePasswordChanged } from '../auth.js';
 import { emitReplyCreated } from '../community-events.js';
+import { addNotification, notifyCommunityReply } from '../notifications.js';
 import {
   TAGS,
   canModerate,
@@ -157,6 +158,10 @@ router.post('/posts', writeLimit, async (req, res, next) => {
       );
       await setAttachments(id, req.user.id, input.attachments, tx);
       await audit(req.user.id, 'community.post_created', 'community-post', id, {}, tx);
+      await addNotification(tx, {
+        type:'community_post',title:'New community discussion',body:input.title.slice(0,300),
+        link:'/community/posts/'+id,actorId:req.user.id,
+      });
     });
     const post = await visiblePost(id, req.user.id);
     const dtos = await postDtos([post], req.user);
@@ -302,6 +307,10 @@ router.post('/posts/:id/comments', writeLimit, async (req, res, next) => {
         'INSERT INTO community_comments (id, post_id, parent_id, author_id, body, depth, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $7)',
         [id, post.id, parent?.id || null, req.user.id, input.body, parent ? parent.depth + 1 : 0, now()]
       );
+      await notifyCommunityReply(tx, {
+        actorId:req.user.id, authorId:post.author_id, parentAuthorId:parent?.author_id,
+        postId:post.id,actorName:req.user.name,
+      });
       return { id, postId: post.id, commentId: id, actorId: req.user.id, recipientId: parent ? parent.author_id : post.author_id };
     });
     if (event.recipientId && event.recipientId !== req.user.id) emitReplyCreated(event);

@@ -12,6 +12,7 @@ import assessmentRoutes from './routes/assessments.js';
 import communityRoutes from './routes/community.js';
 import communityModerationRoutes from './routes/community-moderation.js';
 import { csrfProtection } from './csrf.js';
+import notificationRoutes from './routes/notifications.js';
 import { publicNewsRouter,adminNewsRouter } from './news/routes.js';
 import { schedulerNewsRouter } from './news/scheduler.js';
 
@@ -58,6 +59,7 @@ export function createApp() {
 
   app.get('/api/health',(req,res) => res.json({ status:'ok',time:new Date().toISOString() }));
   app.use('/api/auth',authRoutes);
+  app.use('/api/notifications',notificationRoutes);
   app.use('/api/public',publicRoutes);
   app.use('/api/public/news',publicNewsRouter);
   app.use('/api/admin/news',adminNewsRouter);

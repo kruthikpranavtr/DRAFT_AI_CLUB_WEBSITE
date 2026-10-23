@@ -17,6 +17,7 @@ import {
 } from '../validation.js';
 import { classifyMime, deleteStoredFile, sendStoredFile, storeUpload, storageMode } from '../storage.js';
 import { ensureStudentProfile, updateStudentProfile } from '../profiles.js';
+import { addNotification } from '../notifications.js';
 
 const router = Router();
 router.use(requireAdmin);
@@ -128,7 +129,8 @@ router.post('/content', async (req, res, next) => {
     const id = crypto.randomUUID();
     const time = now();
     const publishedAt = input.status === 'published' ? time : null;
-    await query(
+    await withTransaction(async tx => {
+    await tx.query(
       `INSERT INTO content_entries
         (id, type, page_key, section_key, title, excerpt, body, payload, status, sort_order, published_at, created_at, updated_at, updated_by)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $12, $13)`,
@@ -148,7 +150,12 @@ router.post('/content', async (req, res, next) => {
         req.user.id,
       ]
     );
-    await audit(req.user.id, 'content.created', 'content', id, { title: input.title, status: input.status });
+    await audit(req.user.id, 'content.created', 'content', id, { title: input.title, status: input.status }, tx);
+    if (input.status === 'published') await addNotification(tx, {
+      type:'site_update',title:'New website update',body:input.title.slice(0,180),
+      link:['/','/news','/about','/gallery'].includes('/'+input.pageKey) ? '/'+input.pageKey : '/',actorId:req.user.id,
+    });
+    });
     res.status(201).json({ id });
   } catch (error) {
     next(error);
@@ -166,7 +173,8 @@ router.put('/content/:id', async (req, res, next) => {
       return res.status(403).json({ error: 'You do not have permission to manage this content area.', code: 'PERMISSION_DENIED' });
     }
     const publishedAt = input.status === 'published' ? existing.published_at || now() : existing.published_at;
-    await query(
+    await withTransaction(async tx => {
+    await tx.query(
       `UPDATE content_entries SET type = $1, page_key = $2, section_key = $3, title = $4, excerpt = $5, body = $6,
         payload = $7, status = $8, sort_order = $9, published_at = $10, updated_at = $11, updated_by = $12 WHERE id = $13`,
       [
@@ -185,7 +193,12 @@ router.put('/content/:id', async (req, res, next) => {
         req.params.id,
       ]
     );
-    await audit(req.user.id, 'content.updated', 'content', req.params.id, { title: input.title, status: input.status });
+    await audit(req.user.id, 'content.updated', 'content', req.params.id, { title: input.title, status: input.status }, tx);
+    if (input.status === 'published') await addNotification(tx, {
+      type:'site_update',title:'Website content updated',body:input.title.slice(0,180),
+      link:['/','/news','/about','/gallery'].includes('/'+input.pageKey) ? '/'+input.pageKey : '/',actorId:req.user.id,
+    });
+    });
     res.json({ ok: true });
   } catch (error) {
     next(error);
@@ -651,14 +664,22 @@ router.put('/settings/:key', requirePermission(PERMISSIONS.MANAGE_SETTINGS), asy
   try {
     const input = settingSchema.parse(req.body);
     const time = now();
-    await query(
+    await withTransaction(async tx => {
+    await tx.query(
       `INSERT INTO settings (key, value, is_public, updated_at, updated_by)
         VALUES ($1, $2, $3, $4, $5)
         ON CONFLICT(key) DO UPDATE SET value = EXCLUDED.value, is_public = EXCLUDED.is_public,
         updated_at = EXCLUDED.updated_at, updated_by = EXCLUDED.updated_by`,
       [req.params.key, JSON.stringify(input.value), Boolean(input.isPublic), time, req.user.id]
     );
-    await audit(req.user.id, 'setting.updated', 'setting', req.params.key);
+    await audit(req.user.id, 'setting.updated', 'setting', req.params.key, {}, tx);
+    if (req.params.key === 'announcement.text' && typeof input.value === 'string' && input.value.trim()) {
+      await addNotification(tx, {
+        type:'site_update',title:'AI Club announcement',body:input.value.trim().slice(0,800),
+        link:'/',actorId:req.user.id,
+      });
+    }
+    });
     res.json({ ok: true });
   } catch (error) {
     next(error);
