@@ -35,8 +35,8 @@ test('AI Club reference-inspired light sign-in keeps contrast, access and respon
   assert.match(authCss,/@media\(max-width:767px\)/);
   assert.match(portalCss,/@media\s*\(prefers-reduced-motion: reduce\)/);
   assert.doesNotMatch(portalCss,/@keyframes|animation:\s*(?!none)/);
-  assert.match(portalJsx,/ai-club-campus-realistic\.webp/);
-  assert.ok(fs.existsSync(new URL('../public/ai-club-campus-realistic.webp',import.meta.url)),'Campus illustration must exist');
+  assert.match(portalJsx,/ai-club-ai-orbit-lab\.svg/);
+  assert.ok(fs.existsSync(new URL('../public/ai-club-ai-orbit-lab.svg',import.meta.url)),'Campus illustration must exist');
   assert.doesNotMatch(portalJsx,/pointermove|pointerleave|mousemove|requestAnimationFrame/i);
   assert.match(portalCss,/pointer-events:none/);
   assert.match(portalCss,/transform:translateY\(-50%\)/);

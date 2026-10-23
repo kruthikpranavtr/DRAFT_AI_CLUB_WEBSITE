@@ -5,7 +5,7 @@ import './InnovationCampus.css';
 export default function InnovationCampus() {
   return <div className="innovation-campus" aria-hidden="true">
     <div className="innovation-campus__aura" />
-    <img className="innovation-campus__image" src="/ai-club-campus-realistic.webp"
+    <img className="innovation-campus__image" src="/ai-club-ai-orbit-lab.svg"
       alt="" draggable="false" loading="eager" decoding="async"/>
   </div>;
 }

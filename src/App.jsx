@@ -1,16 +1,18 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import SiteAnnouncement from './components/SiteAnnouncement';
 import ProtectedRoute from './components/ProtectedRoute';
-import HomePage from './pages/HomePage';
+import HomePage, { ChatPanel } from './pages/HomePage';
+import { MessageSquare } from 'lucide-react';
 import GalleryPage from './pages/GalleryPage';
 import StudentAchievementsPage from './pages/StudentAchievementsPage';
 import StudentGalleryPage from './pages/StudentGalleryPage';
 import AboutPage from './pages/AboutPage';
 import NewsPage from './pages/NewsPage';
+import ChatPage from './pages/ChatPage';
 import LoginPage from './pages/LoginPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import StudentDashboardPage from './pages/StudentDashboardPage';
@@ -44,16 +46,43 @@ function DashboardRedirect() {
 
 function AppRoutes() {
   const { pathname } = useLocation();
+  const { session } = useAuth();
+  const [chatOpen,setChatOpen] = useState(false);
+  const [pandaFailed,setPandaFailed] = useState(false);
+  useEffect(() => {
+    const openChat=()=>setChatOpen(true);
+    window.addEventListener('aiclub:open-chat',openChat);
+    return ()=>window.removeEventListener('aiclub:open-chat',openChat);
+  },[]);
   const standalone = pathname === '/notifications' || pathname === '/login' || pathname === '/forgot-password' || pathname === '/change-password' || pathname.startsWith('/admin') || pathname.startsWith('/student');
+  // Keep workspace layouts untouched, but allow the same chat launcher on authenticated role-matched routes.
+  const canChatInWorkspace = !session?.must_change_password && (
+    (pathname.startsWith('/student/') && session?.role === 'student') ||
+    (pathname.startsWith('/admin/') && pathname !== '/admin/login' && session?.role === 'admin')
+  );
+  const showChat = !standalone || canChatInWorkspace;
 
   return <>
     {!standalone && <><Navbar/><SiteAnnouncement/></>}
     <ScrollToTop />
+    {showChat && <>
+      <button className="ai-panda-launcher" type="button"
+        aria-label={chatOpen?'Close AI chat':'Open AI chat'}
+        aria-expanded={chatOpen}
+        aria-controls="site-ai-chat-panel"
+        onClick={()=>setChatOpen(open=>!open)}>
+        {pandaFailed && <MessageSquare className="ai-panda-launcher__fallback" aria-hidden="true" size={32}/>}
+        <img src="/images/panda-chatbot.gif" alt="" aria-hidden="true" width="115" height="115"
+          hidden={pandaFailed} onError={()=>setPandaFailed(true)} />
+      </button>
+      <ChatPanel open={chatOpen} onClose={()=>setChatOpen(false)}/>
+    </>}
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/gallery" element={<GalleryPage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/news" element={<NewsPage />} />
+      <Route path="/chat" element={<ChatPage />} />
       <Route path="/assessment" element={<Navigate to="/" replace />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/admin/login" element={<Navigate to="/login" replace />} />

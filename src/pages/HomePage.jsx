@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Send, X, Sparkles } from 'lucide-react';
-import { KB, FALLBACK, SUGGESTIONS } from '../data/chatData';
+import { answerClubQuestion,SUGGESTIONS } from '../data/chatData';
+import { useClubKnowledge } from '../lib/useClubKnowledge';
+import { Link } from 'react-router-dom';
 import ScrollVideoStory from '../components/ScrollVideoStory';
 import { usePublishedContent } from '../lib/useCms';
 
@@ -43,37 +45,37 @@ const fallbackPanels = [
   },
 ];
 
-function ChatPanel({ open, onClose }) {
+export function ChatPanel({ open, onClose }) {
   const [messages, setMessages] = useState([
     { role: 'assistant', text: "Hi — I'm the AI Club assistant. Ask me about projects, events, workshops or the club." }
   ]);
   const [input, setInput] = useState('');
+  const knowledge=useClubKnowledge(open);
 
   const ask = (value) => {
     const text = value.trim();
     if (!text) return;
-    const lower = text.toLowerCase();
-    const match = KB.find(item => item.k.some(k => lower.includes(k)));
-    setMessages(prev => [...prev, { role: 'user', text }, { role: 'assistant', text: match?.r || FALLBACK }]);
+    const reply=answerClubQuestion(text,knowledge);
+    setMessages(prev => [...prev, { role:'user', text }, { role:'assistant', text:reply.text,link:reply.link }]);
     setInput('');
   };
 
   if (!open) return null;
   return (
     <div className="ai-chat-backdrop" onMouseDown={onClose}>
-      <aside className="ai-chat-panel" onMouseDown={e => e.stopPropagation()} aria-label="AI Club chat">
+      <aside id="site-ai-chat-panel" className="ai-chat-panel" onMouseDown={e => e.stopPropagation()} aria-label="AI Club chat">
         <div className="ai-chat-head">
           <div><Sparkles size={16}/><span>AI CLUB ASSISTANT</span></div>
           <button onClick={onClose} aria-label="Close AI chat"><X size={18}/></button>
         </div>
         <div className="ai-chat-messages">
-          {messages.map((m, i) => <div key={i} className={'ai-msg '+m.role}>{m.text}</div>)}
+          {messages.map((m, i) => <div key={i} className={'ai-msg '+m.role}>{m.text}{m.link&&<Link className="ai-chat-source" to={m.link.href}>{m.link.label} ?</Link>}</div>)}
         </div>
         <div className="ai-chat-suggestions">
           {SUGGESTIONS.slice(0, 3).map(s => <button key={s} onClick={() => ask(s)}>{s}</button>)}
         </div>
         <form className="ai-chat-form" onSubmit={e => { e.preventDefault(); ask(input); }}>
-          <input value={input} onChange={e => setInput(e.target.value)} placeholder="Ask the AI Club..." />
+          <input value={input} maxLength={300} aria-label="Ask the AI Club assistant" onChange={e => setInput(e.target.value)} placeholder="Ask the AI Club..." />
           <button type="submit" aria-label="Send"><Send size={17}/></button>
         </form>
       </aside>
@@ -82,7 +84,6 @@ function ChatPanel({ open, onClose }) {
 }
 
 export default function HomePage() {
-  const [chatOpen, setChatOpen] = useState(false);
   const { items } = usePublishedContent({ page:'home',type:'page-section' });
   const panels = items.length ? items.map(item => ({
     id:item.section_key,
@@ -95,8 +96,7 @@ export default function HomePage() {
   })) : fallbackPanels;
   return (
     <main className="cin-page video-home">
-      <ScrollVideoStory panels={panels} onChat={() => setChatOpen(true)} />
-      <ChatPanel open={chatOpen} onClose={() => setChatOpen(false)} />
+      <ScrollVideoStory panels={panels} onChat={() => window.dispatchEvent(new Event('aiclub:open-chat'))} />
     </main>
   );
 }

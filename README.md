@@ -2,6 +2,25 @@
 
 React + Vite frontend, Express API, and SQLite storage. Student and administrator access is determined by the server after a single sign-in.
 
+## Clone the current feature-complete preview
+
+The latest Student/Admin Portal, assessment publishing and conditional visibility, AI Club website assistant, enlarged **animated panda chatbot** (including the original `public/images/panda-chatbot.gif`), and updated login illustration are versioned on branch `deploy/render-preserve-data-20261022`.
+
+To get **these exact features** on another computer:
+
+```sh
+git clone --branch deploy/render-preserve-data-20261022 --single-branch https://github.com/kruthikpranavtr/DRAFT_AI_CLUB_WEBSITE.git
+cd DRAFT_AI_CLUB_WEBSITE
+npm ci
+npm run demo:dev
+```
+
+Open **http://localhost:5175/**. This launches the self-contained demonstration environment. The GIF, artwork and code are included in Git, so there is no need to copy assets separately. Use the demo account details below.
+
+If you have already cloned this branch, update it with `git pull --ff-only origin deploy/render-preserve-data-20261022`.
+
+**Important:** A plain `git clone` checks out the GitHub default `main` branch, which is intentionally not yet promoted to this feature branch. The pending production database/media cutover must be approved before making `main` the live release. Git does **not** transfer actual student accounts, passwords, uploaded private documents, or a local database; the demo creates separate example data. Production and shared-preview backend services need their own approved data and backend deployment before their new features can work against real accounts.
+
 ## Try the project on any computer
 
 ```sh

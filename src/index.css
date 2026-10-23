@@ -2486,6 +2486,7 @@ body{background:var(--cin-bg);color:var(--cin-text)}
 .ai-msg{max-width:86%;padding:12px 14px;border-radius:14px;font-size:13px;line-height:1.55}
 .ai-msg.assistant{align-self:flex-start;background:#131923;color:#d7dce5;border:1px solid rgba(255,255,255,.08)}
 .ai-msg.user{align-self:flex-end;background:linear-gradient(135deg,#ffcf67,#ffad38);color:#181006}
+.ai-chat-source{display:block;margin-top:10px;color:#ffcf67;text-decoration:underline;text-underline-offset:3px;font-size:12px}
 .ai-chat-suggestions{display:flex;gap:7px;overflow:auto;padding:0 18px 12px}
 .ai-chat-suggestions button{white-space:nowrap;border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:7px 10px;color:#9ca5b2;font-size:10px}
 .ai-chat-form{display:grid;grid-template-columns:1fr 44px;gap:8px;padding:14px;border-top:1px solid var(--cin-line)}
@@ -2800,4 +2801,59 @@ body{background:var(--cin-bg);color:var(--cin-text)}
 }
 @media(prefers-reduced-motion:reduce){
   .home-frame-buffer,.home-frame-buffer__track span{transition:none}
+}
+
+/* Panda AI assistant launcher - transparent asset only, no decorative effects. */
+.ai-panda-launcher {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 2201;
+  display: grid;
+  place-items: center;
+  width: 115px;
+  height: 115px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  cursor: pointer;
+  appearance: none;
+  transform: none;
+  transition: none;
+}
+.ai-panda-launcher:focus-visible { outline: 3px solid #a5b9ff; outline-offset: 2px; border-radius: 12px; }
+.ai-panda-launcher img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+.ai-panda-launcher img[hidden] { display: none; }
+.ai-panda-launcher__fallback { color: #a3a0f2; pointer-events: none; }
+.ai-chat-backdrop { z-index: 2000; padding: 0; }
+.ai-chat-panel {
+  position: absolute;
+  right: 20px;
+  bottom: 150px;
+  width: min(440px, calc(100vw - 40px));
+  height: min(640px, calc(100dvh - 180px));
+  min-height: 230px;
+  z-index: 1;
+}
+@media (max-width: 600px) {
+  .ai-panda-launcher { width: 90px; height: 90px; right: 12px; bottom: 12px; }
+  .ai-chat-panel {
+    right: 10px;
+    bottom: 114px;
+    width: calc(100vw - 20px);
+    height: calc(100dvh - 134px);
+    min-height: 180px;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,.14);
+  }
 }
