@@ -3,6 +3,7 @@
 import { pool, closePool } from '../pg.js';
 import { initializeFreshPreviewIfApproved } from './initialize-render-preview.js';
 import { createPreviewTestAccounts } from './create-preview-test-accounts.js';
+import { ensurePreviewCreators } from './ensure-preview-creators.js';
 
 class PreflightError extends Error {}
 function requireValue(name) {
@@ -32,6 +33,7 @@ async function main() {
       'Preview setup requires explicit one-time isolated-database approval.');
     await initializeFreshPreviewIfApproved();
     await createPreviewTestAccounts();
+    await ensurePreviewCreators();
     console.warn('DISPOSABLE PREVIEW: external object storage is not configured; do not upload real files.');
   } else {
     const s3Endpoint=requireValue('S3_ENDPOINT');
