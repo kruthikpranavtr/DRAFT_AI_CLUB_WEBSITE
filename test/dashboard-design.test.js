@@ -20,20 +20,26 @@ test('dashboard text, navigation, actions and status palettes meet WCAG AA contr
 test('dashboard field boundaries and focus indicators meet non-text contrast',() => {
   verifyPairs([['8490aa','ffffff'],['8490aa','f8faff'],['5049e7','ffffff'],['5049e7','f8faff'],['c4c1ff','111833']],3);
 });
-test('AI Club sign-in theme preserves readable contrast, keyboard focus and mobile layout',() => {
+test('AI Club reference-inspired light sign-in keeps contrast, access and responsive portal animation',() => {
   const authCss = fs.readFileSync(new URL('../src/components/PortalAuth.css',import.meta.url),'utf8');
   const authJsx = fs.readFileSync(new URL('../src/components/PortalAuth.jsx',import.meta.url),'utf8');
-  for (const color of ['#080e20','#eef3ff','#f6f8ff','#aebfdf','#a8a5ff']) {
-    assert.ok(authCss.includes(color),`New authentication theme should include ${color}`);
+  const portalCss = fs.readFileSync(new URL('../src/components/InnovationPortal.css',import.meta.url),'utf8');
+  const portalJsx = fs.readFileSync(new URL('../src/components/InnovationPortal.jsx',import.meta.url),'utf8');
+  for (const color of ['#111833','#f8faff','#5049e7','#e5e9f5','#8490aa']) {
+    assert.ok(authCss.includes(color),`Light auth palette must include ${color}`);
   }
-  assert.ok(contrast('f6f8ff','1e274b') >= 4.5,'Card heading must be legible');
-  assert.ok(contrast('aebfdf','1e274b') >= 4.5,'Card supporting text must be legible');
-  assert.ok(contrast('ffffff','6561f3') >= 4.5,'Submit label must contrast against its background');
+  assert.ok(contrast('111833','ffffff') >= 4.5,'Card heading must be readable');
+  assert.ok(contrast('626d87','ffffff') >= 4.5,'Muted card copy must be readable');
+  assert.ok(contrast('ffffff','5049e7') >= 4.5,'Sign-in label needs high contrast');
   assert.match(authCss,/:focus-visible/);
-  assert.match(authCss,/prefers-reduced-motion/);
-  assert.match(authCss,/@media\(max-width:830px\)/);
-  assert.match(authCss,/@media\(max-width:480px\)/);
-  assert.match(authJsx,/autocomplete|autoComplete="username"/i);
+  assert.match(authCss,/@media\(max-width:767px\)/);
+  assert.match(portalCss,/@media\(prefers-reduced-motion: reduce\)/);
+  assert.match(portalCss,/innovation-portal--paused/);
+  assert.match(portalJsx,/visibilitychange/);
+  assert.match(portalJsx,/pointermove/);
+  assert.match(portalJsx,/aria-hidden="true"/);
+  assert.match(authJsx,/<InnovationPortal\s*\/>/);
+  assert.match(authJsx,/autoComplete="username"/);
   assert.match(authJsx,/autoComplete="current-password"/);
   assert.match(authJsx,/aria-label=\{showPassword \? 'Hide password' : 'Show password'\}/);
 });
