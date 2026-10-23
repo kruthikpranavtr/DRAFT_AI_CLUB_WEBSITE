@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Eye, EyeOff, KeyRound, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Eye, EyeOff, KeyRound, ShieldCheck, Mail, LockKeyhole } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import InnovationCampus from './InnovationCampus';
 import './PortalAuth.css';
@@ -13,7 +13,7 @@ export function PortalLoginLayout({ eyebrow, title, story, backLabel, backTo, ch
       <InnovationCampus />
       <div className="admin-login__story">
         <span className="admin-login__eyebrow">{eyebrow}</span>
-        <h2>{title}</h2>
+        <h2>{title === 'Your club' ? <>Your <em>club</em></> : title}</h2>
         <p>{story}</p>
         <div className="admin-login__trust">
           <span><ShieldCheck size={17} aria-hidden="true"/> Protected member spaces</span>
@@ -33,12 +33,12 @@ export function PortalLoginLayout({ eyebrow, title, story, backLabel, backTo, ch
 export function LoginForm({ identifier, setIdentifier, password, setPassword, remember, setRemember, showPassword, setShowPassword, status, setStatus, submitting, handleSubmit }) {
   return <form onSubmit={handleSubmit}>
     <label htmlFor="portal-identifier">Roll number, admin ID, or email</label>
-    <div className="admin-field">
-      <input id="portal-identifier" name="identifier" type="text" autoComplete="username" autoCapitalize="none" spellCheck={false} maxLength={160} value={identifier} onChange={event => { setIdentifier(event.target.value); setStatus(null); }} required/>
+    <div className="admin-field"><Mail size={17} aria-hidden="true"/>
+      <input id="portal-identifier" name="identifier" type="text" autoComplete="username" autoCapitalize="none" spellCheck={false} maxLength={160} placeholder="Enter your roll number, ID, or email" value={identifier} onChange={event => { setIdentifier(event.target.value); setStatus(null); }} required/>
     </div>
     <div className="admin-password-row"><label htmlFor="portal-password">Password</label></div>
-    <div className="admin-field">
-      <input id="portal-password" name="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" value={password} onChange={event => { setPassword(event.target.value); setStatus(null); }} required minLength={8} maxLength={200}/>
+    <div className="admin-field"><LockKeyhole size={17} aria-hidden="true"/>
+      <input id="portal-password" name="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" placeholder="Enter your password" value={password} onChange={event => { setPassword(event.target.value); setStatus(null); }} required minLength={8} maxLength={200}/>
       <button type="button" className="admin-password-toggle" onClick={() => setShowPassword(value => !value)} aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} aria-controls="portal-password">{showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}</button>
     </div>
     <label className="admin-remember"><input type="checkbox" checked={remember} onChange={event => setRemember(event.target.checked)}/>Keep me signed in on this device</label>

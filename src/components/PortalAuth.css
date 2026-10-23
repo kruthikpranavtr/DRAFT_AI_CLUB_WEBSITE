@@ -184,3 +184,9 @@
 @media(prefers-reduced-motion:reduce) {
   .admin-login * {transition:none!important;animation:none!important;scroll-behavior:auto!important;}
 }
+
+/* Screenshot-style login accents and leading field pictograms. */
+.admin-login__story h2 em { color:#5946F5;font-style:normal; }
+.admin-field > svg {position:absolute;left:13px;color:#64748B;pointer-events:none;}
+.admin-field:has(> svg) input {padding-left:40px;}
+.admin-field:has(> svg) input::placeholder {font-size:12px;}
