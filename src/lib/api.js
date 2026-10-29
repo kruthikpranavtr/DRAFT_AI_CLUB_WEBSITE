@@ -2,11 +2,21 @@ let csrfToken = null;
 
 async function getCsrfToken() {
   if (csrfToken) return csrfToken;
-  const response = await fetch('/api/auth/csrf',{ credentials:'include' });
-  const data = await response.json().catch(() => null);
-  if (!response.ok || !data?.csrfToken) throw new Error(data?.error || 'Security token could not be created.');
-  csrfToken = data.csrfToken;
-  return csrfToken;
+  let lastError;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      const response = await fetch('/api/auth/csrf', { credentials:'include', cache:'no-store' });
+      const data = await response.json().catch(() => null);
+      if (response.ok && typeof data?.csrfToken === 'string' && data.csrfToken.length > 12) {
+        csrfToken = data.csrfToken;
+        return csrfToken;
+      }
+      lastError = new Error(data?.error || 'Security token could not be created.');
+      if (response.status >= 400 && response.status < 500 && ![408,429].includes(response.status)) break;
+    } catch (error) { lastError = error; }
+    if (attempt < 4) await new Promise(resolve => setTimeout(resolve, [1200,2200,4000,6000][attempt]));
+  }
+  throw new Error('The login security service is temporarily unavailable. Please retry. ' + (lastError?.message || ''));
 }
 
 export async function api(path, options = {}) {

@@ -21,6 +21,10 @@ If you have already cloned this branch, update it with `git pull --ff-only origi
 
 **Important:** A plain `git clone` checks out the GitHub default `main` branch, which is intentionally not yet promoted to this feature branch. The pending production database/media cutover must be approved before making `main` the live release. Git does **not** transfer actual student accounts, passwords, uploaded private documents, or a local database; the demo creates separate example data. Production and shared-preview backend services need their own approved data and backend deployment before their new features can work against real accounts.
 
+## Homepage video delivery
+
+The original high-resolution videos in `public/*.mp4` remain in Git LFS. The homepage uses browser-ready H.264 MP4 copies in `public/web-video/`, stored directly in Git so Vercel and fresh clones serve playable files rather than Git LFS pointers. Do not switch these URLs back to `/api/public/media/` without verifying durable media storage and playback on the deployed backend.
+
 ## Try the project on any computer
 
 ```sh

@@ -2,6 +2,8 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
+// Shared editorial styling for interior pages; the cinematic homepage stays unchanged.
+import './styles/EditorialInterior.css'
 
 // In local shared-preview mode the remote backend sets Secure session cookies.
 // Browsers accept those on localhost, but may reject them on 127.0.0.1.

@@ -21,9 +21,10 @@ test('launcher accessibility, transparency and responsive CSS',()=>{
   assert.match(app,/aria-expanded=\{chatOpen\}/);
   assert.match(app,/aria-controls="site-ai-chat-panel"/);
   assert.match(home,/id="site-ai-chat-panel"/);
-  assert.match(styles,/\.ai-panda-launcher \{[^}]*width: 115px;[^}]*height: 115px;/s);
+  assert.match(styles,/\.ai-panda-launcher \{[^}]*width: clamp\(150px, 10\.5vw, 178px\);[^}]*height: clamp\(150px, 10\.5vw, 178px\);/s);
+  assert.match(app,/srcSet="\/p\.webp"/);
   assert.match(styles,/\.ai-panda-launcher \{[^}]*background: transparent;[^}]*border: 0;[^}]*box-shadow: none;/s);
-  assert.match(styles,/@media \(max-width: 600px\)[\s\S]*\.ai-panda-launcher \{ width: 90px; height: 90px;/);
+  assert.match(styles,/@media \(max-width: 600px\)[\s\S]*\.ai-panda-launcher \{ width: 104px; height: 104px; right: 14px; bottom: 16px;/);
 });
 
 test('the original animation asset is a looping 256px GIF',()=>{

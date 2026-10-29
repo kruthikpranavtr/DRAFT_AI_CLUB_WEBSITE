@@ -2806,13 +2806,13 @@ body{background:var(--cin-bg);color:var(--cin-text)}
 /* Panda AI assistant launcher - transparent asset only, no decorative effects. */
 .ai-panda-launcher {
   position: fixed;
-  right: 20px;
-  bottom: 20px;
+  right: clamp(34px, 4.2vw, 76px);
+  bottom: clamp(34px, 5.8vh, 64px);
   z-index: 2201;
   display: grid;
   place-items: center;
-  width: 115px;
-  height: 115px;
+  width: clamp(150px, 10.5vw, 178px);
+  height: clamp(150px, 10.5vw, 178px);
   padding: 0;
   background: transparent;
   border: 0;
@@ -2839,14 +2839,14 @@ body{background:var(--cin-bg);color:var(--cin-text)}
 .ai-chat-panel {
   position: absolute;
   right: 20px;
-  bottom: 150px;
+  bottom: clamp(218px, 24vh, 260px);
   width: min(440px, calc(100vw - 40px));
   height: min(640px, calc(100dvh - 180px));
   min-height: 230px;
   z-index: 1;
 }
 @media (max-width: 600px) {
-  .ai-panda-launcher { width: 90px; height: 90px; right: 12px; bottom: 12px; }
+  .ai-panda-launcher { width: 104px; height: 104px; right: 14px; bottom: 16px; }
   .ai-chat-panel {
     right: 10px;
     bottom: 114px;

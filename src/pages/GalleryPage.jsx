@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, CalendarDays, Images, Trophy, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CalendarDays, Images, LayoutGrid, List, Search, Trophy, X } from 'lucide-react';
 import { GALLERY } from '../data/galleryData';
 import { EVENTS } from '../data/eventsData';
 import { ACHIEVEMENTS } from '../data/achievementsData';
@@ -29,6 +29,8 @@ export default function GalleryPage({ embedded=false, initialMode='gallery' }) {
     return next;
   },{ preventScrollReset:true });
   const [category, setCategory] = useState('All');
+  const [search, setSearch] = useState('');
+  const [layout, setLayout] = useState('grid');
   const [gallery, setGallery] = useState([]);
   const [selected, setSelected] = useState(null);
   const { items:content } = usePublishedContent({ page:'gallery' });
@@ -69,7 +71,10 @@ export default function GalleryPage({ embedded=false, initialMode='gallery' }) {
       alt:item.t, index, demo:true,
     })),[gallery,embedded]);
 
-  const filtered = photos.filter(item => category === 'All' || classify(item.category) === category);
+  const filtered = photos.filter(item =>
+    (category === 'All' || classify(item.category) === category) &&
+    (!search.trim() || [item.title,item.category,item.caption].join(' ').toLowerCase().includes(search.trim().toLowerCase()))
+  );
   const cmsEvents = content.filter(item => item.type === 'event');
   const events = cmsEvents.length ? cmsEvents.map(item => ({
     id:item.id,title:item.title,description:item.body,
@@ -100,12 +105,24 @@ export default function GalleryPage({ embedded=false, initialMode='gallery' }) {
           <span className="concept-kicker concept-kicker--light">MOMENTS / PEOPLE / IDEAS</span>
           <h1>Moments from<br/><em>AI Club.</em></h1>
           <p>Workshops, projects, events and the people who make our community extraordinary.</p>
+          <div className="editorial-gallery-hero-actions">
+            <a href="#gallery-collection">Explore Gallery <ArrowRight size={16}/></a>
+            <div className="editorial-gallery-stats" aria-label="Gallery statistics">
+              <span><b>{photos.length}+</b><small>Moments</small></span>
+              <span><b>{CATEGORIES.length - 1}</b><small>Categories</small></span>
+              <span><b>1</b><small>Community</small></span>
+            </div>
+          </div>
+        </div>
+        <div className="editorial-gallery-collage" aria-hidden="true">
+          <img src={conceptPhotos[0]} alt="" loading="lazy"/>
+          <img src={conceptPhotos[1]} alt="" loading="lazy"/>
         </div>
         <span className="concept-gallery-hero__side">IDEAS<br/>PEOPLE<br/>IMPACT</span>
       </div>
     </section>}
 
-    <section className="concept-wrap concept-gallery__body" aria-label="Gallery collection">
+    <section id="gallery-collection" className="concept-wrap concept-gallery__body" aria-label="Gallery collection">
       {!embedded && <div className="concept-modes" role="group" aria-label="Gallery views">
         <button type="button" className={mode==='gallery'?'is-selected':''} onClick={()=>selectMode('gallery')}><Images size={16}/> Photos</button>
         <button type="button" className={mode==='events'?'is-selected':''} onClick={()=>selectMode('events')}><CalendarDays size={16}/> Events</button>
@@ -113,6 +130,14 @@ export default function GalleryPage({ embedded=false, initialMode='gallery' }) {
       </div>}
 
       {mode === 'gallery' && <>
+        {!embedded && <div className="editorial-gallery-search-tools">
+          <label><Search size={15}/><input aria-label="Search gallery photos" type="search"
+            value={search} onChange={event=>setSearch(event.target.value)} placeholder="Search photos..."/></label>
+          <button type="button" aria-label="Grid view" aria-pressed={layout==='grid'}
+            onClick={()=>setLayout('grid')}><LayoutGrid size={17}/></button>
+          <button type="button" aria-label="List view" aria-pressed={layout==='list'}
+            onClick={()=>setLayout('list')}><List size={17}/></button>
+        </div>}
         <div className="concept-filter-row">
           <div className="concept-pills" role="group" aria-label="Filter photos by category">
             {CATEGORIES.map(item => <button type="button" key={item}
@@ -121,7 +146,7 @@ export default function GalleryPage({ embedded=false, initialMode='gallery' }) {
           </div>
           <span className="concept-results">{filtered.length} {filtered.length === 1 ? 'moment' : 'moments'}</span>
         </div>
-        <div className="concept-photo-grid">
+        <div className={'concept-photo-grid' + (layout==='list' && !embedded ? ' is-list' : '')}>
           {filtered.map((item,index) => <button
             type="button" className={'concept-photo-card concept-photo-card--'+(index%7)}
             key={item.id} onClick={()=>setSelected(item)}

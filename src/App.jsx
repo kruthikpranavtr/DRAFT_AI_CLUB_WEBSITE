@@ -72,8 +72,11 @@ function AppRoutes() {
         aria-controls="site-ai-chat-panel"
         onClick={()=>setChatOpen(open=>!open)}>
         {pandaFailed && <MessageSquare className="ai-panda-launcher__fallback" aria-hidden="true" size={32}/>}
-        <img src="/images/panda-chatbot.gif" alt="" aria-hidden="true" width="115" height="115"
-          hidden={pandaFailed} onError={()=>setPandaFailed(true)} />
+        <picture>
+          <source srcSet="/p.webp" type="image/webp" />
+          <img src="/images/panda-chatbot.gif" alt="" aria-hidden="true" width="175" height="175"
+            hidden={pandaFailed} onError={()=>setPandaFailed(true)} />
+        </picture>
       </button>
       <ChatPanel open={chatOpen} onClose={()=>setChatOpen(false)}/>
     </>}

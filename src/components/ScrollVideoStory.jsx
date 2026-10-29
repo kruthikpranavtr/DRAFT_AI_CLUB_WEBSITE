@@ -4,10 +4,10 @@ import './ScrollVideoStory.css';
 import HeroIntro from './HeroIntro';
 
 const backgroundVideos = [
-  { id: 'home', src: '/api/public/media/hero-particle-ribbon-web.mp4', poster: '/hero-particle-ribbon-poster.jpg' },
-  { id: 'discover', src: '/api/public/media/section-discover.mp4', poster: '/section-discover-poster.jpg' },
-  { id: 'create', src: '/api/public/media/section-create.mp4', poster: '/section-create-poster.jpg' },
-  { id: 'connect', src: '/api/public/media/section-connect.mp4', poster: '/section-connect-poster.jpg' },
+  { id: 'home', src: '/web-video/hero-particle-ribbon-web.mp4', poster: '/hero-particle-ribbon-poster.jpg' },
+  { id: 'discover', src: '/web-video/section-discover.mp4', poster: '/section-discover-poster.jpg' },
+  { id: 'create', src: '/web-video/section-create.mp4', poster: '/section-create-poster.jpg' },
+  { id: 'connect', src: '/web-video/section-connect.mp4', poster: '/section-connect-poster.jpg' },
 ];
 
 function SharedStoryBackground({ chapterRefs }) {
@@ -45,6 +45,11 @@ function SharedStoryBackground({ chapterRefs }) {
         const opacity = index === from ? 1 - progress : index === to ? progress : 0;
         layer.style.opacity = String(opacity);
         const video = layer.querySelector('video');
+        // Defer loading off-screen videos until their chapter becomes visible.
+        if (opacity > 0.015 && !video.getAttribute('src')) {
+          video.src = video.dataset.src;
+          video.load();
+        }
         const shouldPlay = !reducedMotion && opacity > 0.015;
         if (shouldPlay && video.paused) video.play().catch(() => {});
         if (!shouldPlay && !video.paused) video.pause();
@@ -71,7 +76,9 @@ function SharedStoryBackground({ chapterRefs }) {
       key={video.id}
       ref={element => { layerRefs.current[index] = element; }}
       style={{ opacity: index === 0 ? 1 : 0 }}>
-      <video src={video.src} poster={video.poster} muted loop playsInline autoPlay preload={index === 0 ? 'auto' : 'metadata'} tabIndex="-1"/>
+      <video src={index === 0 ? video.src : undefined} data-src={video.src}
+        poster={video.poster} muted loop playsInline autoPlay={index === 0}
+        preload={index === 0 ? 'auto' : 'none'} tabIndex="-1"/>
     </div>)}
   </div>;
 }
