@@ -5,6 +5,7 @@ import { runPostgresMigrations } from '../migrations/pg-runner.js';
 import { initializeFreshPreviewIfApproved } from './initialize-render-preview.js';
 import { createPreviewTestAccounts } from './create-preview-test-accounts.js';
 import { ensurePreviewCreators } from './ensure-preview-creators.js';
+import { ensurePreviewQaAccounts } from './ensure-preview-qa-accounts.js';
 
 class PreflightError extends Error {}
 function requireValue(name) {
@@ -35,6 +36,7 @@ async function main() {
     await initializeFreshPreviewIfApproved();
     await createPreviewTestAccounts();
     await ensurePreviewCreators();
+    await ensurePreviewQaAccounts();
     await runPostgresMigrations(pool); // Apply additive migrations only on the verified disposable preview.
     console.warn('DISPOSABLE PREVIEW: external object storage is not configured; do not upload real files.');
   } else {
